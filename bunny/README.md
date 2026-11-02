@@ -1,5 +1,37 @@
 # JacRed Bunny — installation / установка / installatie
 
+## Автоматическая установка (RU)
+На Mac/Linux нужны только `curl` и Python 3.9+. Никакого Docker на компьютере пользователя.
+
+```bash
+curl -fsSL --retry 3   https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh   -o /tmp/jacred-bunny-install.sh   && sh /tmp/jacred-bunny-install.sh
+```
+
+Скрипт скрыто спрашивает Bunny Account API Key (настройки аккаунта Bunny → API). Он проверяет существующие приложения, доступный GHCR image/digest и регионы, затем предлагает выбрать регион и ввод `CREATE` перед созданием оплачиваемых ресурсов. Для GHCR, уже подключённого в Bunny, других API-ключей не требуется. Если GHCR ещё не подключён, скрипт запросит GitHub username и PAT с `read:packages` и попробует создать подключение через Bunny API. **Образ JacRed Bunny должен быть предварительно опубликован в GHCR** — публикация автоматизирована в workflow `bunny-image.yml`. До публикации установщик остановится без создания платного приложения. Приватный GHCR образ должен быть доступен подключённому registry.
+
+Создаётся ровно один Magic Container в одном регионе, HTTPS endpoint и постоянные тома `/app/Data` (10 GB по умолчанию) и `/app/config` (1 GB). Настройки и два ключа JacRed создаются автоматически. Дополнительная официальная синхронизация FileDB — по желанию. Bunny Database/Scripting не создаются.
+
+Команды после установки (работают даже если `~/.local/bin` не добавлен в PATH):
+
+```bash
+$HOME/.local/bin/jacred-bunny status
+$HOME/.local/bin/jacred-bunny credentials
+$HOME/.local/bin/jacred-bunny stop
+$HOME/.local/bin/jacred-bunny start
+$HOME/.local/bin/jacred-bunny doctor
+```
+
+Ключ Bunny сохраняется локально в `~/.config/jacred-bunny/config.json`, права 600. **Никогда не публикуйте этот файл.** Изменения в веб-конфигурации сохраняются в отдельном томе. Остановка `stop` останавливает вычисления, но не удаляет оплачиваемые тома. Контейнер может запускаться/создаваться асинхронно; до появления HTTPS URL и ответа `/health` запуск не считается подтверждённым.
+
+## Automatic installation (EN)
+On macOS/Linux, run the single curl command above. The installer asks for a Bunny account API key, checks the GHCR image and numeric registry ID, offers a region, creates one single-replica Magic Container, HTTPS endpoint, and two persistent volumes automatically after you type `CREATE`. JacRed API and admin keys are generated locally. If no GHCR connection exists, a GitHub `read:packages` PAT may also be required. The built image must already exist in GHCR; the dedicated GitHub Actions workflow builds it. The default FileDB is empty; optional official sync can populate it. Run `~/.local/bin/jacred-bunny status` or `credentials`. Stopping the app does not delete billed storage.
+
+## Automatische installatie (NL)
+Voer op macOS/Linux de curl-opdracht hierboven uit. Het programma vraagt om de Bunny-account-API-sleutel, controleert de GHCR-image en de numerieke register-ID, laat een regio kiezen en maakt na `CREATE` automatisch één Magic Container, HTTPS-endpoint en twee permanente volumes aan. De API- en beheerderssleutel van JacRed worden automatisch gegenereerd. Als er nog geen GHCR-verbinding is, kan ook een GitHub PAT met `read:packages` nodig zijn. De Docker-image moet al via GitHub Actions in GHCR gepubliceerd zijn. De FileDB is aanvankelijk leeg; officiële synchronisatie is optioneel. Status: `~/.local/bin/jacred-bunny status`. Stoppen verwijdert de betaalde opslag niet.
+
+---
+
+
 **[Русский](#русский)** · **[English](#english)** · **[Nederlands](#nederlands)**
 
 ## Русский

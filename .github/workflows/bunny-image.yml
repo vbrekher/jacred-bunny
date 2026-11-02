@@ -32,6 +32,7 @@ jobs:
       - name: Offline CLI source smoke
         run: |
           python3 bunny/cli.py self-test
+          python3 -m unittest discover -s tests -p 'test_bunny_installer.py' -v
           python3 -m py_compile bunny/cli.py
           bash -n bunny/build-push.sh
           sh -n install-bunny.sh bunny/boot.sh bunny/cron-job.sh
