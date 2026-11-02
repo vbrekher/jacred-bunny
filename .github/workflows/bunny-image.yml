@@ -1,0 +1,63 @@
+name: Publish JacRed Bunny image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile.bunny'
+      - 'bunny/boot.sh'
+      - 'bunny/cron-job.sh'
+      - 'bunny/crontabs/**'
+      - 'JacRed.csproj'
+      - '**/*.cs'
+      - 'web/**'
+      - 'Data/**'
+      - 'scripts/build-web-ui.sh'
+      - '.github/workflows/bunny-image.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Offline CLI source smoke
+        run: |
+          python3 bunny/cli.py self-test
+          python3 -m unittest discover -s tests -p 'test_bunny_installer.py' -v
+          python3 -m py_compile bunny/cli.py
+          bash -n bunny/build-push.sh
+          sh -n install-bunny.sh bunny/boot.sh bunny/cron-job.sh
+      - name: Enable buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Authenticate to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish this fork
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.bunny
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            JACRED_VERSION=${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/jacred-bunny:main
+            ghcr.io/${{ github.repository_owner }}/jacred-bunny:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}

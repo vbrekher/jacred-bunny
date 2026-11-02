@@ -49,7 +49,22 @@ Samsung TV / Lampa / Sonarr / Radarr / Prowlarr
              Bunny Database (optional later)
 ```
 
-## Quick start
+## One-command installer (macOS / Linux)
+
+```bash
+curl -fsSL --retry 3 \
+  https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh \
+  -o /tmp/jacred-bunny-install.sh \
+  && sh /tmp/jacred-bunny-install.sh
+```
+
+The installer prompts for your **Bunny API key**, selects a region, and automatically creates a Magic Container, persistent FileDB/config volumes, HTTPS endpoint, and unique JacRed keys. It checks the published GHCR image before allocating billable resources and asks for `CREATE` before provisioning. An existing GHCR registry is reused; otherwise a GitHub read:packages PAT may be needed.
+
+**[RU / EN / NL step-by-step instructions](bunny/README.md#автоматическая-установка-ru)** · `~/.local/bin/jacred-bunny status` · `credentials` · `start` · `stop`
+
+> The first FileDB is empty until optional official sync or authorized tracker indexing runs. The GitHub Actions image publication must succeed before the first installation. No live Bunny deployment has been claimed.
+
+## Advanced: manual image build
 
 ```bash
 git clone https://github.com/vbrekher/jacred-bunny.git
