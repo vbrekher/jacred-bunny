@@ -17,6 +17,17 @@
 
 ---
 
+## v0.3.0 — Source and capacity audit
+
+The next development milestone includes a **read-only API/25-tracker inventory**, optional local FileDB size audit, bounded gzip sampling and synthetic SQLite FTS5 probe. It does **not** create Bunny Database resources or migrate any data.
+
+**[Русский · v0.3.0 audit and exact commands](docs/BUNNY_NATIVE_v0.3.0_IMPLEMENTATION.ru.md)**
+
+```bash
+python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
+python3 tools/bunny_native_audit.py --strict --synthetic-sqlite 1500 --output "$HOME/Downloads/jacred-bunny-v0.3-source-audit.json"
+```
+
 ## Full Bunny-native rewrite roadmap
 
 A documented upgrade path covers complete SQL-backed replacement of FileDB, a TypeScript Edge Scripting API, automatic collection from all 25 supported tracker adapters, shared logical data for multiple replicas, Bunny Storage backup/restore, and optional TorrServer-bunny playback integration.
