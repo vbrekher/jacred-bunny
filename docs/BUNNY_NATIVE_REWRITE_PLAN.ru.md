@@ -19,7 +19,7 @@
 
 ## 1. Целевая архитектура
 
-\`\`\`text
+```text
 Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
                          HTTPS
                            |
@@ -44,7 +44,7 @@ Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
                            |
        Separate Bunny Magic Container: TorrServer-bunny
            torrent peer engine + playback streaming
-\`\`\`
+```
 
 **Source of truth:** SQL data and durable job state in Bunny Database. Bunny Storage is backup/archive, not a mutable SQL DB. Ephemeral worker caches are disposable. Local FileDB becomes an *import-only legacy format*, not production authority. Several web/worker replicas share the same **logical catalog**, not the same physical FileDB directory. One distributed authoritative database service, bounded reads and version awareness; no multi-writer local disks.
 
@@ -52,11 +52,11 @@ Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
 
 ## 2. Current source inventory (from repo's main branch at planning)
 
-- FileDB: \`Infrastructure/Persistence/FileDB/*\`; master index in \`Data/masterDb*.bz\`, data shards in \`Data/fdb/**\`, \`FastDbIndex\` in \`Application/Index/FastDbIndex.cs\`.
-- Search: \`Application/Search/*\`; API controllers \`Controllers/JackettController.cs\`, \`Controllers/TorznabController.cs\`, \`Controllers/TorrentsController.cs\`, \`Controllers/SyncController.cs\`.
-- Background: \`SyncWorker\`, \`TrackersWorker\`, \`TracksWorker\`, \`FileDbWorker\`, \`FastDbRefreshWorker\`, stats and resume workers under \`Infrastructure/Background/*\`.
-- Parsed sources listed in \`Data/init.yaml\` (25): anibelka, anidub, anifilm, aniliberty, animelayer, anistar, baibako, bitru, kinozal, knaben, korsars, leproduction, lostfilm, mazepa, megapeer, nnmclub, rudub, rutor, rutracker, selezen, subsplease, toloka, torrentby, ultradox, viruseproject.
-- Tracks metadata is not merely torrent title: \`Infrastructure/Tracks/*\`, magnet/infohash, ffprobe, languages, synchronization and exports must migrate too.
+- FileDB: `Infrastructure/Persistence/FileDB/*`; master index in `Data/masterDb*.bz`, data shards in `Data/fdb/**`, `FastDbIndex` in `Application/Index/FastDbIndex.cs`.
+- Search: `Application/Search/*`; API controllers `Controllers/JackettController.cs`, `Controllers/TorznabController.cs`, `Controllers/TorrentsController.cs`, `Controllers/SyncController.cs`.
+- Background: `SyncWorker`, `TrackersWorker`, `TracksWorker`, `FileDbWorker`, `FastDbRefreshWorker`, stats and resume workers under `Infrastructure/Background/*`.
+- Parsed sources listed in `Data/init.yaml` (25): anibelka, anidub, anifilm, aniliberty, animelayer, anistar, baibako, bitru, kinozal, knaben, korsars, leproduction, lostfilm, mazepa, megapeer, nnmclub, rudub, rutor, rutracker, selezen, subsplease, toloka, torrentby, ultradox, viruseproject.
+- Tracks metadata is not merely torrent title: `Infrastructure/Tracks/*`, magnet/infohash, ffprobe, languages, synchronization and exports must migrate too.
 - Original system supports local parser credentials, Cloudflare sidecars, remote sync, maintenance, metadata, dashboards. Feature contract must be captured before replacing storage or routes.
 
 ## 3. Релизы и приёмка
@@ -69,11 +69,11 @@ Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
 - Gate: pinned upstream commit, documented 25 connectors, complete route matrix, SQL capacity plan with no unsupported claims.
 
 ### v0.4.0 — Database-Native Storage + FileDB Import
-- Introduce interfaces \`ITorrentRepository\`, \`ISearchIndex\`, \`ITrackMetadataStore\`, \`ISyncCursorStore\`, \`IJobLeaseStore\` and adapters; never scatter raw SQL across parser implementations.
-- SQL schema for records: \`torrents\` (stable compound source ID, source URL, magnet/infohash, size, seeds/peers, title/name, timestamps, categories, available media/quality/language metadata, original JSON when necessary); \`aliases\`, \`search_terms\`, \`track_metadata\`, \`sources\`, \`job_runs\`, \`leases\`, \`sync_cursors\`, \`tombstones\`, \`schema_migrations\`. Unique/idempotent upsert keys.
+- Introduce interfaces `ITorrentRepository`, `ISearchIndex`, `ITrackMetadataStore`, `ISyncCursorStore`, `IJobLeaseStore` and adapters; never scatter raw SQL across parser implementations.
+- SQL schema for records: `torrents` (stable compound source ID, source URL, magnet/infohash, size, seeds/peers, title/name, timestamps, categories, available media/quality/language metadata, original JSON when necessary); `aliases`, `search_terms`, `track_metadata`, `sources`, `job_runs`, `leases`, `sync_cursors`, `tombstones`, `schema_migrations`. Unique/idempotent upsert keys.
 - SQLite FTS5 / BM25 or verified alternative respecting JacRed's search normalization and ranking. Reuse compatibility tests before declaring identical output.
 - Dedicated catalog DB maps keys or deterministic partitioning to bounded shard DBs. Keep each database below operational watermark (e.g., 70–80% of 1GB); no silent auto-create beyond quotas; support controlled reshard.
-- Versioned offline importer from \`masterDb*.bz\` + all \`Data/fdb/**\` + \`Data/tracks/**\`; resumable cursor, checksums, count/field parity, duplicates, corruption report, safe retry; rollback to legacy mode until verified.
+- Versioned offline importer from `masterDb*.bz` + all `Data/fdb/**` + `Data/tracks/**`; resumable cursor, checksums, count/field parity, duplicates, corruption report, safe retry; rollback to legacy mode until verified.
 - Initial phase = shadow/dual-read comparison with *one authoritative writer*. No double charging / double writes of the same event.
 - Gate: every original record accounted for, 0 unexplained missing/changed values, golden result equivalence, restart and reimport idempotency, measured p50/p95 and cost.
 
@@ -85,10 +85,10 @@ Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
 - Gate: all in-scope routes 1:1 documented and passing; Edge requests stay inside 128MB, 30s CPU, 50 subrequest quotas with realistic loads; no .NET API process required for client-facing search.
 
 ### v0.6.0 — 25/25 Automatic Tracker Collector Fleet
-- Preserve and refactor 25 adapters with explicit \`SourceCapability\` and \`SourceHealth\` records. Initially reuse original .NET worker in Bunny Magic Containers; optionally port parsers to TS later, but do not equate TS with Edge-only long-lived crawling.
+- Preserve and refactor 25 adapters with explicit `SourceCapability` and `SourceHealth` records. Initially reuse original .NET worker in Bunny Magic Containers; optionally port parsers to TS later, but do not equate TS with Edge-only long-lived crawling.
 - Distributed scheduler with bounded queues, per-tracker rate/concurrency, jitter, backoff, deadline, idempotent pages, durable checkpoints, dead-letter/poison job triage, shutdown recovery and source-specific permissions/cookies/proxy configuration.
 - Sidecars (FlareSolverr/cffetch) deployed as separate MC containers **only where needed and authorized**; never invent a claim that captcha, login or third-party blocks have been bypassed.
-- Test each connector with fixture unit tests plus real source smoke only when source permits; independent statuses \`PASS\`, \`AUTH_REQUIRED\`, \`BLOCKED\`, \`RATE_LIMITED\`, \`UNAVAILABLE\`, \`NOT_TESTED\`.
+- Test each connector with fixture unit tests plus real source smoke only when source permits; independent statuses `PASS`, `AUTH_REQUIRED`, `BLOCKED`, `RATE_LIMITED`, `UNAVAILABLE`, `NOT_TESTED`.
 - Gate: all 25 adapters implemented, scheduler autonomous, no duplicate writes under concurrency, evidence per connector, no misleading universal-live claims.
 
 ### v0.7.0 — Distributed Consistency & Multi-Replica
@@ -105,18 +105,18 @@ Samsung Tizen / Lampa / Sonarr / Radarr / Prowlarr / Web
 - Gate: independently restored instance passes search/track golden corpus; measured RPO/RTO, not assumed zero.
 
 ### v0.9.0 — TorrServer-bunny Integrated Playback
-- Detect or install \`vbrekher/TorrServer-bunny\` by its actual API/CLI contract without touching unrelated apps. Use **Bunny Magic Containers** for the torrent peer/stream engine, never route raw sustained torrent traffic through Edge Script.
-- Search results provide a \`Play\` action (magnet/.torrent URL → authorized TorrServer session). Proxy or redirect only signed short-lived session metadata; scope per user to avoid open torrent proxy or leaking the TorrServer password.
+- Detect or install `vbrekher/TorrServer-bunny` by its actual API/CLI contract without touching unrelated apps. Use **Bunny Magic Containers** for the torrent peer/stream engine, never route raw sustained torrent traffic through Edge Script.
+- Search results provide a `Play` action (magnet/.torrent URL → authorized TorrServer session). Proxy or redirect only signed short-lived session metadata; scope per user to avoid open torrent proxy or leaking the TorrServer password.
 - Samsung Tizen/Lampa player and embedded browser test matrix: Range requests, seek, buffering, bitrate, subtitles, codecs, browser CORS/HTTPS, auth token refresh. No claim every codec is natively supported by TV.
 - Gate: real permitted torrent playback and seek on Samsung Tizen and desktop; TorrServer continues to work independently.
 
 ### v1.0.0 — One Command Install / Full Acceptance
-- Upgrade \`install-bunny.sh\` + \`bunny/cli.py\` to create/reuse databases, schema/migrations, per-db credentials, Storage Zone, Edge Script, static UI CDN and Magic Containers workers; optional TorrServer integration; supports trial quotas and reused resources.
-- Preflight account limits **before billable POST**, published signed image digest, region/registry access, incremental cost estimate and explicit \`CREATE\`. Reconcile ambiguous HTTP 500, checkpoint resources one by one, rerun idempotently without duplicate apps/databases/zones.
-- Commands: \`setup\`, \`status\`, \`doctor\`, \`update\`, \`backup\`, \`restore\`, \`rotate-keys\`, \`playback-test\`, \`stop\`, \`start\`, \`uninstall --dry-run\`. Full ID ownership manifest; safe cleanup must never delete shared unrelated resources.
+- Upgrade `install-bunny.sh` + `bunny/cli.py` to create/reuse databases, schema/migrations, per-db credentials, Storage Zone, Edge Script, static UI CDN and Magic Containers workers; optional TorrServer integration; supports trial quotas and reused resources.
+- Preflight account limits **before billable POST**, published signed image digest, region/registry access, incremental cost estimate and explicit `CREATE`. Reconcile ambiguous HTTP 500, checkpoint resources one by one, rerun idempotently without duplicate apps/databases/zones.
+- Commands: `setup`, `status`, `doctor`, `update`, `backup`, `restore`, `rotate-keys`, `playback-test`, `stop`, `start`, `uninstall --dry-run`. Full ID ownership manifest; safe cleanup must never delete shared unrelated resources.
 - RU/EN/NL docs; setup wizard needs only Bunny account key and source credentials **if truly required**. Never promise hidden third-party cookies/logins available by magic.
 - Final gates: API parity, 25 adapters audited, database cutover, worker failover, backups/restore, concurrent load, TS Edge quota, security/abuse controls, real Lampa/Samsung playback and charge visibility, all with evidence.
-- Status \`PRODUCTION_READY=true\` only after LIVE acceptance; code quality PASS alone is insufficient.
+- Status `PRODUCTION_READY=true` only after LIVE acceptance; code quality PASS alone is insufficient.
 
 ## 4. Critical decision points
 
