@@ -22,9 +22,9 @@ class AuditTests(unittest.TestCase):
 
     def test_gzip_is_not_bzip2_despite_extension(self):
         with tempfile.TemporaryDirectory() as d:
-            root=Path(d);(root/"fdb").mkdir()
+            root=Path(d);(root/"fdb"/"a1").mkdir(parents=True)
             with gzip.open(root/"masterDb.bz","wb") as f:f.write(b"{}")
-            with gzip.open(root/"fdb"/"part","wb") as f:f.write(b'{"a":{},"b":{}}')
+            with gzip.open(root/"fdb"/"a1"/("b"*30),"wb") as f:f.write(b'{"a":{},"b":{}}')
             result=a.inspect_disk(root,1)
             self.assertEqual(result["master_files"][0]["gzip_magic"],True)
             self.assertEqual(result["sample"]["records_seen"],2)
@@ -32,8 +32,8 @@ class AuditTests(unittest.TestCase):
 
     def test_invalid_shard_never_leaks_data(self):
         with tempfile.TemporaryDirectory() as d:
-            root=Path(d);(root/"fdb").mkdir()
-            (root/"fdb"/"part").write_bytes(b"VERY_PRIVATE_DATA")
+            root=Path(d);(root/"fdb"/"c3").mkdir(parents=True)
+            (root/"fdb"/"c3"/("f"*30)).write_bytes(b"VERY_PRIVATE_DATA")
             report=a.inspect_disk(root,1)
             self.assertEqual(report["sample"]["invalid"],1)
             self.assertNotIn("VERY_PRIVATE_DATA",json.dumps(report))
@@ -66,6 +66,58 @@ public IActionResult Custom() => Ok();
             values=a.extract_routes(root)
             self.assertEqual({x["route"] for x in values},
                 {"/api/Demo/Read","/api/Demo/Create/create","/absolute"})
+
+
+    def test_git_checkout_placeholder_is_not_a_database(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root/"fdb").mkdir()
+            (root/"fdb"/".gitignore").write_text("*\n!.gitignore\n")
+            report = a.inspect_disk(root, sample_limit=20)
+            self.assertEqual(report["state"], "NO_REAL_DATASET")
+            self.assertEqual(report["fdb_files"], 0)
+            self.assertEqual(report["total_source_bytes"], 0)
+            self.assertEqual(report["sample"]["checked"], 0)
+            self.assertEqual(report["ignored_non_shard_fdb_files"], 1)
+            self.assertEqual(a.capacity(report)["state"], "BLOCKED_MISSING_REAL_DATA")
+
+    def test_only_recognized_md5_shard_paths_are_counted(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root/"fdb"/"f").mkdir(parents=True)
+            (root/"fdb"/"c0").mkdir(parents=True)
+            (root/"fdb"/"not-a-shard").mkdir(parents=True)
+            with gzip.open(root/"fdb"/"f"/("a"*32), "wb") as fh:
+                fh.write(b'{"oldLayout":{}}')
+            with gzip.open(root/"fdb"/"c0"/("b"*30), "wb") as fh:
+                fh.write(b'{"newLayout":{}}')
+            (root/"fdb"/"not-a-shard"/"README.txt").write_text("placeholder")
+            report = a.inspect_disk(root, sample_limit=10)
+            self.assertEqual(report["state"], "MEASURED_LOCAL_FILE_BYTES")
+            self.assertEqual(report["fdb_files"], 2)
+            self.assertEqual(report["ignored_non_shard_fdb_files"], 1)
+            self.assertEqual(report["sample"]["records_seen"], 2)
+
+    def test_invalid_master_file_is_not_valid_data(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root/"fdb").mkdir()
+            (root/"masterDb.bz").write_bytes(b"not a gzip database")
+            report = a.inspect_disk(root)
+            self.assertEqual(report["state"], "NO_REAL_DATASET")
+            self.assertEqual(report["master_files"][0]["gzip_magic"], False)
+            self.assertEqual(report["valid_gzip_master_files"], 0)
+            self.assertEqual(report["total_source_bytes"], 0)
+
+    def test_track_placeholder_alone_not_data(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root/"tracks").mkdir()
+            (root/"tracks"/".gitignore").write_text("*")
+            (root/"tracks"/"README.md").write_text("info")
+            report = a.inspect_disk(root)
+            self.assertEqual(report["state"], "NO_REAL_DATASET")
+            self.assertEqual(report["track_files"], 0)
 
     def test_actual_repo_source_contract(self):
         report=a.audit(SCRIPT.parents[1])
