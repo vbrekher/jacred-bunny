@@ -48,7 +48,11 @@ def export_stage(database, output):
                 ]
                 for kind,sql,keys in specs:
                     for record in conn.execute(sql):
-                        stream.write(encode({"kind":kind,**dict(zip(keys,record))}))
+                        fields=dict(zip(keys,record))
+                        # .NET FileTime is > 2^53; JSON decimal string avoids JS rounding.
+                        if kind=="bucket" and fields["file_time"] is not None:
+                            fields["file_time"]=str(fields["file_time"])
+                        stream.write(encode({"kind":kind,**fields}))
                         counts[kind]+=1
                 stream.write(encode({"kind":"end","counts":counts}))
                 stream.flush();os.fsync(stream.fileno())
