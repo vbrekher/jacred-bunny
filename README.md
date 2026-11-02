@@ -1,111 +1,71 @@
-# JacRed
+<div align="center">
 
-![Jacred — A Torrent aggregator & file database](web/public/img/jacred-social-preview.png)
+# 🐰 JacRed Bunny
 
-[![Build](https://github.com/jacred-fdb/jacred/actions/workflows/build.yml/badge.svg)](https://github.com/jacred-fdb/jacred/actions/workflows/build.yml)
-[![Release](https://github.com/jacred-fdb/jacred/actions/workflows/release.yml/badge.svg)](https://github.com/jacred-fdb/jacred/actions/workflows/release.yml)
-[![Documentation](https://img.shields.io/badge/docs-Mintlify-0D9373?logo=mintlify&logoColor=white)](https://docs.jacred.stream)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/jacred-fdb/jacred?label=version)](https://github.com/jacred-fdb/jacred/releases)
-[![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/jacred-fdb/jacred?include_prereleases&label=pre-release)](https://github.com/jacred-fdb/jacred/tags)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+### JacRed on Bunny Magic Containers — no VPS required
 
-Агрегатор торрент-трекеров с API в формате Jackett. Хранит данные в файловой БД (fdb), поддерживает синхронизацию с удалённой базой и самостоятельный парсинг трекеров по cron.
+**The original .NET 10 torrent search aggregator, adapted for persistent FileDB on bunny.net.**
 
-## Основные возможности
+[![Hosting](https://img.shields.io/badge/Hosting-Bunny_Magic_Containers-ff6600)](https://bunny.net/magic-containers/)
+[![Upstream](https://img.shields.io/badge/Upstream-JacRed-1687a7)](https://github.com/jacred-fdb/jacred)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-blue)](LICENSE)
+![Deployment](https://img.shields.io/badge/Release-Deployment_Candidate-yellow)
 
-- 🔍 **Агрегация торрентов** с множества трекеров в единый API
-- 📦 **Файловая БД (fdb)** для быстрого доступа к данным
-- 🔄 **Синхронизация** с удалёнными серверами или самостоятельный парсинг
-- 🎯 **API Jackett** — полная совместимость с форматом Jackett
-- 📡 **Torznab XML** — встроенный Torznab API для Sonarr/Radarr/Prowlarr
-- 🌐 **Веб-интерфейс** — поиск, статистика и редактор конфигурации
-- ⚙️ **Настройки в браузере** — `/settings` (форма, YAML/JSON, валидация, diff перед сохранением)
-- 📖 **OpenAPI / Swagger** — `/openapi.yaml`, интерактивная документация на `/swagger`
-- 🗂️ **25 трекеров** — парсинг и sync (см. [каталог трекеров](docs/trackers/overview.mdx))
-- 🔐 **Поддержка прокси** и Tor для доступа к .onion доменам
-- 📊 **Статистика** по трекерам и торрентам
-- 🎵 **Модуль tracks** для сбора метаданных треков (опционально)
-- ⚡ **Кеширование** для высокой производительности
-- 🐳 **Docker** поддержка для простого развёртывания
+**[RU · EN · NL Installation Guide](bunny/README.md)** · **[Lampa Setup](bunny/README.md#lampa--sonarr--radarr)** · **[Original Documentation](https://docs.jacred.stream)**
 
-## AI Документация
-
-[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jacred-fdb/jacred)
+</div>
 
 ---
 
-## Поддержать проект
+## What you get
 
-💲 **YooMoney (RUB):** [https://yoomoney.ru/fundraise/1FRDH2NBCE3.260210](https://yoomoney.ru/fundraise/1FRDH2NBCE3.260210)
+| Feature | Bunny edition |
+| :--- | :--- |
+| Jackett JSON, Torznab, Native API, Vue interface | ✅ Preserved upstream |
+| 25 built-in tracker integrations | ✅ Source retained, each requires real acceptance |
+| Local FastDb/FileDB | ✅ Persistent Bunny volume |
+| Web configuration editor | ✅ Can write back to persistent `/app/config` |
+| Docker image of *this fork's code* | ✅ `Dockerfile.bunny` |
+| First-run security | ✅ Distinct API and admin secrets required |
+| Cron | ✅ Optional maintenance-only schedule |
+| Bunny Database | 🔜 Future optional SQL module; **not** a drop-in FileDB replacement |
+| Bunny Edge Scripting | 🔜 Optional edge gateway |
+| Automatic cloud backup and verified live deployment | ❌ Not yet implemented or certified |
 
-💰 **TON / USDT:** `UQAFGIN19ZDeUQFC4SpHMg2dhjliSXq_vzUWYZMDJ8w_zSqo`
+## Architecture
 
-💴 **MIR (RUB):** `2204120115029460`
-
-💸 **YooMoney (прямой перевод):** [https://yoomoney.ru/to/410015186713710](https://yoomoney.ru/to/410015186713710)
-
----
-
-## Требования
-
-- **.NET 10.0** (для запуска из исходников)
-- Для установки скриптом: **Linux** (systemd, cron), рекомендуется Debian/Ubuntu
-- **libicu** — на Linux (.NET использует ICU для глобализации). При запуске бинарника напрямую (без Docker) установите пакет:
-  - **Debian/Ubuntu:** `apt install libicu-dev` или `libicu76` / `libicu72` (имя пакета зависит от версии дистрибутива)
-  - **Alpine:** `apk add icu-libs` (в Docker-образе уже включено)
-
----
-
-## Быстрый старт
-
-```bash
-curl -s https://raw.githubusercontent.com/jacred-fdb/jacred/main/jacred.sh | bash
+```text
+Samsung TV / Lampa / Sonarr / Radarr / Prowlarr
+                        │ HTTPS
+                Bunny CDN / Shield
+                        │
+              Bunny Magic Container
+                 JacRed / .NET 10
+                  ├─ /app/Data    ← persistent FileDB
+                  ├─ /app/config  ← persistent settings
+                  └─ maintenance cron (optional)
+                        │
+             Bunny Storage (planned backups)
+             Bunny Database (optional later)
 ```
 
-Скрипт ставит приложение в **`/opt/jacred`**, создаёт systemd-сервис `jacred` и оставляет FileDB пустой.
+## Quick start
 
-Полезные опции: `--download-db`, `--pre-release`, `--update`, `--remove` (подробности — [установка](docs/installation.mdx)).
+```bash
+git clone https://github.com/vbrekher/jacred-bunny.git
+cd jacred-bunny
+# Sign in to GHCR first; replace YOUR_ACCOUNT:
+IMAGE=ghcr.io/YOUR_ACCOUNT/jacred-bunny:0.1.0 bash bunny/build-push.sh
+```
 
-После установки:
+Then create a Bunny Magic Containers app, select **one region / one replica**, the published image, HTTP **port 9117**, health check **/health**, and mount **TWO persistent volumes**: `/app/Data` and `/app/config`. Add two different secret environment values: `JACRED_BUNNY_API_KEY` and `JACRED_BUNNY_DEV_KEY`. Do **not** put the admin key in Lampa.
 
-- Конфиг: **`/opt/jacred/init.yaml`** или **`/opt/jacred/init.conf`**, либо веб-редактор **`/settings`** (LAN или `devkey` — см. [аутентификацию](docs/authentication.mdx))
-- Веб-интерфейс: **`http://127.0.0.1:9117/`** (поиск), **`/stats`**, **`/settings`**
-- Перезапуск: `systemctl restart jacred`
-- Полный crontab для парсинга: `crontab /opt/jacred/Data/crontab`
+See the [full guide in Russian, English, and Dutch](bunny/README.md) before publicly exposing the instance.
 
-> По умолчанию синхронизация отключена, FileDB пустая, парсинг — по cron. Чтобы подтягивать базу с внешнего сервера, укажите `syncapi` в конфиге ([конфигурация](docs/configuration/overview.mdx)). Снимок при установке — опция `--download-db`.
+> **Important:** JacRed indexes/searches torrent metadata. It does not download or stream movies itself. A separate compatible playback solution (e.g. TorrServer) is required. A fresh instance starts with an **empty FileDB** until you configure lawful/authorized sync or parsing. External trackers may require credentials, sidecars or proxies, none of which is guaranteed by this hosting profile.
 
-Docker: [документация по развёртыванию](docs/deployment/docker.mdx).
+## Credits
 
----
+A big thank you to **[JacRed maintainers and contributors](https://github.com/jacred-fdb/jacred)** for the original project, API implementations, parsers, FileDB engine and UI. JacRed Bunny is a deployment-oriented derivative, not an official upstream release. The original [AGPL-3.0 license](LICENSE) and attribution remain in place.
 
-## Документация
-
-Онлайн: **[https://docs.jacred.stream](https://docs.jacred.stream)**
-
-Исходники документации: **[docs/](docs/)**.
-
-| Документ | Описание |
-| --- | --- |
-| [Установка](docs/installation.mdx) | Скрипт, обновление, удаление |
-| [Linux](docs/deployment/linux.mdx) | systemd, `libicu`, crontab на хосте |
-| [Клиенты](docs/clients/overview.mdx) | Lampa, Lampac, Sonarr, Prowlarr |
-| [Конфигурация](docs/configuration/overview.mdx) | `init.yaml` / `init.conf`, sync, logging, search, Torznab |
-| [Tracks](docs/concepts/tracks.mdx) | Модуль tracks (TorrServer / ffprobe) |
-| [Трекеры и парсинг](docs/trackers/overview.mdx) | Список трекеров, cron, .onion |
-| [Аутентификация](docs/authentication.mdx) | Политики доступа, `apikey` / `devkey` |
-| [API](docs/api-reference/overview.mdx) | OpenAPI, эндпоинты, `/dev/*`, cron, maintenance |
-| [Сборка](docs/development/building.mdx) | `make publish`, RID |
-| [Docker](docs/deployment/docker.mdx) | Run / Compose и cron снаружи контейнера |
-| [Решение проблем](docs/operations/troubleshooting.mdx) | Типичные сбои |
-| [Архитектура](docs/concepts/architecture.mdx) | Структура проекта и фоновые процессы |
-
-Матрица доступа: [docs/operations/access-matrix.mdx](docs/operations/access-matrix.mdx). Веб-UI: [web/README.md](web/README.md).
-
----
-
-## Лицензия
-
-Copyright (c) 2026 jacred-fdb, pavelpikta
-
-AGPL-3.0. См. файл [LICENSE](LICENSE) для подробностей.
+**Status:** Source changes pushed as a deployment candidate. .NET build, Magic Containers startup, persistence, cron, authenticated client traffic, and backup/restore require real-world validation before production claims.
