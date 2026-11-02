@@ -17,6 +17,14 @@
 
 ---
 
+## Full Bunny-native rewrite roadmap
+
+A documented upgrade path covers complete SQL-backed replacement of FileDB, a TypeScript Edge Scripting API, automatic collection from all 25 supported tracker adapters, shared logical data for multiple replicas, Bunny Storage backup/restore, and optional TorrServer-bunny playback integration.
+
+**[Read the full technical roadmap (Русский)](docs/BUNNY_NATIVE_REWRITE_PLAN.ru.md)**
+
+> This is a development roadmap, **not** a claim that the rewrite or all live integrations are complete. The original .NET process cannot run inside the Edge Scripting isolate; long-running collectors and torrent networking will remain in Bunny Magic Containers.
+
 ## What you get
 
 | Feature | Bunny edition |
