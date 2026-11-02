@@ -84,14 +84,37 @@ def trackers(root):
     return out
 
 def inspect_disk(data_root, sample_limit=0):
-    files = sorted(p for p in (data_root / "fdb").rglob("*") if p.is_file() and not p.is_symlink()) if (data_root / "fdb").is_dir() else []
-    tracks = sorted(p for p in (data_root / "tracks").rglob("*") if p.is_file() and not p.is_symlink()) if (data_root / "tracks").is_dir() else []
+    fdb_root = data_root / "fdb"
+    all_fdb = sorted(p for p in fdb_root.rglob("*") if p.is_file() and not p.is_symlink()) if fdb_root.is_dir() else []
+
+    def is_file_db_shard(p):
+        # Match the two real pathDb() formats from FileDB.MasterDb.cs:
+        # fdbPathLevels=2: fdb/aa/<30 hex>, =1: fdb/a/<32 hex>.
+        # Dotfiles, READMEs and arbitrary nested files are not database shards.
+        parts = p.relative_to(fdb_root).parts
+        if len(parts) != 2:
+            return False
+        folder, filename = parts
+        return bool((re.fullmatch(r"[0-9a-f]{2}", folder) and
+                     re.fullmatch(r"[0-9a-f]{30}", filename)) or
+                    (re.fullmatch(r"[0-9a-f]", folder) and
+                     re.fullmatch(r"[0-9a-f]{32}", filename)))
+
+    files = [p for p in all_fdb if is_file_db_shard(p)]
+    track_root = data_root / "tracks"
+    tracks = sorted(p for p in track_root.rglob("*")
+                    if p.is_file() and not p.is_symlink()
+                    and all(not part.startswith(".") for part in p.relative_to(track_root).parts)
+                    and not p.name.lower().startswith("readme")) if track_root.is_dir() else []
     masters = sorted(p for p in data_root.glob("masterDb*.bz") if p.is_file() and not p.is_symlink())
     master_magic = []
+    valid_masters = []
     for p in masters:
         with p.open("rb") as inp:
             is_gzip = inp.read(2) == b"\x1f\x8b"
         master_magic.append({"name": p.name, "gzip_magic": is_gzip, "bytes": p.stat().st_size})
+        if is_gzip:
+            valid_masters.append(p)
     sample = {"checked": 0, "records_seen": 0, "invalid": 0, "over_limit": 0}
     for p in files[:max(0,sample_limit)]:
         sample["checked"] += 1
@@ -108,10 +131,13 @@ def inspect_disk(data_root, sample_limit=0):
                 sample["records_seen"] += len(obj)
         except (OSError, ValueError, UnicodeError):
             sample["invalid"] += 1
-    size = sum(x.stat().st_size for x in files + tracks + masters)
-    return {"state": "MEASURED_LOCAL_FILE_BYTES" if (files or tracks or masters) else "NO_REAL_DATASET",
+    size = sum(x.stat().st_size for x in files + tracks + valid_masters)
+    # Presence of canonical files establishes only disk bytes, not record parity.
+    return {"state": "MEASURED_LOCAL_FILE_BYTES" if (files or tracks or valid_masters) else "NO_REAL_DATASET",
             "fdb_files": len(files), "fdb_bytes": sum(x.stat().st_size for x in files),
+            "ignored_non_shard_fdb_files": len(all_fdb) - len(files),
             "track_files": len(tracks), "master_files": master_magic,
+            "valid_gzip_master_files": len(valid_masters),
             "total_source_bytes": size, "total_records": "UNKNOWN_NOT_COUNTED", "sample": sample}
 
 def capacity(d):
