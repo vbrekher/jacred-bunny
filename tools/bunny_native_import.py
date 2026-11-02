@@ -140,7 +140,9 @@ def stage(data_root,out,cap=LIMIT,replace=False):
         con=init_database(temp)
         total=0
         for bucket,md5,path,meta in plan["specs"]:
-            try:records=json.loads(decompress(path,cap))
+            try:
+                raw_shard=decompress(path,cap)
+                records=json.loads(raw_shard)
             except (ValueError,UnicodeError,OSError) as e:raise Refused("Invalid shard GZip/JSON") from e
             if not isinstance(records,dict):raise Refused("Non-dictionary FileDB shard")
             timevalue=meta.get("updateTime") if isinstance(meta,dict) else meta
@@ -148,7 +150,7 @@ def stage(data_root,out,cap=LIMIT,replace=False):
             with con:
                 con.execute("INSERT INTO buckets VALUES (?,?,?,?,?,?)",
                             (bucket,md5,str(timevalue) if timevalue is not None else None,
-                             filetime,sha(decompress(path,cap)),len(records)))
+                             filetime,sha(raw_shard),len(records)))
                 for alias in sorted(set(bucket.split(":"))):
                     if alias:con.execute("INSERT INTO bucket_aliases VALUES (?,?)",(alias,bucket))
                 for url,obj in sorted(records.items()):
@@ -169,7 +171,7 @@ def stage(data_root,out,cap=LIMIT,replace=False):
                     for chunk in iter(lambda:inp.read(1024*1024),b""):h.update(chunk)
                 con.execute("INSERT INTO track_file_inventory VALUES (?,?,?)",
                             (relative,path.stat().st_size,h.hexdigest()))
-            con.execute("INSERT INTO native_imports VALUES(1,?,?,?,?,?,?)",
+            con.execute("INSERT INTO native_imports VALUES(1,?,?,?,?,?)",
                         (sha(decompress(plan["master"],cap)),len(plan["specs"]),total,
                          len(plan["tracks"]),str(int(time.time()))))
         outcome=validate(con)
