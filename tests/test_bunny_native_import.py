@@ -173,4 +173,47 @@ class Importer(unittest.TestCase):
             (src/"tracks"/"evil").symlink_to(base/"secret")
             with self.assertRaisesRegex(a.Refused,"symlink"):a.discover(src)
 
+
+    def test_export_64bit_filetime_and_private_mode(self):
+        import sys
+        sys.path.insert(0,str(MODULE.parent))
+        from bunny_native_export import export_stage
+        with tempfile.TemporaryDirectory() as td:
+            base=Path(td)
+            data,bucket,_,_=make_source(base)
+            with gzip.open(data/"masterDb.bz","wt",encoding="utf-8") as out:
+                json.dump({bucket:{"updateTime":"2026-11-03","fileTime":133123456789012345}},out)
+            staged=base/"stage.db";a.stage(data,staged)
+            export=base/"private.jsonl";result=export_stage(staged,export)
+            self.assertEqual(result["counts"]["torrent"],2)
+            self.assertEqual(export.stat().st_mode & 0o777,0o600)
+            data=[json.loads(x) for x in export.read_text("utf-8").splitlines()]
+            row=next(x for x in data if x["kind"]=="bucket")
+            self.assertEqual(row["file_time"],"133123456789012345")
+            self.assertEqual(data[-1]["kind"],"end")
+            self.assertEqual(hashlib.sha256(export.read_bytes()).hexdigest(),result["sha256"])
+            with self.assertRaises(a.Refused):export_stage(staged,export)
+
+    def test_remote_dry_run_without_bunny_or_npm(self):
+        import shutil
+        import subprocess
+        import sys
+        if not shutil.which("node"):self.skipTest("Node.js missing")
+        sys.path.insert(0,str(MODULE.parent))
+        from bunny_native_export import export_stage
+        with tempfile.TemporaryDirectory() as td:
+            base=Path(td);data,*_=make_source(base)
+            staged=base/"stage.db";a.stage(data,staged)
+            export=base/"private.jsonl";result=export_stage(staged,export)
+            cmd=["node",str(MODULE.parents[1]/"bunny-native/remote-import.mjs"),
+                 "--file",str(export),"--sha256",result["sha256"]]
+            run=subprocess.run(cmd,capture_output=True,text=True,timeout=15)
+            self.assertEqual(run.returncode,0,run.stderr)
+            self.assertEqual(json.loads(run.stdout)["status"],"BUNNY_REMOTE_DRY_RUN_NO_NETWORK")
+            run=subprocess.run(cmd[:-1]+["0"*64],capture_output=True,text=True,timeout=15)
+            self.assertNotEqual(run.returncode,0)
+            self.assertNotIn("magnet:?",run.stderr)
+            run=subprocess.run(cmd+["--apply"],capture_output=True,text=True,timeout=15)
+            self.assertNotEqual(run.returncode,0)
+
 if __name__=="__main__":unittest.main()
