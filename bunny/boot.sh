@@ -8,7 +8,13 @@ valid_key() {
   [ "$count" -ge 32 ] && [ "$count" -le 128 ] || return 1
   case "$1" in *[!A-Za-z0-9_-]*) return 1 ;; esac
 }
-mkdir -p /app/config /app/Data/temp
+# Persistent volumes can arrive owned by root. Correct just the mount roots at startup.
+# Do not recursively chown a potentially multi-GB FileDB on every restart.
+mkdir -p /app/config /app/Data
+chown jacred:jacred /app/config /app/Data
+chmod 700 /app/config
+su-exec jacred:jacred mkdir -p /app/Data/temp
+
 if [ ! -s /app/config/init.yaml ] && [ ! -s /app/config/init.conf ]; then
   api="$(printenv JACRED_BUNNY_API_KEY || true)"
   dev="$(printenv JACRED_BUNNY_DEV_KEY || true)"
@@ -23,6 +29,7 @@ if [ ! -s /app/config/init.yaml ] && [ ! -s /app/config/init.conf ]; then
     -e '/^flaresolverr:/,/^cffetch:/ s/^  enable: true/  enable: false/' \
     -e '/^cffetch:/,/^mergeduplicates:/ s/^  enable: true/  enable: false/' \
     /app/config/init.yaml
+  chown jacred:jacred /app/config/init.yaml
   chmod 600 /app/config/init.yaml
   echo "JacRed Bunny: secured configuration created on persistent volume"
 fi
@@ -46,4 +53,4 @@ case "$JACRED_BUNNY_CRON" in
     ;;
   *) fail "JACRED_BUNNY_CRON must be 0 or 1" ;;
 esac
-exec /entrypoint.sh "$@"
+exec su-exec jacred:jacred /entrypoint.sh "$@"

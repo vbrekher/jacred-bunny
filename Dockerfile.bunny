@@ -66,6 +66,7 @@ RUN set -eux; \
     ca-certificates \
     curl \
     dumb-init \
+    su-exec \
     icu-libs \
     libgcc \
     libintl \
@@ -112,7 +113,8 @@ ENV JACRED_CONFIG_DIR=/app/config \
     TZ=UTC \
     UMASK=0027
 
-USER jacred:jacred
+# Initialize mounted volume ownership at boot, then drop privileges with su-exec.
+USER root
 
 VOLUME ["/app/Data", "/app/config"]
 
