@@ -28,6 +28,15 @@ python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
 python3 tools/bunny_native_audit.py --strict --synthetic-sqlite 1500 --output "$HOME/Downloads/jacred-bunny-v0.3-source-audit.json"
 ```
 
+## v0.4.0 — Bunny Native SQL & FileDB importer
+
+The source now includes a **read-only GZip FileDB importer**, atomic SQLite staging,
+searchable FTS5/SQL, private SHA256-verified JSONL export, and an explicit
+**new-empty-database-only** Bunny SQL uploader. These are staging tools;
+no production cutover, live Bunny data acceptance or claim of search parity.
+
+**[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
+
 ## Full Bunny-native rewrite roadmap
 
 A documented upgrade path covers complete SQL-backed replacement of FileDB, a TypeScript Edge Scripting API, automatic collection from all 25 supported tracker adapters, shared logical data for multiple replicas, Bunny Storage backup/restore, and optional TorrServer-bunny playback integration.
