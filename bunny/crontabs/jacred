@@ -1,0 +1,5 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+*/5 * * * * /app/bunny/cron-job.sh checkpoint
+*/15 * * * * /app/bunny/cron-job.sh resume
+0 5 * * 0 /app/bunny/cron-job.sh report

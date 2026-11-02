@@ -10,8 +10,15 @@ namespace JacRed.Configuration
 {
     public static class AppConfigurationLoader
     {
-        public const string ConfigFileYaml = "init.yaml";
-        public const string ConfigFileJson = "init.conf";
+        // Optional durable configuration directory for managed container hosting.
+        public static readonly string ConfigFileYaml = ResolveConfigPath("init.yaml");
+        public static readonly string ConfigFileJson = ResolveConfigPath("init.conf");
+
+        static string ResolveConfigPath(string name)
+        {
+            var directory = Environment.GetEnvironmentVariable("JACRED_CONFIG_DIR");
+            return string.IsNullOrWhiteSpace(directory) ? name : Path.Combine(directory, name);
+        }
 
         /// <summary>Config file priority: init.yaml wins over init.conf. If both exist, init.yaml is used.</summary>
         public static (string path, DateTime lastWrite) GetConfigSource()
