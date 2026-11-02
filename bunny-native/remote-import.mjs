@@ -19,7 +19,7 @@ function parseArgs(args) {
   let result={};
   for(let i=0;i<args.length;i++){
     if(args[i]==="--apply"||args[i]==="--ack-new-database") result[args[i]]=true;
-    else if(["--file","--sha256","--max-rows"].includes(args[i])){
+    else if(["--file","--sha256"].includes(args[i])){
       if(!args[i+1])throw Error("Missing CLI value");
       result[args[i]]=args[++i];
     } else throw Error("Unknown CLI argument");
@@ -73,7 +73,7 @@ const FIELDS={
   track:["relative_path","bytes","sha256"],
 };
 async function apply(db,file,stats){
-  const tablesAlready=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('buckets','torrents','native_imports')").all();
+  const tablesAlready=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
   if(tablesAlready.rows.length)throw Error("Target database already has JacRed tables; refusing overwrite/resume");
   await db.exec(readFileSync(join(migration,"0001_catalog.sql"),"utf8"));
   await db.exec(readFileSync(join(migration,"0002_search_fts5.sql"),"utf8"));
