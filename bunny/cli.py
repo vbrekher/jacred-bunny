@@ -341,6 +341,11 @@ def setup(args):
     print("Region:", region, "| FileDB:", args.data_gb, "GB | config: 1 GB")
     print("Storage allocation approximately $%.2f/month, PLUS compute and traffic." % ((args.data_gb + 1) * 0.10))
     print("No optional Bunny Database, Scripting, or paid Anycast.")
+    enable_sync = ask("Enable official JacRed remote sync on first boot? (y/N)", "N").lower() == "y"
+    if enable_sync:
+        body["containerTemplates"][0]["environmentVariables"].append(
+            {"name": "JACRED_BUNNY_SYNC_API", "value": "https://sync.jacred.stream"})
+        print("Official sync is optional; initial indexing may take considerable time and bandwidth.")
     if ask("Type CREATE to confirm paid resources") != "CREATE":
         print("Cancelled. No JacRed Bunny app created.")
         return

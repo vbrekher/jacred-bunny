@@ -29,6 +29,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Offline CLI source smoke
+        run: |
+          python3 bunny/cli.py self-test
+          python3 -m py_compile bunny/cli.py
+          bash -n bunny/build-push.sh
+          sh -n install-bunny.sh bunny/boot.sh bunny/cron-job.sh
       - name: Enable buildx
         uses: docker/setup-buildx-action@v3
       - name: Authenticate to GHCR

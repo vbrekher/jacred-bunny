@@ -2,6 +2,7 @@
 set -eu
 command -v curl >/dev/null 2>&1 || { echo 'curl is required' >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo 'Python 3.9+ is required' >&2; exit 1; }
+python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3,9) else 1)' || { echo 'Python 3.9+ required' >&2; exit 1; }
 REPO='vbrekher/jacred-bunny'
 BIN_DIR="$HOME/.local/bin"
 SHARE_DIR="$HOME/.local/share/jacred-bunny"

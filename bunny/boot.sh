@@ -31,6 +31,14 @@ if [ ! -s /app/config/init.yaml ] && [ ! -s /app/config/init.conf ]; then
     /app/config/init.yaml
   chown jacred:jacred /app/config/init.yaml
   chmod 600 /app/config/init.yaml
+  case "${JACRED_BUNNY_SYNC_API:-}" in
+    '') ;;
+    'https://sync.jacred.stream')
+      sed -i 's|^syncapi:.*|syncapi: "https://sync.jacred.stream"|' /app/config/init.yaml
+      echo "JacRed Bunny: official remote sync enabled on first boot"
+      ;;
+    *) fail "Unsupported sync API supplied; refusing to write arbitrary remote URL" ;;
+  esac
   echo "JacRed Bunny: secured configuration created on persistent volume"
 fi
 [ -s /app/config/init.yaml ] || fail "Bunny profile requires persistent /app/config/init.yaml"
