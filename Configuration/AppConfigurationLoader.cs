@@ -10,18 +10,27 @@ namespace JacRed.Configuration
 {
     public static class AppConfigurationLoader
     {
+        // Optional durable configuration directory for managed container hosting.
         public const string ConfigFileYaml = "init.yaml";
         public const string ConfigFileJson = "init.conf";
+
+        public static string ResolveConfigPath(string name)
+        {
+            var directory = Environment.GetEnvironmentVariable("JACRED_CONFIG_DIR");
+            return string.IsNullOrWhiteSpace(directory) ? name : Path.Combine(directory, name);
+        }
 
         /// <summary>Config file priority: init.yaml wins over init.conf. If both exist, init.yaml is used.</summary>
         public static (string path, DateTime lastWrite) GetConfigSource()
         {
-            var hasYaml = File.Exists(ConfigFileYaml);
-            var hasJson = File.Exists(ConfigFileJson);
+            var yamlPath = ResolveConfigPath(ConfigFileYaml);
+            var jsonPath = ResolveConfigPath(ConfigFileJson);
+            var hasYaml = File.Exists(yamlPath);
+            var hasJson = File.Exists(jsonPath);
             if (hasYaml)
-                return (ConfigFileYaml, File.GetLastWriteTimeUtc(ConfigFileYaml));
+                return (yamlPath, File.GetLastWriteTimeUtc(yamlPath));
             if (hasJson)
-                return (ConfigFileJson, File.GetLastWriteTimeUtc(ConfigFileJson));
+                return (jsonPath, File.GetLastWriteTimeUtc(jsonPath));
             return (null, default);
         }
 

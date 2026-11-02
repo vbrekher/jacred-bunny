@@ -317,7 +317,7 @@ namespace JacRed.Configuration
         {
             var sourceInfo = GetConfigSourceInfo();
             var outputFormat = format ?? sourceInfo.format ?? "yaml";
-            var targetPath = sourceInfo.path ?? (outputFormat == "json" ? AppConfigurationLoader.ConfigFileJson : AppConfigurationLoader.ConfigFileYaml);
+            var targetPath = sourceInfo.path ?? AppConfigurationLoader.ResolveConfigPath(outputFormat == "json" ? AppConfigurationLoader.ConfigFileJson : AppConfigurationLoader.ConfigFileYaml);
 
             try
             {
