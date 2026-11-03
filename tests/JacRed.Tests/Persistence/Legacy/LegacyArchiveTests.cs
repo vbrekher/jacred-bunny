@@ -50,6 +50,8 @@ public sealed class LegacyArchiveTests : IDisposable
             using var memory = new MemoryStream();
             entry.DataStream?.CopyTo(memory);
             content.Add(entry.Name, memory.ToArray());
+            if (entry.Name != "manifest.json")
+                Assert.Equal(result.Files.Single(f => f.Path == entry.Name).ModifiedUtcTicks, entry.ModificationTime.UtcTicks);
         }
         foreach (var file in result.Files)
         {
@@ -81,6 +83,21 @@ public sealed class LegacyArchiveTests : IDisposable
         cancellation.Cancel();
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => LegacyArchive.Create(Data, Config, Private, Source, cancellation.Token));
         Assert.Empty(Directory.EnumerateFileSystemEntries(Private));
+    }
+
+    [Theory]
+    [InlineData("Data")]
+    [InlineData("config")]
+    [InlineData("shared")]
+    public async Task Source_or_shared_directory_cannot_receive_private_archive(string kind)
+    {
+        var output = kind == "Data" ? Data : kind == "config" ? Config : Private;
+        if (kind != "shared" && !OperatingSystem.IsWindows())
+            File.SetUnixFileMode(output, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        if (kind == "shared" && !OperatingSystem.IsWindows())
+            File.SetUnixFileMode(Private, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead);
+        await Assert.ThrowsAsync<InvalidDataException>(() => LegacyArchive.Create(Data, Config, output, Source, default));
+        Assert.False(File.Exists(Path.Combine(output, "legacy.tar.gz")));
     }
 
     [Theory]

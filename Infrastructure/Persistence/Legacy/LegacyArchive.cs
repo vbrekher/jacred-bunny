@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace JacRed.Infrastructure.Persistence.Legacy;
 
-internal sealed record LegacyArchiveFile(string Path, long Bytes, string Sha256);
+internal sealed record LegacyArchiveFile(string Path, long Bytes, string Sha256, long ModifiedUtcTicks);
 internal sealed record LegacyArchiveResult(string Path, string Sha256, long Bytes,
     IReadOnlyList<LegacyArchiveFile> Files);
 
@@ -158,9 +158,10 @@ internal static class LegacyArchive
                         source.Position = 0;
                         var entry = new PaxTarEntry(TarEntryType.RegularFile, item.Name) {
                             DataStream = source, Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite,
+                            ModificationTime = new DateTimeOffset(new DateTime(item.Modified, DateTimeKind.Utc)),
                             Uid = 0, Gid = 0, UserName = "", GroupName = "" };
                         await tar.WriteEntryAsync(entry, cancellation);
-                        files.Add(new(item.Name, item.Length, digest));
+                        files.Add(new(item.Name, item.Length, digest, item.Modified));
                     }
                     // Re-read original bytes and topology after every tar entry.
                     // This detects concurrent changes but is NOT a substitute for
@@ -178,7 +179,7 @@ internal static class LegacyArchive
                     var manifest = JsonSerializer.SerializeToUtf8Bytes(new {
                         schema = "jacred-legacy-byte-archive/v1", source_sha = sourceSha,
                         quiescence = "REQUIRES_VERIFIED_SINGLE_WORKER_REPLACEMENT",
-                        files = files.Select(f => new { path = f.Path, bytes = f.Bytes, sha256 = f.Sha256 }) });
+                        files = files.Select(f => new { path = f.Path, bytes = f.Bytes, sha256 = f.Sha256, modified_utc_ticks = f.ModifiedUtcTicks }) });
                     using var manifestStream = new MemoryStream(manifest, writable: false);
                     await tar.WriteEntryAsync(new PaxTarEntry(TarEntryType.RegularFile, "manifest.json") {
                         DataStream = manifestStream, Mode = UnixFileMode.UserRead | UnixFileMode.UserWrite }, cancellation);
