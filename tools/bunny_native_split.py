@@ -106,7 +106,7 @@ def split(source,out,shard_count):
             result.append({"index":idx,"buckets":buckets,"torrents":torrents,"tracks":tracks})
         if sum(x["buckets"] for x in result)!=origin["buckets"] or \
            sum(x["torrents"] for x in result)!=origin["torrents"] or \
-           sum(x["tracks"] for x in result)!=origin["track_file_manifest_only"]:
+           sum(x["tracks"] for x in result)!=origin["track_files_inventory_only"]:
             raise SplitRefused("Global source/shard reconciliation failed")
         if (source.stat().st_size,source.stat().st_mtime_ns)!=source_stat:
             raise SplitRefused("Source stage modified during split")
