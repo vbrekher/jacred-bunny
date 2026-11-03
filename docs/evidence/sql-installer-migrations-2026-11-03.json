@@ -1,0 +1,23 @@
+{
+  "kind": "LIVE_INSTALLER_SQL_MIGRATION",
+  "at": "2026-11-03T14:09:36Z",
+  "production_ready": false,
+  "first_apply": [
+    "0001_catalog.sql",
+    "0002_search_fts5.sql"
+  ],
+  "second_apply": [],
+  "receipts": [
+    {
+      "name": "0001_catalog.sql",
+      "sha256": "e3aad13389a7efa63bb665f13341eba87d3fb69d771152acaf723be0b613b1df"
+    },
+    {
+      "name": "0002_search_fts5.sql",
+      "sha256": "9bd74eaf74022d1f80f3fb0dc58ea39edc4e37ce512deaf3cce9e2d731a46628"
+    }
+  ],
+  "catalog_torrents": 0,
+  "read_only_read": true
+}
+

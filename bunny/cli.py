@@ -4,11 +4,13 @@ import argparse
 import getpass
 import ipaddress
 import json
+import math
 import os
 from pathlib import Path
 import re
 import secrets
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -496,6 +498,158 @@ def self_test():
                                        {"type": "cdn", "isSslEnabled": True, "publicHost": "mc-foo.bunny.run"}]}) == "https://mc-foo.bunny.run"
     print("JACRED_BUNNY_CLI_SELF_TEST_PASS")
 
+def resolve_native_registry(key, image, expected_digest, preferred=None):
+    if preferred is not None:
+        if not re.fullmatch(r"[1-9][0-9]*", str(preferred)):
+            raise DeploymentError("Expected a numeric Bunny registry ID")
+        candidates = [str(preferred)]
+    else:
+        data = request("GET", "/mc/registries", key)
+        allowed = registry_ids(data)
+        entries = data.get("items", []) if isinstance(data, dict) else data
+        public = [str(x.get("id")) for x in entries if isinstance(x, dict)
+                  and "public" in str(x.get("displayName", "")).lower() and str(x.get("id")) in allowed]
+        candidates = public + [x for x in allowed if x not in public]
+    for ident in candidates:
+        try:
+            digest = check_image(key, ident, image)
+        except DeploymentError:
+            continue
+        if digest and (expected_digest is None or digest == expected_digest):
+            return ident, digest
+    raise DeploymentError("No connected GHCR registry can verify the immutable fork image; no paid resources created")
+
+
+def native_health(deploy):
+    from native import read_private, NativeError
+    observations = {"productionReady": False, "infrastructureReady": False}
+    if "worker" not in deploy.state["resources"]:
+        observations["worker"] = "NOT_PROVISIONED"
+        return observations
+    worker = deploy.verify("worker")
+    url = extract_endpoint(worker)
+    if not url or not urllib.parse.urlsplit(url).hostname.endswith((".bunny.run", ".b-cdn.net")):
+        raise NativeError("No verified Bunny HTTPS worker endpoint")
+    credentials = read_private(deploy.secret_path)
+    observations["worker_url"] = url
+    def get(path):
+        req = urllib.request.Request(url + path, headers={"X-Api-Key": credentials["api_key"]})
+        try:
+            with urllib.request.build_opener(NoRedirect()).open(req, timeout=8) as response:
+                data = response.read(16385)
+                if len(data) > 16384:
+                    return response.status, None
+                try:
+                    return response.status, json.loads(data)
+                except ValueError:
+                    return response.status, None
+        except urllib.error.HTTPError as exc:
+            exc.close()
+            return exc.code, None
+        except (urllib.error.URLError, TimeoutError):
+            return None, None
+    code, health = get("/health")
+    observations["worker_health_http"] = code
+    observations["worker_healthy"] = code == 200 and isinstance(health, dict) and health.get("status") == "OK"
+    code, version = get("/version")
+    sha = version.get("gitSha", "") if isinstance(version, dict) else ""
+    observations["server_git_sha"] = sha if re.fullmatch(r"[0-9a-f]{8,40}", sha) else None
+    observations["worker_source_matches"] = bool(observations["server_git_sha"] and deploy.state["source_sha"].startswith(sha))
+    try:
+        sql = deploy.sql_client(create=False)
+        observations["sql_migration_count"] = sql.query("SELECT count(*) AS n FROM native_schema_migrations")[0]["n"]
+        observations["catalog_torrent_count"] = sql.query("SELECT count(*) AS n FROM torrents")[0]["n"]
+        observations["sql_schema_ready"] = observations["sql_migration_count"] >= 2
+    except NativeError:
+        observations["sql_schema_ready"] = False
+    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"])
+    observations["catalog_acceptance"] = "NOT_ESTABLISHED"
+    return observations
+
+
+def native_install(args):
+    from native import installation_lock
+    if not args.apply:
+        return _native_install(args)
+    with installation_lock(args.state_dir):
+        return _native_install(args)
+
+
+def _native_install(args):
+    from native import (API as NativeAPI, Deployment, NativeError, load_payload,
+                        staging_cost_plan, current_pricing, read_private)
+    if args.release:
+        from native import fetch_release_payload
+        if args.payload_dir:
+            raise NativeError("Use either --release or --payload-dir")
+        args.payload_dir = fetch_release_payload(args.release, args.state_dir / "payloads", args.source_sha)
+    if not args.payload_dir:
+        raise NativeError("Require --release or --payload-dir containing verified release artifacts")
+    payload = load_payload(args.payload_dir)  # All files checked BEFORE paid API writes.
+    if not args.apply:
+        print(json.dumps({"apply": False, "source_sha": payload["source_sha"],
+            "resources": {"database": 1, "storage": 1, "edge": 1, "worker": 1},
+            "hours": args.hours, "productionReady": False}, indent=2))
+        return
+    key = account_key()
+    api = NativeAPI(key)
+    limits = api("GET", "/mc/limits")
+    rates = current_pricing()  # Refuse unknown/changed billing formats before creation.
+    cost = staging_cost_plan(limits, args.hours, args.data_gb, rates=rates)
+    if not 0 < args.max_estimated_usd <= 5 or cost["estimated_initial_usd"] > args.max_estimated_usd:
+        raise NativeError("Current staging estimate exceeds --max-estimated-usd (maximum $5)")
+    account = api("GET", "/user")
+    credit = [account.get("Balance"), account.get("TrialBalance", 0)]
+    if not all(type(x) in (int, float) and math.isfinite(x) for x in credit):
+        raise NativeError("COST_UNKNOWN: account credit could not be verified")
+    balance = sum(credit)
+    if balance < cost["estimated_initial_usd"]:
+        raise NativeError("Insufficient account credit for the conservative staging estimate")
+    image = payload["image"]["reference"]
+    deploy = Deployment(args.state_dir, api)
+    preferred = args.registry_id
+    if preferred is None and deploy.state and "worker" in deploy.state["resources"]:
+        preferred = deploy.state["resources"]["worker"].get("identity", {}).get("container", {}).get("imageRegistryId")
+    registry, digest = resolve_native_registry(key, image, payload["image"]["digest"], preferred)
+    if "AMS" not in {region for region, _ in regions(api("GET", "/mc/regions"))}:
+        raise NativeError("AMS staging region unavailable")
+    if not deploy.state:
+        if limits.get("existingNumberOfApplications", 0) >= limits.get("maxNumberOfApplications", 0):
+            raise NativeError("Magic Containers application quota exhausted")
+        db_limits = api("GET", "/database/v1/config/limits")
+        if db_limits.get("current_databases", 0) >= db_limits.get("max_databases", 0):
+            raise NativeError("Database quota exhausted")
+    deploy.initialize(payload["source_sha"], image, digest, hours=args.hours)
+    if time.time() >= deploy.state["stop_at"]:
+        raise NativeError("Existing staging window expired; use an explicitly bounded start window")
+    deploy.state["cost_plan"] = cost
+    deploy.save()
+    print("Verified release files, current pricing, image digest and quota. Creating/resuming isolated staging.")
+    deploy.provision_data_plane()
+    changed = deploy.migrate([args.payload_dir / name for name in ("0001_catalog.sql", "0002_search_fts5.sql")])
+    print("SQL migrations applied:", len(changed))
+    deploy.wire_edge(args.payload_dir / "edge.js", payload["files"]["edge.js"])
+    deploy.start_watchdog()
+    credentials = read_private(deploy.secret_path)
+    body = build_payload("AMS", image, registry, credentials["api_key"], credentials["admin_key"], args.data_gb, digest=digest)
+    deploy.provision_worker(body)
+    deploy.bound_staging_cdn()
+    worker = deploy.verify("worker")
+    if worker.get("status") != "active":
+        deploy.worker_action("start")
+    deadline = time.monotonic() + 180
+    while True:
+        health = native_health(deploy)
+        if health["infrastructureReady"]:
+            break
+        if time.monotonic() >= deadline:
+            raise NativeError("Worker source/health not confirmed within deadline; saved IDs permit resume")
+        time.sleep(5)
+    deploy.record_infrastructure_health(health)
+    print(json.dumps(health, indent=2))
+    print("Infrastructure installed; FileDB compatibility API is active. SQL collector cutover and catalog/client acceptance remain required.")
+
+
 def native_staging(args):
     # One CLI, with its implementation split into a standard-library module.
     try:
@@ -503,6 +657,9 @@ def native_staging(args):
     except ImportError:
         raise DeploymentError("Native staging module missing; reinstall the CLI") from None
     try:
+        if args.operation in ("install", "resume"):
+            native_install(args)
+            return
         if args.operation == "plan" or (args.operation == "provision" and not args.apply):
             print(json.dumps({"resources": {"database": 1, "storage": 1, "edge": 1},
                               "estimated_initial_usd": 1.22, "hard_cost_limit": False,
@@ -512,6 +669,30 @@ def native_staging(args):
             return
         key = account_key()
         deploy = Deployment(args.state_dir, NativeAPI(key))
+        if args.operation in ("start", "stop", "health", "doctor"):
+            if not deploy.state:
+                raise DeploymentError("No native staging deployment manifest")
+            if args.operation in ("health", "doctor"):
+                health = native_health(deploy)
+                print(json.dumps(health, indent=2))
+                if not health["infrastructureReady"]:
+                    raise DeploymentError("Native infrastructure is not healthy")
+            else:
+                if args.operation == "start":
+                    remote = deploy.verify("worker")
+                    if remote.get("status") == "active" and deploy.watchdog_available():
+                        print("Owned worker already active with a live budget watchdog")
+                        return
+                    limits = deploy.api("GET", "/mc/limits")
+                    data_gb = next((x["size"] for x in deploy.state["resources"]["worker"]["identity"]["volumes"] if x["name"] == "data"), None)
+                    cost = __import__("native").staging_cost_plan(limits, args.hours, data_gb, rates=__import__("native").current_pricing())
+                    if not 0 < args.max_estimated_usd <= 5 or cost["estimated_initial_usd"] > args.max_estimated_usd:
+                        raise DeploymentError("Renewed staging window exceeds budget")
+                    deploy.renew_window(args.hours)
+                    deploy.start_watchdog()
+                deploy.worker_action(args.operation)
+                print("Owned worker lifecycle requested:", args.operation)
+            return
         if args.operation == "status":
             if not deploy.state:
                 raise DeploymentError("No native staging deployment manifest")
@@ -525,9 +706,7 @@ def native_staging(args):
             raise DeploymentError("Native staging requires this fork's immutable source-SHA image tag")
         if image_parts(args.image)["imageTag"] != "sha-" + args.source_sha:
             raise DeploymentError("Image tag does not match source SHA")
-        digest = check_image(key, args.registry_id, args.image)
-        if not digest:
-            raise DeploymentError("Cannot verify this fork's public immutable image; no resources created")
+        registry, digest = resolve_native_registry(key, args.image, None, args.registry_id)
         deploy.initialize(args.source_sha, args.image, digest)
         print(json.dumps(deploy.provision_data_plane(), indent=2))
         print("Staging infrastructure only. Catalog import, worker SQL integration and production acceptance remain required.")
@@ -548,11 +727,15 @@ def main():
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
-    native.add_argument("operation", choices=("plan", "provision", "status"))
+    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop"))
     native.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
+    native.add_argument("--release", help="Public GitHub release payload; no GitHub PAT required")
+    native.add_argument("--payload-dir", type=Path)
+    native.add_argument("--hours", type=float, default=1)
+    native.add_argument("--data-gb", type=int, default=1)
     native.add_argument("--source-sha")
     native.add_argument("--image", default=IMAGE)
-    native.add_argument("--registry-id", default="1156")
+    native.add_argument("--registry-id", help="Optional existing numeric registry; public GHCR is auto-discovered")
     native.add_argument("--apply", action="store_true")
     native.add_argument("--max-estimated-usd", type=float, default=2.0)
     args = parser.parse_args()

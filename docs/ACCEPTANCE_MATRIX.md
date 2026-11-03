@@ -14,8 +14,8 @@ Checked: 3 November 2026. **IN PROGRESS — NOT PRODUCTION READY.**
 | WORKERS | FAIL | SQL collector, durable queue integration and 24h live soak incomplete. |
 | SECURITY | FAIL | Live missing-key 401 and no-cache responses verified; full scans/429/SSRF/RBAC matrix incomplete. |
 | CLIENTS | FAIL | Real browser UI checked; actual Lampa/Tizen/Prowlarr/Sonarr/Radarr/TorrServer integration untested. |
-| INSTALLER | FAIL | Legacy CLI safety improved; journalled native resource provisioning added; complete fresh native one-command install untested. |
-| OPERATIONS | FAIL | 20 sequential MC health latency samples recorded; product usage accounting, alerts and DR incomplete. |
+| INSTALLER | FAIL | Four services created by one CLI run; repeat preserves IDs, migrations skip; expiry stop/restart verified. Default public bootstrap, real catalog fixture, all operations and owned cleanup remain incomplete. |
+| OPERATIONS | FAIL | 20 MC health samples, real expiry watchdog and CDN byte caps recorded; full usage accounting, alerts and DR incomplete. |
 | DOCUMENTATION | FAIL | English root README and real empty-catalog screenshots added; equivalent full RU/EN/NL sets incomplete. |
 | RELEASE | FAIL | PR #10 merged after CI; native foundation PR pending; no v1.0.0 release or production launch. |
 

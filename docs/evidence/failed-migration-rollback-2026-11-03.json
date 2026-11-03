@@ -1,0 +1,9 @@
+{
+  "kind": "LIVE_INSTALLER_FAILED_MIGRATION_ROLLBACK",
+  "migration_rejected": true,
+  "created_table_rolled_back": true,
+  "no_receipt_for_failed_migration": true,
+  "existing_migration_receipts": 2,
+  "production_ready": false
+}
+
