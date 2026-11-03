@@ -37,6 +37,13 @@ jobs:
           node --check bunny-native/remote-import.mjs
       - name: Edge API compatibility and security tests (no network)
         run: node --test bunny-native/edge/tests/api.test.mjs
+      - name: Bundle deployable Edge script with official Bunny packages
+        working-directory: bunny-native/edge
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -s dist/index.js
+          echo "EDGE_SCRIPT_BUNDLE_CREATED_PASS"
       - name: Staged import regression after provenance transport change
         run: |
           python3 -m unittest discover -s tests -p 'test_bunny_native_import.py' -v
