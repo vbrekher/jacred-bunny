@@ -43,7 +43,17 @@
   "after": {
     "scope": "Actual loopback HTTP config API with dummy secrets, FileDB mode, no cloud resources or real credentials",
     "source_sha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
-    "label": "after",
+    "checkout_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+    "service_version": {
+      "version": "dev-fix-lan-admin-origin+8cab97bc",
+      "gitSha": "8cab97bc",
+      "gitFullSha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+      "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+      "catalogBackend": "filedb",
+      "gitBranch": "fix/lan-admin-origin",
+      "buildDate": "2026-11-03 21:51:49 UTC"
+    },
+    "label": "after-attested",
     "keyless_mode": false,
     "results": [
       {
@@ -124,7 +134,17 @@
   "keyless_legacy": {
     "scope": "Actual loopback HTTP config API with dummy secrets, FileDB mode, no cloud resources or real credentials",
     "source_sha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
-    "label": "keyless",
+    "checkout_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+    "service_version": {
+      "version": "dev-fix-lan-admin-origin+8cab97bc",
+      "gitSha": "8cab97bc",
+      "gitFullSha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+      "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+      "catalogBackend": "filedb",
+      "gitBranch": "fix/lan-admin-origin",
+      "buildDate": "2026-11-03 21:51:49 UTC"
+    },
+    "label": "keyless-attested",
     "keyless_mode": true,
     "results": [
       {
@@ -227,5 +247,6 @@
     "Configured devkey is mandatory everywhere; keyless legacy LAN remains a trusted-network mode and cannot authenticate metadata-free clients",
     "Full RBAC/CORS/dependency/history/license/429/500 audit remains open"
   ],
-  "production_acceptance": false
+  "production_acceptance": false,
+  "after_service_version_observed": true
 }
