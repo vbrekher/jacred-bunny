@@ -883,6 +883,72 @@ def native_empty_sql_cutover(args):
                           'legacy_rollback_allowed':False,'health':health},indent=2))
 
 
+def native_legacy_export(args):
+    from native import API as NativeAPI, NativeError, installation_lock, read_private
+    from legacy import LegacyExports
+    if not args.apply:
+        print(json.dumps({'operation': 'legacy-export', 'apply': False, 'creates_cloud_resources': False,
+            'maximum_new_window_seconds': 540,
+            'requires': 'Owned normal FileDB worker with verified shutdown/export bridge and saved HTTPS health',
+            'effects': 'Bounded stop, isolated byte export, private verification, restore original environment, leave compute stopped',
+            'sql_imported': False, 'productionReady': False}, indent=2))
+        return
+    with installation_lock(args.state_dir):
+        deploy = LegacyExports(args.state_dir, NativeAPI(account_key()))
+        if not deploy.state or 'worker' not in deploy.state.get('resources', {}):
+            raise NativeError('No owned native legacy installation')
+        if deploy.state.get('pending_legacy_export'):
+            print(json.dumps(deploy.export_legacy(), indent=2))
+            return
+        deploy.verify('worker')
+        data_gb = next(row['size'] for row in deploy.state['resources']['worker']['identity']['volumes'] if row['name'] == 'data')
+        if not .1 <= args.hours <= 24 or not 0 < args.max_estimated_usd <= 5:
+            raise NativeError('Legacy export window exceeds conservative estimate budget')
+        hours = min(args.hours, .15)
+        cost = staging_cost_plan(deploy.api('GET', '/mc/limits'), hours, data_gb, rates=current_pricing())
+        if cost['estimated_initial_usd'] > args.max_estimated_usd:
+            raise NativeError('Legacy export window exceeds conservative estimate budget')
+        if not deploy.watchdog_available() or deploy.state['stop_at'] - time.time() < 240:
+            deploy.renew_window(hours)
+            deploy.start_watchdog()
+        capabilities = read_private(deploy.directory / 'watchdog.json').get('capabilities') or []
+        if not all(value in capabilities for value in ('authority_intent_stop', 'legacy_export_stop')):
+            deploy.worker_action('stop')
+            deploy._wait_inactive()
+            deploy.renew_window(.0001)
+            deadline = time.monotonic() + 30
+            while read_private(deploy.directory / 'watchdog.json').get('status') != 'stopped_confirmed':
+                if time.monotonic() >= deadline:
+                    raise NativeError('Prior owned watchdog termination not confirmed')
+                time.sleep(1)
+            deploy.renew_window(hours)
+            deploy.start_watchdog()
+            capabilities = read_private(deploy.directory / 'watchdog.json').get('capabilities') or []
+            if not all(value in capabilities for value in ('authority_intent_stop', 'legacy_export_stop')):
+                raise NativeError('Legacy-export-aware watchdog unavailable; mutation refused')
+        deploy.bound_staging_cdn()
+        started_here = False
+        try:
+            if str(deploy.verify('worker').get('status', '')).lower() != 'active':
+                deploy.worker_action('start')
+                started_here = True
+                deadline = time.monotonic() + 120
+                while True:
+                    try:
+                        deploy._normal_proof()
+                        break
+                    except NativeError:
+                        if time.monotonic() >= deadline:
+                            raise NativeError('Owned normal export bridge not ready; no export configuration applied') from None
+                        time.sleep(2)
+            result = deploy.export_legacy()
+        finally:
+            if started_here:
+                deploy.worker_action('stop')
+                deploy._wait_inactive()
+        print(json.dumps(result, indent=2))
+
+
 def native_staging(args):
     # One CLI, with its implementation split into a standard-library module.
     try:
@@ -890,6 +956,9 @@ def native_staging(args):
     except ImportError:
         raise DeploymentError("Native staging module missing; reinstall the CLI") from None
     try:
+        if args.operation == "legacy-export":
+            native_legacy_export(args)
+            return
         if args.operation == "cutover-empty-sql":
             native_empty_sql_cutover(args)
             return
@@ -979,7 +1048,7 @@ def main():
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
-    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test", "cutover-empty-sql"))
+    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test", "cutover-empty-sql", "legacy-export"))
     native.add_argument("--backup-id", help="Private SQL backup receipt ID for isolated restore test")
     native.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
     native.add_argument("--release", help="Public GitHub release payload; no GitHub PAT required")

@@ -63,6 +63,7 @@ class WatchdogTests(unittest.TestCase):
         try:
             self.assertTrue(self.deploy.watchdog_available())
             self.assertIn('authority_intent_stop',heartbeat['capabilities'])
+            self.assertIn('legacy_export_stop',heartbeat['capabilities'])
             self.assertNotIn('test-only-account-key',self.deploy.path.read_text())
             self.deploy.start_watchdog()
             self.assertEqual(n.read_private(Path(self.tmp.name)/'watchdog.json')['pid'],pid)

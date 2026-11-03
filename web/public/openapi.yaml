@@ -1727,6 +1727,20 @@ components:
           type: string
           enum: [filedb, bunny-sql]
           description: Authoritative catalog backend used by the running process
+        legacyByteExportVersion:
+          type: string
+          description: Isolated original-byte export protocol supported by this build
+        legacyCheckpointVersion:
+          type: string
+          description: Verified graceful legacy shutdown checkpoint protocol
+        legacyCheckpointReady:
+          type: string
+          enum: ['0', '1']
+          description: Current normal process can invalidate and create its owned checkpoint receipt
+        legacyBootId:
+          type: string
+          pattern: '^[a-f0-9]{32}$'
+          description: Normal process identity bound to its graceful shutdown receipt
         gitBranch:
           type: string
         buildDate:
