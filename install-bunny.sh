@@ -45,6 +45,14 @@ import sys
 compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
 PYTHON
 python3 "$TMP" self-test
+curl -fsSL --retry 3 "https://raw.githubusercontent.com/$REPO/$REV/bunny/legacy.py" -o "$TMP.legacy"
+python3 - "$TMP.legacy" <<'PYTHON'
+from pathlib import Path
+import sys
+compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
+PYTHON
+mv "$TMP.legacy" "$SHARE_DIR/legacy.py"
+chmod 600 "$SHARE_DIR/legacy.py"
 mv "$TMP.backup" "$SHARE_DIR/backup.py"
 chmod 600 "$SHARE_DIR/backup.py"
 mv "$TMP.operations" "$SHARE_DIR/operations.py"

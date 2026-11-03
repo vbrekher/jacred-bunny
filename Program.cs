@@ -78,6 +78,8 @@ namespace JacRed
             builder.WebHost.UseKestrel(op =>
                 op.Listen(AppInit.conf.listenip == "any" ? IPAddress.Any : IPAddress.Parse(AppInit.conf.listenip), AppInit.conf.listenport));
 
+            builder.Services.Configure<HostOptions>(options => options.ServicesStopConcurrently = false);
+            builder.Services.AddHostedService<LegacyCheckpointWorker>();
             builder.Services.AddJacRedConfiguration();
             builder.Services.AddJacRedSecurity();
             builder.Services.AddJacRedLogging();

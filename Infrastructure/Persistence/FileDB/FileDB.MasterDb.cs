@@ -53,7 +53,7 @@ namespace JacRed.Infrastructure.Persistence
             set
             {
                 if (NativeCatalogRuntime.Enabled) throw new NativeSqlException("Native catalog index must come from SQL");
-                masterIndex = value;
+                lock (LegacyWriteGate) { RequireLegacyWritesOpen(); masterIndex = value; }
             }
         }
 
@@ -203,12 +203,16 @@ namespace JacRed.Infrastructure.Persistence
         public static void RemoveKeyFromMasterDb(string key)
         {
             if (NativeCatalogRuntime.Enabled) { InvalidateNativeIndex(); return; }
-            if (string.IsNullOrEmpty(key))
-                return;
-            if (masterDb.TryRemove(key, out _))
+            lock (LegacyWriteGate)
             {
-                Interlocked.Increment(ref searchKeysVersion);
-                MarkDirty();
+                RequireLegacyWritesOpen();
+                if (string.IsNullOrEmpty(key))
+                    return;
+                if (masterDb.TryRemove(key, out _))
+                {
+                    Interlocked.Increment(ref searchKeysVersion);
+                    MarkDirty();
+                }
             }
         }
 
@@ -222,31 +226,35 @@ namespace JacRed.Infrastructure.Persistence
         public static void SetShard(string key, DateTime updateTime)
         {
             if (NativeCatalogRuntime.Enabled) { InvalidateNativeIndex(); return; }
-            if (string.IsNullOrEmpty(key))
-                return;
+            lock (LegacyWriteGate)
+            {
+                RequireLegacyWritesOpen();
+                if (string.IsNullOrEmpty(key))
+                    return;
 
-            var shard = new MasterDbShard
-            {
-                updateTime = updateTime,
-                fileTime = updateTime.ToFileTimeUtc()
-            };
-            var shards = masterDb;
-            while (true)
-            {
-                if (shards.TryGetValue(key, out var previous))
+                var shard = new MasterDbShard
                 {
-                    if (shards.TryUpdate(key, shard, previous))
+                    updateTime = updateTime,
+                    fileTime = updateTime.ToFileTimeUtc()
+                };
+                var shards = masterDb;
+                while (true)
+                {
+                    if (shards.TryGetValue(key, out var previous))
+                    {
+                        if (shards.TryUpdate(key, shard, previous))
+                            break;
+                    }
+                    else if (shards.TryAdd(key, shard))
+                    {
+                        // Publish after insertion so a refresh cannot consume a change
+                        // before its key is visible. Removal races retry above.
+                        Interlocked.Increment(ref searchKeysVersion);
                         break;
+                    }
                 }
-                else if (shards.TryAdd(key, shard))
-                {
-                    // Publish after insertion so a refresh cannot consume a change
-                    // before its key is visible. Removal races retry above.
-                    Interlocked.Increment(ref searchKeysVersion);
-                    break;
-                }
+                MarkDirty();
             }
-            MarkDirty();
         }
 
         static void AddOrUpdateMasterDb(TorrentDetails torrent)
@@ -311,6 +319,15 @@ namespace JacRed.Infrastructure.Persistence
         public static FileDB OpenWrite(string key)
         {
             if (NativeCatalogRuntime.Enabled) return OpenNativeWrite(NativeCatalogRuntime.WriteStore, key);
+            lock (LegacyWriteGate)
+            {
+                RequireLegacyWritesOpen();
+                return OpenLegacyWrite(key);
+            }
+        }
+
+        static FileDB OpenLegacyWrite(string key)
+        {
             while (true)
             {
                 if (openWriteTask.TryGetValue(key, out WriteTaskModel existing))

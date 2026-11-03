@@ -46,6 +46,8 @@ jobs:
         run: dotnet test tests/JacRed.Tests/JacRed.Tests.csproj --configuration Release --logger trx --results-directory artifacts/unit-tests
       - name: Verify isolated legacy exporter through actual local HTTP
         run: python3 tools/bunny_legacy_export_acceptance.py --run --app bin/Release/net10.0/JacRed.dll
+      - name: Verify normal shutdown checkpoint and private archive transport
+        run: python3 tools/bunny_legacy_checkpoint_acceptance.py --run --app bin/Release/net10.0/JacRed.dll
       - name: Retain non-secret test results
         if: always()
         uses: actions/upload-artifact@v4

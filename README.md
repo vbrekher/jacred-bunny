@@ -20,7 +20,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 | Component | Verified state |
 | --- | --- |
-| Original .NET application | 1,071 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
+| Original .NET application | 1,081 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
 | Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
 | Bunny Database | 22 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
 | Edge API | Original API gateway deployed to owned staging; 101 live HTTP comparisons and six Torznab XML cases passed |
@@ -34,7 +34,9 @@ TLS-hardened live collection and source announce-probe safeguards are recorded i
 
 Private local migration and HTTP capture tools now refuse output symlinks and preserve files created during validation. [Filesystem regression evidence](docs/evidence/private-publication-2026-11-04.json) records the reproduced data-loss risk and 193 passing Python tests; general live FileDB migration remains incomplete.
 
-A separate [legacy byte export mode](bunny/LEGACY_EXPORT.md) now prepares a private, bounded archive without starting normal writers. Actual local HTTP verified archive hashes, authentication, absent collector routes and deadline shutdown. It is a development building block: owned-volume cloud migration and nonempty SQL import remain incomplete. Current local source passes 1,071 .NET and 195 Python tests.
+A separate [legacy byte export mode](bunny/LEGACY_EXPORT.md) now prepares a private, bounded archive without starting normal writers. Actual local HTTP verified archive hashes, authentication, absent collector routes and deadline shutdown. It is a development building block: owned-volume cloud migration and nonempty SQL import remain incomplete.
+
+The CLI now journals owned legacy export and environment compensation. A graceful shutdown receipt binds the normal process, build and persisted master; a bare asynchronous save response is insufficient. [Local checkpoint/controller evidence](docs/evidence/legacy-checkpoint-controller-2026-11-04.json) records actual normal shutdown and archive verification, with control-plane failure cases explicitly simulated. Current local source passes 1,081 .NET and 225 Python tests; cloud migration acceptance remains open.
 
 The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store checks matched the retained 22-record catalog. The subsequent collector call produced no fresh commits; it is not new write-path acceptance. [Current runtime evidence](docs/evidence/live-paged-runtime-2026-11-03.json).
 

@@ -50,6 +50,10 @@ namespace JacRed.Controllers
                 ["gitFullSha"] = VersionInfo.GitFullSha,
                 ["sourceUrl"] = VersionInfo.SourceUrl,
                 ["catalogBackend"] = JacRed.Infrastructure.Persistence.Native.NativeCatalogRuntime.Enabled ? "bunny-sql" : "filedb",
+                ["legacyByteExportVersion"] = "1",
+                ["legacyCheckpointVersion"] = "1",
+                ["legacyCheckpointReady"] = JacRed.Infrastructure.Background.LegacyCheckpointWorker.Ready ? "1" : "0",
+                ["legacyBootId"] = JacRed.Infrastructure.Background.LegacyCheckpointWorker.BootId,
                 ["gitBranch"] = VersionInfo.GitBranch,
                 ["buildDate"] = VersionInfo.BuildDate
             });

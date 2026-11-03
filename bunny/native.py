@@ -629,6 +629,18 @@ class Deployment:
         try:
             return self.verify("worker")
         except NativeError:
+            legacy = self.state.get('pending_legacy_export')
+            if legacy:
+                record = self.state['resources']['worker']
+                original = record['identity']
+                try:
+                    for candidate in (legacy.get('old_identity'), legacy.get('target_identity')):
+                        if not isinstance(candidate, dict):continue
+                        record['identity'] = candidate
+                        try:return self.verify('worker')
+                        except NativeError:pass
+                finally:record['identity'] = original
+                raise NativeError('Neither recorded legacy export worker identity matches; refusing stop')
             cutover = self.state.get("pending_cutover")
             if cutover:
                 record = self.state["resources"]["worker"]
@@ -658,9 +670,12 @@ class Deployment:
                 record["identity"]["container"] = original
 
     @serialized
-    def worker_action(self, action):
+    def worker_action(self, action, allow_legacy_export=False):
         if action not in ("start", "stop"):
             raise NativeError("Unknown worker lifecycle action")
+        if action == 'start' and self.state.get('pending_legacy_export'):
+            if not allow_legacy_export or self.state['pending_legacy_export'].get('phase') != 'export_environment_confirmed':
+                raise NativeError('Recover the pending private legacy export before starting normal compute')
         if action == "start" and time.time() >= self.state["stop_at"]:
             raise NativeError("Staging budget deadline expired; renew a bounded window before start")
         if action == "start" and not self.watchdog_available():
@@ -941,7 +956,7 @@ def run_watchdog(directory, key, nonce, sleep=time.sleep, clock=time.time):
             if not deploy.state or deploy.state.get("watchdog_nonce") != nonce:
                 raise NativeError("Watchdog ownership token changed")
             heartbeat = {"pid": os.getpid(), "nonce": nonce, "at": clock(),
-                         "deadline": deploy.state["stop_at"], "status": "watching", "capabilities": ["authority_intent_stop"]}
+                         "deadline": deploy.state["stop_at"], "status": "watching", "capabilities": ["authority_intent_stop", "legacy_export_stop"]}
             if clock() >= deploy.state["stop_at"]:
                 worker = deploy.state["resources"].get("worker")
                 if not worker or worker.get("status") != "created":

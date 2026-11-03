@@ -1,0 +1,74 @@
+{
+  "scope": "Local synthetic normal graceful shutdown -> isolated exporter -> Python archive verifier; synthetic original bytes, not cloud acceptance",
+  "normal_version": {
+    "version": "dev-feat-legacy-export-controller+63fae98a",
+    "gitSha": "63fae98a",
+    "gitFullSha": "63fae98aff98b3df6a36e59d33943ea10134bc88",
+    "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/63fae98aff98b3df6a36e59d33943ea10134bc88",
+    "catalogBackend": "filedb",
+    "legacyByteExportVersion": "1",
+    "legacyCheckpointVersion": "1",
+    "legacyCheckpointReady": "1",
+    "legacyBootId": "737405cb4b304ff3bbab51aca82d16b1",
+    "gitBranch": "feat/legacy-export-controller",
+    "buildDate": "2026-11-03 23:36:41 UTC"
+  },
+  "export_version": {
+    "gitFullSha": "63fae98aff98b3df6a36e59d33943ea10134bc88",
+    "mode": "legacy-export-only",
+    "catalogBackend": "filedb"
+  },
+  "shutdown_receipt": {
+    "schema": "jacred-legacy-shutdown/v1",
+    "owner": "jacred-bunny",
+    "boot_id": "737405cb4b304ff3bbab51aca82d16b1",
+    "source_sha": "63fae98aff98b3df6a36e59d33943ea10134bc88",
+    "master_sha256": "7a663df2f9a3a650c838b5d5fa5b58ab6ac97bfdbe8dc43ad429e3abad7322d6",
+    "master_keys": 1,
+    "checkpointed_utc": "2026-11-03T23:37:41.3063310Z"
+  },
+  "archive_receipt": {
+    "schema": "jacred-legacy-archive-receipt/v1",
+    "source_sha": "63fae98aff98b3df6a36e59d33943ea10134bc88",
+    "gzip_sha256": "a5dc9c5a5857ff26158bab33223d57b692d9976db06dca3d8a1f9584fcb795ed",
+    "manifest_sha256": "17a718724bdfcfd87e8869076ef00021433ee48dba0d117512bbf0d82060b954",
+    "file_count": 7,
+    "source_bytes": 1129,
+    "shutdown_checkpoint_verified": true,
+    "status": "VERIFIED_PRIVATE_BYTES_NOT_SQL_MIGRATION"
+  },
+  "stale_receipt_invalidated": true,
+  "source_bytes_unchanged_during_export": true,
+  "normal_and_exporter_stopped": true,
+  "schema": "jacred-legacy-checkpoint-controller-evidence/v1",
+  "checked_at": "2026-11-04",
+  "production_ready": false,
+  "source_scope": "Runtime core 63fae98aff98b3df6a36e59d33943ea10134bc88; local synthetic processes, no Bunny mutations",
+  "dotnet_tests": {
+    "passed": 1081,
+    "skipped": 0,
+    "new_checkpoint_cases": 10
+  },
+  "python_tests": {
+    "passed": 225,
+    "skipped": 0,
+    "new_archive_cases": 14,
+    "new_fake_control_plane_cases": 16
+  },
+  "control_plane_scope": "Fake API exercises owned spec preservation, uncertain PATCH reconciliation, stop/recovery, drift, watchdog capability and account-key rejection; NOT live Bunny acceptance",
+  "ci_scope": "All checks through PR35 passed; new controller/checkpoint CI pending",
+  "remaining": [
+    "Real owned Bunny volume/environment export",
+    "Nonempty original FileDB to verified fresh SQL authority",
+    "Restored executable permissions, complete backup policy and full migration acceptance"
+  ],
+  "sha256": {
+    "bunny/legacy.py": "8360ddc3770fdbaa2f730fbd189244f0555f487e903c56b878301a164f3f9c70",
+    "bunny/native.py": "81fd9e78ebd445826f2948d47cfe27cc74fadb4b6be36bd9fafdb9159eec3631",
+    "bunny/cli.py": "9e4c23f76173b2a30cfeb172e830a47a14978fca19affdbe693c533466484d78",
+    "Infrastructure/Background/LegacyCheckpointWorker.cs": "c5c04419e5fa78b89d83a98f5e182065036d1febca7f6c54e5571954706c2352",
+    "Infrastructure/Persistence/FileDB/FileDB.LegacyCheckpoint.cs": "3d94daf853b31178c926e61b047e6077cbd13722f36439da45e58e5d41ff94bb",
+    "Infrastructure/Persistence/FileDB/FileDB.MasterDb.cs": "f4cae1e841303722409f9f2c9706e5d5a4fc2f2a6e50368db0336cc5e00a82b7",
+    "tools/bunny_legacy_checkpoint_acceptance.py": "20617c72c5cc146b8cbbb744782dc4b02a079b0a73c1603430b25289cf30cbed"
+  }
+}

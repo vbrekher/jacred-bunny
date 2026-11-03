@@ -891,6 +891,17 @@ export interface components {
              * @enum {string}
              */
             catalogBackend?: "filedb" | "bunny-sql";
+            /** @description Isolated original-byte export protocol supported by this build */
+            legacyByteExportVersion?: string;
+            /** @description Verified graceful legacy shutdown checkpoint protocol */
+            legacyCheckpointVersion?: string;
+            /**
+             * @description Current normal process can invalidate and create its owned checkpoint receipt
+             * @enum {string}
+             */
+            legacyCheckpointReady?: "0" | "1";
+            /** @description Normal process identity bound to its graceful shutdown receipt */
+            legacyBootId?: string;
             gitBranch?: string;
             buildDate?: string;
         };
