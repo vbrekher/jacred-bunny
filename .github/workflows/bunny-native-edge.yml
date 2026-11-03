@@ -34,9 +34,12 @@ jobs:
           node --check bunny-native/edge/src/app.mjs
           node --check bunny-native/edge/src/format.mjs
           node --check bunny-native/edge/src/sql.mjs
+          node --check bunny-native/edge/src/parity.mjs
           node --check bunny-native/remote-import.mjs
       - name: Edge API compatibility and security tests (no network)
-        run: node --test bunny-native/edge/tests/api.test.mjs
+        run: |
+          cd bunny-native/edge
+          npm test
       - name: Bundle deployable Edge script with official Bunny packages
         working-directory: bunny-native/edge
         run: |
