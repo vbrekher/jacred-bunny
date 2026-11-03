@@ -1,0 +1,20 @@
+name: Bunny native provisioning safety
+on:
+  pull_request:
+    paths: ['bunny/**', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+  push:
+    branches: [main]
+    paths: ['bunny/**', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+permissions:
+  contents: read
+jobs:
+  provisioning-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Control-plane regressions (offline; never live acceptance)
+        run: |
+          python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_bunny*.py'
+          python3 bunny/cli.py native-staging plan
+          sh -n install-bunny.sh

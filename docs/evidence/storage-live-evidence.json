@@ -1,0 +1,9 @@
+{
+  "kind": "LIVE_STORAGE_TRANSPORT_SMOKE",
+  "productionBackupRestored": false,
+  "putStatus": 201,
+  "sha256": "55afd50f4ae22aab069c82e2137df23868e8340184aa70772feb878035c7ebe1",
+  "readAfterWriteVerified": true,
+  "object": "staging/transport-smoke.json",
+  "storage_id": 2034361
+}

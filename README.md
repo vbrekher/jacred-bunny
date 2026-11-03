@@ -1,183 +1,107 @@
 <div align="center">
 
-# 🐰 JacRed Bunny
+# JacRed Bunny
 
-### JacRed on Bunny Magic Containers — no VPS required
+### JacRed on bunny.net — no VPS
 
-**The original .NET 10 torrent search aggregator, adapted for persistent FileDB on bunny.net.**
+An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adapting its .NET torrent metadata search service to bunny.net.
 
-[![Hosting](https://img.shields.io/badge/Hosting-Bunny_Magic_Containers-ff6600)](https://bunny.net/magic-containers/)
-[![Upstream](https://img.shields.io/badge/Upstream-JacRed-1687a7)](https://github.com/jacred-fdb/jacred)
-[![License](https://img.shields.io/badge/License-AGPL--3.0-blue)](LICENSE)
-![Deployment](https://img.shields.io/badge/Release-Deployment_Candidate-yellow)
+[![Build](https://github.com/vbrekher/jacred-bunny/actions/workflows/build.yml/badge.svg)](https://github.com/vbrekher/jacred-bunny/actions/workflows/build.yml)
+[![Edge tests](https://github.com/vbrekher/jacred-bunny/actions/workflows/bunny-native-edge.yml/badge.svg)](https://github.com/vbrekher/jacred-bunny/actions/workflows/bunny-native-edge.yml)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue)](LICENSE)
 
-**[RU · EN · NL Installation Guide](bunny/README.md)** · **[Lampa Setup](bunny/README.md#lampa--sonarr--radarr)** · **[Original Documentation](https://docs.jacred.stream)**
+**Development preview · v1.0.0 has not passed production acceptance**
+
+[Installation: Русский · English · Nederlands](bunny/README.md) · [Acceptance matrix](docs/ACCEPTANCE_MATRIX.md) · [Upstream documentation](https://docs.jacred.stream)
 
 </div>
 
----
+## What works today
 
-## v0.3.0 — Source and capacity audit
+| Component | Verified state |
+| --- | --- |
+| Original .NET application | 946 local tests passed; running on an isolated Magic Container |
+| Magic Containers | Real HTTPS health, source version, public GHCR pull and digest-pinned update tested |
+| Bunny Database | Real CRUD, FTS5, transaction rollback and separate read-only token tested with synthetic records |
+| Edge API | Deployed preview; empty catalog correctly returns `503 NOT_READY` |
+| Bunny Storage | Real PUT/GET with SHA256 verification; production restore is still untested |
+| 25 original tracker adapters | Source roster preserved; live parser readiness is not established |
+| Native worker, durable scheduler and client acceptance | In progress; no production claim |
 
-The next development milestone includes a **read-only API/25-tracker inventory**, optional local FileDB size audit, bounded gzip sampling and synthetic SQLite FTS5 probe. It does **not** create Bunny Database resources or migrate any data.
+The .NET service currently uses persistent FileDB. Database/Edge are a separate staging preview; there is no production SQL cutover. [Dated evidence and limitations](docs/evidence/2026-11-03-staging.md) explain exactly what was tested.
 
-**[Русский · v0.3.0 audit and exact commands](docs/BUNNY_NATIVE_v0.3.0_IMPLEMENTATION.ru.md)**
+## Install the FileDB deployment candidate
 
-```bash
-python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
-python3 tools/bunny_native_audit.py --strict --synthetic-sqlite 1500 --output "$HOME/Downloads/jacred-bunny-v0.3-source-audit.json"
+You need a bunny.net account, `curl`, and Python 3.9+ on macOS or Linux. Docker, local .NET builds and a GitHub PAT are not required when the public GHCR registry is available.
+
+Download and inspect the installer before running it:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh -o /tmp/install-jacred-bunny.sh
+sh /tmp/install-jacred-bunny.sh
 ```
 
-## v0.4.0 — Bunny Native SQL & FileDB importer
+The shorter form trusts the current remote installer immediately:
 
-The source now includes a **read-only GZip FileDB importer**, atomic SQLite staging,
-searchable FTS5/SQL, private SHA256-verified JSONL export, and an explicit
-**new-empty-database-only** Bunny SQL uploader. These are staging tools;
-no production cutover, live Bunny data acceptance or claim of search parity.
-
-**[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
-
-## v0.5.3 — Golden HTTP evidence and read-only multi-Bunny Database audit
-
-This release adds an operator-initiated, strictly read-only **multi-DB
-acceptance checker**. It validates common snapshot identity, manifests,
-row totals and FTS5 on 2–4 databases, with explicit opt-in full payload SHA256
-and shard bucket-routing audits. It reports query counts/timing as *client
-measurements*, never claims Bunny billing charges or production availability.
-
-Captured original .NET vs Edge HTTP fixtures now support operator-declared
-source identities. Strict parity gates reject self-comparison, mismatched
-source snapshots and empty-only search results, without exposing magnets.
-macOS JSONL splitter tests now close all opened streams.
-
-[Русский · v0.5.3: полный порядок проверки](docs/BUNNY_NATIVE_v0.5.3_IMPLEMENTATION.ru.md)
-
-**No live Bunny database or original .NET golden acceptance has been run by this release.**
-Production .NET remains authoritative and cutover is disabled.
-
-## v0.5.2 — SQL shard query fanout and source-derived result merge
-
-The Bunny-native Edge preview now supports 2–4 separate **server-only** SQL
-shards with exact-first search across every shard, strict common-snapshot
-readiness, bounded candidate budgets and all-or-nothing error handling.
-
-The offline splitter creates private 0700/0600 local SQLite shard sets from an
-already verified FileDB staging database, without changing source data.
-Jackett/Torznab/Prowlarr merge torrent releases by 40-hex magnet infohash and
-prefer reliable seeder counts over unreliable tracker sources.
-
-[Русский — v0.5.2 setup, command examples and acceptance gates](docs/BUNNY_NATIVE_v0.5.2_IMPLEMENTATION.ru.md)
-
-**Source + synthetic SQLite only.** Live Bunny multi-database, actual .NET
-golden-response parity and production cutover have **not** been validated.
-
-## v0.5.1 — Original key matching, SQLite parity and Bunny acceptance
-
-The preview now searches masterDb aliases with original JacRed name normalization
-(including Cyrillic Ё→Е and Щ→Ш), restores FileDB dictionary URL keys, and
-adds card/year/season filtering. The complete synthetic GZip FileDB -> real
-SQLite -> Edge API pathway is tested automatically.
-
-See [Русский · v0.5.1 implementation and acceptance](docs/BUNNY_NATIVE_v0.5.1_IMPLEMENTATION.ru.md).
-
-The optional read-only Bunny Database acceptance checker and a strict private
-original-.NET vs Edge HTTP golden comparator are provided. Real Bunny SQL,
-production dataset and complete original-.NET golden parity are NOT CLAIMED.
-
-## v0.5.0 — Edge Scripting API Preview
-
-The Bunny-native path now includes a separate, **opt-in / read-only** Edge Scripting
-API preview for Jackett, Torznab, Prowlarr, tracker discovery and SQL search.
-It uses the official Bunny Edge SDK + Bunny Database client and requires a
-verified completed SQL import manifest before returning search results.
-
-[Русский · v0.5.0 Edge API setup, compatibility matrix and safe staging](docs/BUNNY_NATIVE_v0.5.0_IMPLEMENTATION.ru.md)
-
-**Status:** offline API tests and Edge bundle build PASS. Real Bunny Database access,
-original .NET exact search/result parity, real live deployment and production cutover
-are **not yet certified**. The existing .NET JacRed remains authoritative.
-
-### Run the isolated source tests
-
-```bash
-cd bunny-native/edge
-npm install --no-audit --no-fund
-npm test
-npm run build
+```sh
+curl -fsSL https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh | sh
 ```
 
-## Full Bunny-native rewrite roadmap
+The bootstrap resolves one exact GitHub commit and downloads its CLI modules. It reuses an authorized Bunny CLI profile or prompts for the account key. Verify the downloaded source and pin the URL to a reviewed commit for stronger repeatability. The legacy setup still asks before creating paid resources.
 
-A documented upgrade path covers complete SQL-backed replacement of FileDB, a TypeScript Edge Scripting API, automatic collection from all 25 supported tracker adapters, shared logical data for multiple replicas, Bunny Storage backup/restore, and optional TorrServer-bunny playback integration.
+Useful commands:
 
-**[Read the full technical roadmap (Русский)](docs/BUNNY_NATIVE_REWRITE_PLAN.ru.md)**
-
-> This is a development roadmap, **not** a claim that the rewrite or all live integrations are complete. The original .NET process cannot run inside the Edge Scripting isolate; long-running collectors and torrent networking will remain in Bunny Magic Containers.
-
-## What you get
-
-| Feature | Bunny edition |
-| :--- | :--- |
-| Jackett JSON, Torznab, Native API, Vue interface | ✅ Preserved upstream |
-| 25 built-in tracker integrations | ✅ Source retained, each requires real acceptance |
-| Local FastDb/FileDB | ✅ Persistent Bunny volume |
-| Web configuration editor | ✅ Can write back to persistent `/app/config` |
-| Docker image of *this fork's code* | ✅ `Dockerfile.bunny` |
-| First-run security | ✅ Distinct API and admin secrets required |
-| Cron | ✅ Optional maintenance-only schedule |
-| Bunny Database | 🔜 Future optional SQL module; **not** a drop-in FileDB replacement |
-| Bunny Edge Scripting | 🔜 Optional edge gateway |
-| Automatic cloud backup and verified live deployment | ❌ Not yet implemented or certified |
-
-## Architecture
-
-```text
-Samsung TV / Lampa / Sonarr / Radarr / Prowlarr
-                        │ HTTPS
-                Bunny CDN / Shield
-                        │
-              Bunny Magic Container
-                 JacRed / .NET 10
-                  ├─ /app/Data    ← persistent FileDB
-                  ├─ /app/config  ← persistent settings
-                  └─ maintenance cron (optional)
-                        │
-             Bunny Storage (planned backups)
-             Bunny Database (optional later)
+```sh
+jacred-bunny plan --data-gb 1 --hours 1
+jacred-bunny doctor
+jacred-bunny status
+jacred-bunny stop
+jacred-bunny start
+jacred-bunny native-staging plan
 ```
 
-## One-command installer (macOS / Linux)
+`native-staging provision` is an advanced, journalled Database/Storage/Edge infrastructure operation. It does not install a SQL collector or make the preview production ready. [Control-plane reference](bunny/NATIVE_STAGING.md).
 
-```bash
-curl -fsSL --retry 3 \
-  https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh \
-  -o /tmp/jacred-bunny-install.sh \
-  && sh /tmp/jacred-bunny-install.sh
+## How it works
+
+```mermaid
+flowchart LR
+  Clients[Browser / Lampa / Torznab clients] --> MC[Magic Containers: original .NET API]
+  MC --> FDB[Persistent FileDB: current authoritative data]
+  Preview[Edge API preview] --> SQL[Bunny Database: isolated staging]
+  SQL -. backup transport tested .-> Storage[Bunny Storage]
 ```
 
-The installer prompts for your **Bunny API key**, selects a region, and automatically creates a Magic Container, persistent FileDB/config volumes, HTTPS endpoint, and unique JacRed keys. It checks the published GHCR image before allocating billable resources and asks for `CREATE` before provisioning. An existing GHCR registry is reused; otherwise a GitHub read:packages PAT may be needed.
+The target architecture moves the authoritative catalog and job state into SQL, keeps collection and media processing in Magic Containers, and serves compatible APIs through Edge. That transition is not complete.
 
-**[RU / EN / NL step-by-step instructions](bunny/README.md#автоматическая-установка-ru)** · `~/.local/bin/jacred-bunny status` · `credentials` · `start` · `stop`
+## Clients and trackers
 
-> The first FileDB is empty until optional official sync or authorized tracker indexing runs. The GitHub Actions image publication must succeed before the first installation. No live Bunny deployment has been claimed.
+JacRed exposes native, Jackett, Torznab and Prowlarr-compatible routes. The original roster contains 25 tracker IDs. Source compatibility tests do not establish live availability or successful testing with actual Lampa, Samsung Tizen, Prowlarr, Sonarr or Radarr clients. Those production gates remain open.
 
-## Advanced: manual image build
+Playback requires a separate service such as [TorrServer-bunny](https://github.com/vbrekher/TorrServer-bunny). JacRed indexes metadata; it does not stream video. Use sources and content you are authorized to access. Tracker credentials and cookies remain private.
 
-```bash
-git clone https://github.com/vbrekher/jacred-bunny.git
-cd jacred-bunny
-# Sign in to GHCR first; replace YOUR_ACCOUNT:
-IMAGE=ghcr.io/YOUR_ACCOUNT/jacred-bunny:0.1.0 bash bunny/build-push.sh
-```
+## Costs and operations
 
-Then create a Bunny Magic Containers app, select **one region / one replica**, the published image, HTTP **port 9117**, health check **/health**, and mount **TWO persistent volumes**: `/app/Data` and `/app/config`. Add two different secret environment values: `JACRED_BUNNY_API_KEY` and `JACRED_BUNNY_DEV_KEY`. Do **not** put the admin key in Lampa.
+Hosting is metered. On 3 November 2026 the published rates include CPU at $0.02/core-hour, RAM at $0.005/GB-hour and provisioned volumes at $0.10/GB-month. Egress is separate. The first Edge request activates a $0.22 billing increment; Database is free during public preview. Check the [current Magic Containers rates](https://bunny.net/docs/magic-containers/pricing.md), [Edge rates](https://bunny.net/docs/scripting/pricing.md), [Storage rates](https://bunny.net/docs/storage/pricing.md) and [Database pricing](https://bunny.net/database/).
 
-See the [full guide in Russian, English, and Dutch](bunny/README.md) before publicly exposing the instance.
+A single region and replica reduce exposure but do not create a hard spending limit. Stopping compute retains billable volumes. Never delete or reuse another project's resources. The current staging has a one-hour compute expiry watchdog; it is a temporary test environment, not a permanent public demo.
 
-> **Important:** JacRed indexes/searches torrent metadata. It does not download or stream movies itself. A separate compatible playback solution (e.g. TorrServer) is required. A fresh instance starts with an **empty FileDB** until you configure lawful/authorized sync or parsing. External trackers may require credentials, sidecars or proxies, none of which is guaranteed by this hosting profile.
+## Real interface
 
-## Credits
+This is the running .NET staging interface with an **empty** catalog. It is not evidence of successful tracker indexing or completed native SQL integration.
 
-A big thank you to **[JacRed maintainers and contributors](https://github.com/jacred-fdb/jacred)** for the original project, API implementations, parsers, FileDB engine and UI. JacRed Bunny is a deployment-oriented derivative, not an official upstream release. The original [AGPL-3.0 license](LICENSE) and attribution remain in place.
+![Real JacRed staging search interface with an empty catalog](docs/images/staging-search-empty.png)
 
-**Status:** Source changes pushed as a deployment candidate. .NET build, Magic Containers startup, persistence, cron, authenticated client traffic, and backup/restore require real-world validation before production claims.
+## Documentation and release status
+
+- [Acceptance matrix](docs/ACCEPTANCE_MATRIX.md) and [machine-readable gates](docs/acceptance.json)
+- [Native rewrite plan, Russian](docs/BUNNY_NATIVE_REWRITE_PLAN.ru.md)
+- [Installer and client guide, RU/EN/NL](bunny/README.md)
+- [Historical README and milestone notes](README.history.md)
+- [Security policy](SECURITY.md)
+
+Complete, equivalent English/Russian/Dutch documentation, native one-command installation, backup/restore acceptance, client tests and a verified v1.0.0 release remain required. No v1.0.0 tag or production-ready badge is published before those gates pass.
+
+## License and thanks
+
+[AGPL-3.0](LICENSE). JacRed Bunny is a fork, not an official bunny.net product. Thank you to the original JacRed authors and maintainers: the application, tracker adapters and client contracts originate from their work. Original attribution and license remain in the source. Operators of modified network services must provide the corresponding source under the AGPL.

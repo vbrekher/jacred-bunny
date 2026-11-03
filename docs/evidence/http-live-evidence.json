@@ -1,0 +1,94 @@
+{
+  "kind": "LIVE_HTTP_INFRASTRUCTURE_SMOKE",
+  "production_ready": false,
+  "catalog": "empty",
+  "timestamp": "2026-11-03T13:46:00Z",
+  "checks": [
+    {
+      "host": "https://mc-5ge5797xat.bunny.run",
+      "path": "/health",
+      "authenticated": false,
+      "status": 200,
+      "body_bytes": 15,
+      "sha256": "3d23d39a30bb7323f8ccfd64c52cf286138fba4f83e78f7edcf66703b7c23aaa",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://mc-5ge5797xat.bunny.run",
+      "path": "/version",
+      "authenticated": false,
+      "status": 200,
+      "body_bytes": 163,
+      "sha256": "5774a405a91ed7bad3f22a7a73b4578f16897eebcfb42fb9d84ba49eabde02ec",
+      "cache_control": "no-cache",
+      "server_version": {
+        "version": "dev-feat-native-v054-provisioning+97b22ee7",
+        "gitSha": "97b22ee7",
+        "gitBranch": "feat/native-v054-provisioning",
+        "buildDate": "2026-11-03 13:39:54 UTC"
+      }
+    },
+    {
+      "host": "https://mc-5ge5797xat.bunny.run",
+      "path": "/api/v1.0/torrents?search=Ubuntu",
+      "authenticated": false,
+      "status": 401,
+      "body_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://mc-5ge5797xat.bunny.run",
+      "path": "/api/v1.0/torrents?search=Ubuntu",
+      "authenticated": true,
+      "status": 200,
+      "body_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://mc-5ge5797xat.bunny.run",
+      "path": "/torznab/api?t=caps",
+      "authenticated": true,
+      "status": 200,
+      "body_bytes": 609,
+      "sha256": "8b4807e9351bb4ade7ae31eddcdc876de1f19947b3290495d752282db242be8b",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://jacred-bunny-staging-20261103.bunny.run",
+      "path": "/health",
+      "authenticated": false,
+      "status": 503,
+      "body_bytes": 63,
+      "sha256": "deca48c00acc3d7594f6ba49c3c87d49b55205fc29722698b49126653c5d1d4e",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://jacred-bunny-staging-20261103.bunny.run",
+      "path": "/api/v2.0/indexers/all/results?Query=Ubuntu",
+      "authenticated": false,
+      "status": 401,
+      "body_bytes": 24,
+      "sha256": "3be5b8e53fdc8b0a2996590589456db33504977f3d1ce9bb75016c8a707e1a71",
+      "cache_control": "no-cache"
+    },
+    {
+      "host": "https://jacred-bunny-staging-20261103.bunny.run",
+      "path": "/api/v2.0/indexers/all/results?Query=Ubuntu",
+      "authenticated": true,
+      "status": 503,
+      "body_bytes": 66,
+      "sha256": "501329df1f96183baf609d17a76bef03ea0ef7df18c9610304211be66283acc5",
+      "cache_control": "no-cache"
+    }
+  ],
+  "mc_health_client_latency_ms": {
+    "n": 20,
+    "cold_first": 99.5054069935577,
+    "p50": 104.2018715015729,
+    "p95": 125.68004400236532,
+    "p99": 130.33283699769527,
+    "note": "sequential client wall time; not Edge runtime or SLO measurement"
+  }
+}

@@ -11,8 +11,9 @@ REV="$(curl -fsSL --retry 3 -H 'Accept: application/vnd.github+json' \
   "https://api.github.com/repos/$REPO/commits/main" | \
   python3 -c 'import json,sys,re; s=json.load(sys.stdin).get("sha", "");print(s if re.fullmatch("[0-9a-f]{40}",s) else "")')"
 [ -n "$REV" ] || { echo 'Cannot resolve trusted GitHub commit; aborting' >&2; exit 1; }
-TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT HUP INT TERM
+TMP_DIR="$(mktemp -d)"
+TMP="$TMP_DIR/cli.py"
+trap 'rm -rf "$TMP_DIR"' EXIT HUP INT TERM
 printf 'Installing JacRed Bunny CLI at GitHub revision %s\n' "$REV"
 curl -fsSL --retry 3 "https://raw.githubusercontent.com/$REPO/$REV/bunny/cli.py" -o "$TMP"
 python3 - "$TMP" <<'PY'
@@ -25,7 +26,15 @@ if not all(x in s for x in required):
     raise SystemExit("Invalid JacRed Bunny CLI; refusing to install")
 compile(s,sys.argv[1],"exec")
 PY
+curl -fsSL --retry 3 "https://raw.githubusercontent.com/$REPO/$REV/bunny/native.py" -o "$TMP.native"
+python3 - "$TMP.native" <<'PYTHON'
+from pathlib import Path
+import sys
+compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
+PYTHON
 python3 "$TMP" self-test
+mv "$TMP.native" "$SHARE_DIR/native.py"
+chmod 600 "$SHARE_DIR/native.py"
 mv "$TMP" "$SHARE_DIR/cli.py"
 chmod 600 "$SHARE_DIR/cli.py"
 cat > "$BIN_DIR/jacred-bunny" <<'WRAPPER'

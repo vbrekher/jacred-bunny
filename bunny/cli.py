@@ -22,6 +22,11 @@ UA = "JacRed-bunny/0.2 (+https://github.com/vbrekher/jacred-bunny)"
 class DeploymentError(Exception):
     pass
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise DeploymentError("Unexpected Bunny API redirect; account key not forwarded")
+
+
 def account_key():
     """Reuse the official CLI profile without putting account keys in argv."""
     if os.environ.get("BUNNYNET_API_KEY"):
@@ -74,7 +79,7 @@ def request(method, path, key, payload=None):
         data = json.dumps(payload).encode()
     req = urllib.request.Request(API + path, headers=headers, data=data, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.build_opener(NoRedirect()).open(req, timeout=30) as resp:
             raw = resp.read(1024 * 1024)
             return json.loads(raw) if raw else None
     except urllib.error.HTTPError as exc:
@@ -491,6 +496,45 @@ def self_test():
                                        {"type": "cdn", "isSslEnabled": True, "publicHost": "mc-foo.bunny.run"}]}) == "https://mc-foo.bunny.run"
     print("JACRED_BUNNY_CLI_SELF_TEST_PASS")
 
+def native_staging(args):
+    # One CLI, with its implementation split into a standard-library module.
+    try:
+        from native import API as NativeAPI, Deployment, NativeError
+    except ImportError:
+        raise DeploymentError("Native staging module missing; reinstall the CLI") from None
+    try:
+        if args.operation == "plan" or (args.operation == "provision" and not args.apply):
+            print(json.dumps({"resources": {"database": 1, "storage": 1, "edge": 1},
+                              "estimated_initial_usd": 1.22, "hard_cost_limit": False,
+                              "cost_basis": "Storage monthly minimum + first Edge billing increment; Database public preview free on 2026-11-03",
+                              "traffic": "metered separately", "collector": "not provisioned by this command",
+                              "productionReady": False, "apply": False}, indent=2))
+            return
+        key = account_key()
+        deploy = Deployment(args.state_dir, NativeAPI(key))
+        if args.operation == "status":
+            if not deploy.state:
+                raise DeploymentError("No native staging deployment manifest")
+            print(json.dumps(deploy.status(), indent=2))
+            return
+        if not 1.22 <= args.max_estimated_usd <= 5:
+            raise DeploymentError("Staging estimate budget must be between $1.22 and $5; metered traffic is separate")
+        if not args.source_sha or not re.fullmatch(r"[0-9a-f]{40}", args.source_sha):
+            raise DeploymentError("Require --source-sha with an exact commit")
+        if not args.image.startswith("ghcr.io/vbrekher/jacred-bunny:sha-" + args.source_sha):
+            raise DeploymentError("Native staging requires this fork's immutable source-SHA image tag")
+        if image_parts(args.image)["imageTag"] != "sha-" + args.source_sha:
+            raise DeploymentError("Image tag does not match source SHA")
+        digest = check_image(key, args.registry_id, args.image)
+        if not digest:
+            raise DeploymentError("Cannot verify this fork's public immutable image; no resources created")
+        deploy.initialize(args.source_sha, args.image, digest)
+        print(json.dumps(deploy.provision_data_plane(), indent=2))
+        print("Staging infrastructure only. Catalog import, worker SQL integration and production acceptance remain required.")
+    except NativeError as exc:
+        raise DeploymentError(str(exc)) from None
+
+
 def main():
     parser = argparse.ArgumentParser(description="JacRed Bunny: Magic Containers installer")
     commands = parser.add_subparsers(dest="action")
@@ -503,9 +547,19 @@ def main():
     plan.add_argument("--hours", type=float, default=1)
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
+    native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
+    native.add_argument("operation", choices=("plan", "provision", "status"))
+    native.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
+    native.add_argument("--source-sha")
+    native.add_argument("--image", default=IMAGE)
+    native.add_argument("--registry-id", default="1156")
+    native.add_argument("--apply", action="store_true")
+    native.add_argument("--max-estimated-usd", type=float, default=2.0)
     args = parser.parse_args()
     try:
-        if args.action is None:
+        if args.action == "native-staging":
+            native_staging(args)
+        elif args.action is None:
             setup(argparse.Namespace(image=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE), data_gb=10, no_deploy=False))
         elif args.action == "setup":
             setup(args)
