@@ -201,6 +201,9 @@ def payload_spec(manifest):
             names = ("edge.js", *SQL_RUNTIME_MIGRATIONS)
         else:
             raise NativeError("Unsupported native payload schema/backend")
+        edge_mode = manifest.get("edge_mode", "preview")
+        if edge_mode not in ("preview", "original-api-gateway") or (edge_mode == "original-api-gateway" and manifest.get("catalog_backend") != "bunny-sql"):
+            raise NativeError("Unsupported native Edge mode/backend")
         if (not re.fullmatch(r"[0-9a-f]{40}", sha) or
             image["reference"] != "ghcr.io/vbrekher/jacred-bunny:sha-" + sha or
             not re.fullmatch(r"sha256:[0-9a-f]{64}", image["digest"]) or
@@ -810,10 +813,38 @@ class Deployment:
         code = Path(bundle).read_bytes()
         if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256) or hashlib.sha256(code).hexdigest() != expected_sha256:
             raise NativeError("Edge bundle checksum mismatch")
+        manifest_path = Path(bundle).parent / "manifest.json"
+        manifest = load_payload(Path(bundle).parent) if manifest_path.exists() else {}
+        mode = manifest.get("edge_mode", "preview")
+        worker_origin = ""
+        if mode == "original-api-gateway":
+            if self.state.get("catalog_backend") != "bunny-sql":
+                raise NativeError("Original API gateway requires confirmed SQL authority")
+            worker = self.verify("worker")
+            candidates = []
+            def endpoints(value):
+                if isinstance(value, list):
+                    for item in value:endpoints(item)
+                elif isinstance(value, dict):
+                    selected = value.get("displayEndpoint")
+                    if isinstance(selected, dict) and selected.get("type") == "cdn":candidates.append(selected.get("address"))
+                    if value.get("type") == "cdn" and value.get("isSslEnabled") is True:candidates.append(value.get("publicHost"))
+                    cdn = value.get("cdn")
+                    if isinstance(cdn, dict) and cdn.get("isSslEnabled") is True:
+                        candidates.extend(cdn.get(name) for name in ("publicHost", "hostname", "publicUrl"))
+                    for name in ("items", "endpoints", "containerTemplates", "containers"):
+                        if isinstance(value.get(name), (dict,list)):endpoints(value[name])
+            endpoints(worker)
+            for candidate in candidates:
+                if isinstance(candidate, str) and re.fullmatch(r"(?:https://)?mc-[a-z0-9]+\.bunny\.run/?", candidate):
+                    worker_origin = "https://" + candidate.removeprefix("https://").rstrip("/")
+                    break
+            if not worker_origin:raise NativeError("No verified owned HTTPS worker origin for gateway")
         db = self.verify("database")
         edge = self.verify("edge")
         credentials = read_private(self.secret_path)
-        if (self.state.get("edge_bundle_sha256") == expected_sha256 and
+        if (self.state.get("edge_mode") == mode and self.state.get("edge_worker_origin", "") == worker_origin and
+            self.state.get("edge_bundle_sha256") == expected_sha256 and
             self.state.get("edge_release_id") is not None and
             self.state["edge_release_id"] == edge.get("CurrentReleaseId") and
             "database_read_token" in credentials):
@@ -828,12 +859,16 @@ class Deployment:
             atomic_private(self.secret_path, credentials)
         eid = self.state["resources"]["edge"]["id"]
         values = {"BUNNY_DATABASE_URL": db["url"], "BUNNY_DATABASE_AUTH_TOKEN": credentials["database_read_token"],
-                  "JACRED_EDGE_API_KEY": credentials["api_key"], "JACRED_EDGE_PREVIEW_ENABLED": "true"}
+                  "JACRED_EDGE_API_KEY": credentials["api_key"], "JACRED_EDGE_PREVIEW_ENABLED": "true",
+                  "JACRED_EDGE_GATEWAY_ENABLED": "true" if mode == "original-api-gateway" else "false",
+                  "JACRED_WORKER_ORIGIN": worker_origin}
         for name, value in values.items():
             self.api("PUT", "/compute/script/%s/secrets" % eid, {"Name": name, "Secret": value})
         self.api("POST", "/compute/script/%s/code" % eid, {"Code": code.decode("utf-8")})
         self.api("POST", "/compute/script/%s/publish" % eid, {"Note": "JacRed staging " + self.state["source_sha"]})
         current = self.verify("edge")
+        self.state["edge_mode"] = mode
+        self.state["edge_worker_origin"] = worker_origin
         self.state["edge_release_id"] = current.get("CurrentReleaseId")
         self.state["edge_bundle_sha256"] = expected_sha256
         self.state["edge_url"] = edge.get("DefaultHostname")

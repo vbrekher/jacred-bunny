@@ -3,6 +3,7 @@
 import * as BunnySDK from "@bunny.net/edgescript-sdk";
 import {connect} from "@bunny.net/database-client";
 import {createHandler} from "./src/app.mjs";
+import {createGateway} from "./src/gateway.mjs";
 import {makeShardProvider} from "./src/shards.mjs";
 
 function readEnv(name){
@@ -11,6 +12,8 @@ function readEnv(name){
   return "";
 }
 const env={
+  JACRED_EDGE_GATEWAY_ENABLED:readEnv("JACRED_EDGE_GATEWAY_ENABLED"),
+  JACRED_WORKER_ORIGIN:readEnv("JACRED_WORKER_ORIGIN"),
   JACRED_EDGE_PREVIEW_ENABLED:readEnv("JACRED_EDGE_PREVIEW_ENABLED"),
   JACRED_EDGE_API_KEY:readEnv("JACRED_EDGE_API_KEY"),
   JACRED_EDGE_ALLOWED_ORIGINS:readEnv("JACRED_EDGE_ALLOWED_ORIGINS")
@@ -27,5 +30,7 @@ function getDb(){
   if(!client)client=makeShardProvider(shardEnv,connect)||connect({timeout:2000});
   return client;
 }
-const handle=createHandler({getDb,env});
+const handle=env.JACRED_EDGE_GATEWAY_ENABLED==="true"
+  ?createGateway({env})
+  :createHandler({getDb,env});
 BunnySDK.net.http.serve(handle);
