@@ -14,6 +14,15 @@ class AuditTests(unittest.TestCase):
         self.assertEqual(len(a.EXPECTED_TRACKERS),25)
         self.assertEqual(len(set(a.EXPECTED_TRACKERS)),25)
 
+    def test_tracker_inventory_preserves_exact_directory_case(self):
+        root = SCRIPT.parents[1]
+        actual = {p.relative_to(root).as_posix() for p in (root / 'Infrastructure/Trackers').rglob('*.cs')}
+        rows = a.trackers(root)
+        for row in rows:
+            self.assertTrue(row['parsers'] and row['sync_services'], row['id'])
+            for path in row['parsers'] + row['sync_services']:
+                self.assertIn(path, actual, 'Case-sensitive CI must find ' + path)
+
     def test_missing_data_fail_closed(self):
         with tempfile.TemporaryDirectory() as d:
             disk=a.inspect_disk(Path(d))
