@@ -6,6 +6,11 @@ set -euo pipefail
 OUTPUT_FILE="$1"
 
 GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || echo "unknown")
+GIT_FULL_SHA=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+SOURCE_URL="https://github.com/vbrekher/jacred-bunny"
+if [[ "$GIT_FULL_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    SOURCE_URL="$SOURCE_URL/tree/$GIT_FULL_SHA"
+fi
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
@@ -51,6 +56,10 @@ internal static class VersionInfo
     /// Git commit SHA (short, 8 characters).
     /// </summary>
     public static string GitSha { get; } = "$GIT_SHA";
+
+    public static string GitFullSha { get; } = "$GIT_FULL_SHA";
+
+    public static string SourceUrl { get; } = "$SOURCE_URL";
 
     /// <summary>
     /// Git branch name.

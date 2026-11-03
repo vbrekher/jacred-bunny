@@ -47,6 +47,8 @@ namespace JacRed.Controllers
             {
                 ["version"] = VersionInfo.Version,
                 ["gitSha"] = VersionInfo.GitSha,
+                ["gitFullSha"] = VersionInfo.GitFullSha,
+                ["sourceUrl"] = VersionInfo.SourceUrl,
                 ["gitBranch"] = VersionInfo.GitBranch,
                 ["buildDate"] = VersionInfo.BuildDate
             });

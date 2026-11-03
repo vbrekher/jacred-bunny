@@ -28,6 +28,7 @@ export default {
     save: 'Сохранить',
     footer: {
       github: 'GitHub',
+      source: 'Исходный код',
       telegram: 'Telegram',
       docs: 'Документация',
       swagger: 'OpenAPI / Swagger',

@@ -169,6 +169,14 @@ export async function apiRequest<T = unknown>(
 
 /** Typed helpers for JacRed HTTP endpoints used by the SPA. */
 export const apiClient = {
+  getVersion(options?: ApiClientOptions) {
+    return apiRequest<GetJson<'/version'>>(
+      '/version',
+      { method: 'GET' },
+      { ...options, withApiKey: false, withDevKey: false },
+    )
+  },
+
   getHealth(options?: ApiClientOptions) {
     return apiRequest<GetJson<'/health'> | string>(
       '/health',

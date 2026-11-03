@@ -50,6 +50,19 @@ describe('resolveJacRedBaseUrl', () => {
 })
 
 describe('apiRequest', () => {
+  it('fetches public build source without either application credential', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ gitFullSha: 'a'.repeat(40) }), {
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+    const version = await apiClient.getVersion({ withApiKey: true, withDevKey: true })
+    expect(version.gitFullSha).toBe('a'.repeat(40))
+    const headers = new Headers(fetchMock.mock.calls[0]?.[1]?.headers)
+    expect(headers.has('X-Api-Key')).toBe(false)
+    expect(headers.has('X-Dev-Key')).toBe(false)
+  })
+
   it('adds configured auth headers', async () => {
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
