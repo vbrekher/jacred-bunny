@@ -1,0 +1,42 @@
+name: Bunny Native v0.4 Storage Import
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'bunny-native/**'
+      - 'tools/bunny_native_import.py'
+      - 'tests/test_bunny_native_import.py'
+      - '.github/workflows/bunny-native-storage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'bunny-native/**'
+      - 'tools/bunny_native_import.py'
+      - 'tests/test_bunny_native_import.py'
+      - '.github/workflows/bunny-native-storage.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-import-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile importer
+        run: python3 -m py_compile tools/bunny_native_import.py
+      - name: Test FileDB parity, atomic staging and safety
+        run: python3 -m unittest discover -s tests -p 'test_bunny_native_import.py' -v
+      - name: Check private export and remote Node syntax
+        run: |
+          python3 -m py_compile tools/bunny_native_export.py
+          node --check bunny-native/remote-import.mjs
+      - name: Retest v0.3 auditor
+        run: python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
+      - name: Run no-dataset fail-closed smoke
+        run: |
+          if python3 tools/bunny_native_import.py plan --data-root Data; then
+            echo "ERROR: real dataset was incorrectly detected in repo"
+            exit 1
+          fi
+          echo "NO_PRODUCTION_DATA_IMPORT_SAFE_PASS"
