@@ -97,7 +97,7 @@ export function createHandler({getDb,env={}}){
   const secret=env.JACRED_EDGE_API_KEY??"";
   const origins=(env.JACRED_EDGE_ALLOWED_ORIGINS??"").split(",").map(x=>x.trim())
     .filter(s=>/^https:\/\/[^/]+$/i.test(s));
-  return async function handle(request){
+  const respond=async function handleRequest(request){
     const url=new URL(request.url);
     const q=url.searchParams;
     const pathname=url.pathname.replace(/\/+$/,"")||"/";
@@ -212,6 +212,12 @@ export function createHandler({getDb,env={}}){
       // No SQL, connection string, tracker URLs or tokens in error responses.
       return attach(json({error:"Data backend unavailable",code:"BACKEND_ERROR"},503),responseHeaders);
     }
+  };
+  return async function handle(request){
+    const response=await respond(request);
+    if(request.method==="HEAD")
+      return new Response(null,{status:response.status,headers:response.headers});
+    return response;
   };
 }
 function attach(response,headers){
