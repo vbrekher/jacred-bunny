@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using JacRed.Infrastructure.Logging;
+using JacRed.Infrastructure.Persistence.Native;
 using JacRed.Infrastructure.Utils;
 using JacRed.Models;
 using JacRed.Models.Details;
@@ -20,6 +21,22 @@ namespace JacRed.Infrastructure.Persistence
         public bool savechanges = false;
 
         readonly object _dbLock = new object();
+
+        NativeCatalogStore nativeStore;
+        CatalogBucket nativeSnapshot;
+        string nativeCommitId;
+        bool nativeAborted;
+        readonly Dictionary<string, FileDB> nativeMoveTargets = new(StringComparer.Ordinal);
+
+        internal static FileDB OpenNativeWrite(NativeCatalogStore store, string key) => new FileDB(key, store);
+
+        FileDB(string key, NativeCatalogStore store)
+        {
+            fdbkey = key;
+            nativeStore = store;
+            nativeSnapshot = store.ReadBucket(key).GetAwaiter().GetResult();
+            Database = new Dictionary<string, TorrentDetails>(nativeSnapshot.Torrents, StringComparer.Ordinal);
+        }
 
         FileDB(string key)
         {
@@ -42,11 +59,51 @@ namespace JacRed.Infrastructure.Persistence
         {
             lock (_dbLock)
             {
+                if (nativeStore != null)
+                {
+                    if (nativeAborted) return; // An exception aborts this entire in-memory write scope.
+                    if (savechanges)
+                    {
+                        nativeCommitId ??= Guid.NewGuid().ToString("N");
+                        var scopes = new[] { this }.Concat(nativeMoveTargets.Values).ToArray();
+                        var revisions = nativeStore.WriteBuckets(scopes.Select(scope => new CatalogWrite(scope.nativeSnapshot, scope.Database)).ToArray(), nativeCommitId).GetAwaiter().GetResult();
+                        for (int i = 0; i < scopes.Length; i++)
+                        {
+                            scopes[i].nativeSnapshot = NativeCatalogStore.CommittedSnapshot(scopes[i].fdbkey, revisions[i], scopes[i].Database);
+                            scopes[i].savechanges = false;
+                        }
+                        nativeMoveTargets.Clear();
+                        nativeCommitId = null;
+                        InvalidateNativeIndex();
+                    }
+                    return;
+                }
                 if (Database.Count > 0 && savechanges)
                     JsonStream.Write(pathDb(fdbkey), Database);
             }
         }
         #endregion
+
+        internal void MoveTorrentToNewKey(TorrentDetails torrent, string newKey)
+        {
+            lock (_dbLock)
+            {
+                if (nativeStore == null) { MigrateTorrentToNewKey(torrent, newKey); return; }
+                if (nativeAborted) throw new NativeSqlException("Native write scope was aborted");
+                try
+                {
+                    if (newKey == fdbkey) { AddOrUpdate(torrent); return; }
+                    if (!nativeMoveTargets.TryGetValue(newKey, out var destination))
+                    {
+                        destination = OpenNativeWrite(nativeStore, newKey);
+                        nativeMoveTargets.Add(newKey, destination);
+                    }
+                    destination.AddOrUpdate(torrent);
+                    savechanges = true;
+                }
+                catch { nativeAborted = true; throw; }
+            }
+        }
 
         #region AddOrUpdate
 
@@ -54,7 +111,13 @@ namespace JacRed.Infrastructure.Persistence
         {
             lock (_dbLock)
             {
-                AddOrUpdateCore(torrent);
+                if (nativeAborted) throw new NativeSqlException("Native write scope was aborted");
+                try { AddOrUpdateCore(torrent); }
+                catch
+                {
+                    if (nativeStore != null) nativeAborted = true;
+                    throw;
+                }
             }
         }
 
@@ -271,13 +334,13 @@ namespace JacRed.Infrastructure.Persistence
                     {
                         Database.Remove(t.url);
                         savechanges = true;
-                        MigrateTorrentToNewKey(t, newKey);
+                        MoveTorrentToNewKey(t, newKey);
                         if (Database.Count == 0)
                             RemoveKeyFromMasterDb(fdbkey);
                         return;
                     }
                 }
-                AddOrUpdateMasterDb(t);
+                if (nativeStore == null) AddOrUpdateMasterDb(t);
             }
             else
             {
@@ -336,7 +399,7 @@ namespace JacRed.Infrastructure.Persistence
                     AppendFdbLog(torrent, t);
 
                 Database.TryAdd(t.url, t);
-                AddOrUpdateMasterDb(t);
+                if (nativeStore == null) AddOrUpdateMasterDb(t);
 
                 // Drop legacy bare episode/movie URL once a #quality row is stored.
                 if (string.Equals(t.trackerName, "lostfilm", StringComparison.OrdinalIgnoreCase)
