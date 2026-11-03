@@ -8,6 +8,8 @@ import {fileURLToPath} from "node:url";
 import {SHARD_KIND,parseShardConfig,makeShardProvider,allShardsReady,
  mergeShardRows,searchAllShards,ShardError} from "../src/shards.mjs";
 import {isReady,searchLegacy} from "../src/sql.mjs";
+import {verifyRemote} from "../live-acceptance.mjs";
+import {verifyShardFleet,AcceptanceRefused} from "../src/acceptance.mjs";
 import {createHandler} from "../src/app.mjs";
 
 const BRIDGE=fileURLToPath(new URL("./fixtures/sqlite_bridge.py",import.meta.url));
@@ -190,4 +192,68 @@ test("sharded search rejects one shard outage, never delivers partial hits",asyn
      {headers:{"X-Api-Key":KEY}}));
   assert.equal(response.status,503);
   assert.doesNotMatch(await response.text(),/PRIVATE_DATABASE_ERROR_SECRET/);
+});
+
+
+test("read-only fleet acceptance checks real sharded SQLite and original source identity",async()=>{
+  const report=await verifyShardFleet(provider([db0,db1]),{
+    verifySingle:verifyRemote,hashAll:true,auditRoute:true,maxRowsPerShard:50
+  });
+  assert.equal(report.status,"MULTI_DB_READ_ONLY_STAGING_PASS_NOT_CUTOVER");
+  assert.equal(report.shards,2);
+  assert.equal(report.master_sha256_consistent,true);
+  assert.equal(report.totals.torrents,5);
+  assert.equal(report.totals.buckets,4);
+  assert.ok(report.totals.sql_reads>10);
+  assert.equal(report.per_shard.length,2);
+  assert.ok(report.per_shard.every(x=>x.payload_hash==="PASS"));
+  assert.ok(report.per_shard.every(x=>x.routed_buckets_audited===x.buckets));
+  assert.equal(report.production_cutover_authorized,false);
+  assert.equal(JSON.stringify(report).includes("magnet:?"),false);
+});
+test("read-only fleet refuses insufficient full routing audit row budget",async()=>{
+  await assert.rejects(
+    verifyShardFleet(provider([db0,db1]),{
+      verifySingle:verifyRemote,auditRoute:true,maxRowsPerShard:1
+    }),
+    /MULTI_SHARD_ACCEPTANCE_FAILED/
+  );
+});
+test("read-only fleet detects altered bucket MD5 shard routing",async()=>{
+  const swapped={prepare(sql){
+    if(sql.includes("SELECT key_md5 FROM buckets")){
+      return {bind(){return {async all(){return [{key_md5:"f".repeat(32)}];}}}};
+    }
+    return db1.prepare(sql);
+  }};
+  await assert.rejects(
+    verifyShardFleet(provider([db0,swapped]),{
+      verifySingle:verifyRemote,auditRoute:true,maxRowsPerShard:50
+    }),
+    /MULTI_SHARD_ACCEPTANCE_FAILED/
+  );
+});
+test("read-only fleet fails closed when one Bunny database is offline",async()=>{
+  const offline={prepare(){throw Error("PRIVATE_LIBSQL_URL_DO_NOT_PRINT");}};
+  await assert.rejects(
+    verifyShardFleet(provider([db0,offline]),{verifySingle:verifyRemote}),
+    /SHARD_UNAVAILABLE/
+  );
+});
+test("read-only fleet rejects any accidental SQL mutation in a verifier",async()=>{
+  await assert.rejects(
+    verifyShardFleet(provider([db0,db1]),{
+      verifySingle:async db=>db.prepare("DELETE FROM torrents").first()
+    }),
+    /MULTI_SHARD_ACCEPTANCE_FAILED/
+  );
+});
+test("operator CLI with routing scan flag without acknowledgement refuses offline",()=>{
+  const cli=fileURLToPath(new URL("../live-acceptance.mjs",import.meta.url));
+  const r=spawnSync(process.execPath,[cli,"--run","--audit-routing"],{
+    encoding:"utf8",timeout:10000,env:{PATH:process.env.PATH}
+  });
+  assert.equal(r.status,2);
+  assert.match(r.stderr,/JACRED_BUNNY_REMOTE_ACCEPTANCE_REFUSED/);
+  assert.doesNotMatch(r.stderr,/PRIVATE_LIBSQL_URL/);
 });
