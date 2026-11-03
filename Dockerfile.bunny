@@ -1,10 +1,12 @@
 ARG ALPINE_VERSION=3.23.3
 ARG DOTNET_VERSION=10.0
+ARG DOTNET_SDK_DIGEST=sha256:cc02b814237a76c4735fb6eeee87181597b5e56f2ce458a435e527674d91f4d7
+ARG ALPINE_DIGEST=sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
 
 ################################################################################
 # Builder stage – build from repository context
 ################################################################################
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine@${DOTNET_SDK_DIGEST} AS build
 
 ARG TARGETARCH
 ARG JACRED_VERSION=dev
@@ -51,12 +53,14 @@ RUN set -eu; \
 ################################################################################
 # Runtime stage
 ################################################################################
-FROM alpine:${ALPINE_VERSION} AS runtime
+FROM alpine:${ALPINE_VERSION}@${ALPINE_DIGEST} AS runtime
 
 ARG JACRED_VERSION=dev
 
 LABEL maintainer="Pavel Pikta <devops@pavelpikta.com>" \
-    org.opencontainers.image.title="JacRed" \
+    org.opencontainers.image.title="JacRed Bunny" \
+    org.opencontainers.image.licenses="AGPL-3.0" \
+    org.opencontainers.image.source="https://github.com/vbrekher/jacred-bunny" \
     org.opencontainers.image.description="Jacred - Torrent tracker aggregator" \
     org.opencontainers.image.revision="${JACRED_VERSION}"
 
@@ -86,6 +90,8 @@ RUN set -eux; \
     && chmod -R 750 /app
 
 WORKDIR /app
+
+COPY LICENSE /usr/share/licenses/jacred/LICENSE
 
 # Copy publish output: /dist contains JacRed (binary), wwwroot/, Data/
 COPY --from=build --chown=jacred:jacred --chmod=550 /dist/JacRed /app/JacRed

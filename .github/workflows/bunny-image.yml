@@ -47,6 +47,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish this fork
+        id: publish
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -58,8 +59,30 @@ jobs:
           build-args: |
             JACRED_VERSION=${{ github.sha }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/jacred-bunny:main
+            ${{ github.ref == 'refs/heads/main' && format('ghcr.io/{0}/jacred-bunny:main', github.repository_owner) || '' }}
             ghcr.io/${{ github.repository_owner }}/jacred-bunny:sha-${{ github.sha }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+      - name: Generate SBOM for the exact published digest
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          image: ghcr.io/${{ github.repository_owner }}/jacred-bunny@${{ steps.publish.outputs.digest }}
+          syft-version: v1.56.0
+          format: spdx-json
+          artifact-name: jacred-bunny-${{ github.sha }}-sbom.spdx.json
+          output-file: jacred-bunny-sbom.spdx.json
+          upload-release-assets: false
+          upload-artifact-retention: 14
+      - name: Record immutable artifact identity
+        run: |
+          printf '%s\n' 'ghcr.io/${{ github.repository_owner }}/jacred-bunny@${{ steps.publish.outputs.digest }}' > image-digest.txt
+          sha256sum jacred-bunny-sbom.spdx.json > sbom.sha256
+      - name: Save digest and SBOM checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacred-bunny-${{ github.sha }}-identity
+          path: |
+            image-digest.txt
+            sbom.sha256
+          retention-days: 14
