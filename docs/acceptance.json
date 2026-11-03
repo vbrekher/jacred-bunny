@@ -14,7 +14,7 @@
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and real SQLite concurrent-write isolation. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete."
+      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete."
     },
     {
       "gate": "REAL SQL",
@@ -75,6 +75,7 @@
     "scope": "Local source checks; all CI through PR #27; paged snapshot changes local full suite only until their CI completes"
   },
   "recent_evidence": [
+    "evidence/paged-snapshot-real-sql-2026-11-03.json",
     "evidence/paged-snapshot-source-2026-11-03.json",
     "evidence/public-tracker-probe-source-2026-11-03.json",
     "evidence/tls-live-collector-2026-11-03.json",

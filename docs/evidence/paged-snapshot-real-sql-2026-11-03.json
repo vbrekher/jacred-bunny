@@ -1,0 +1,48 @@
+{
+  "scope": "Actual original HTTP service on local loopback using real Bunny SQL read-only session and 22 real cloud-collected rows; not deployed Magic Container/Edge or large Bunny dataset acceptance",
+  "service_source_sha": "203817b53b069bc741e42db2734fe9973442ecd9",
+  "expected_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "private_snapshot_json_sha256": "f11d910efbf4224a49504cf39cb8fd734fabf7064e22c566dca7fbf7881e154e",
+  "admin_negative_statuses": [
+    401,
+    401,
+    401
+  ],
+  "concurrent_results": [
+    {
+      "http": 200,
+      "body": {
+        "sourceSha": "203817b53b069bc741e42db2734fe9973442ecd9",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "cache": "private, no-store, max-age=0",
+      "elapsed_seconds": 6.257669446989894
+    },
+    {
+      "http": 429,
+      "body": {
+        "error": "A snapshot proof is already running",
+        "productionReady": false
+      },
+      "cache": "private, no-store, max-age=0",
+      "elapsed_seconds": 0.024229037007899024
+    }
+  ],
+  "subsequent_admin_http": 200,
+  "operator_fake_checksum_ignored": true,
+  "post_admin_anonymous_http": 401,
+  "production_acceptance": false
+}
