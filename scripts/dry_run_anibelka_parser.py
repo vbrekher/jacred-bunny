@@ -67,8 +67,6 @@ SPACES_RE = re.compile(r"\s+")
 def fetch(url: str) -> str:
     """Anonymous fetch — never send cookies (passkey risk)."""
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     headers = {"User-Agent": UA, "Accept-Encoding": "gzip"}
     req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, context=ctx, timeout=45) as resp:

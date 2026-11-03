@@ -304,7 +304,6 @@ namespace JacRed.Infrastructure.Trackers.Anifilm
                 using var handler = new HttpClientHandler
                 {
                     AllowAutoRedirect = false,
-                    ServerCertificateCustomValidationCallback = static (_, _, _, _) => true
                 };
                 using var client = new System.Net.Http.HttpClient(handler) { Timeout = TimeSpan.FromSeconds(20) };
 

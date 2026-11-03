@@ -82,7 +82,6 @@ namespace JacRed.Infrastructure.Background
                 {
                     using (var handler = new System.Net.Http.HttpClientHandler())
                     {
-                        handler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
                         using (var client = new System.Net.Http.HttpClient(handler))
                         {

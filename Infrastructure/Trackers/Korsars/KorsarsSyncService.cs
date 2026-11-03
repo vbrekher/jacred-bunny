@@ -137,7 +137,6 @@ namespace JacRed.Infrastructure.Trackers.Korsars
                 {
                     AllowAutoRedirect = false,
                     UseCookies = false,
-                    ServerCertificateCustomValidationCallback = static (_, _, _, _) => true
                 };
                 using var client = new NetHttpClient(handler) { Timeout = TimeSpan.FromSeconds(20) };
 

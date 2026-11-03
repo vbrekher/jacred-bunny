@@ -210,7 +210,6 @@ namespace JacRed.Infrastructure.Trackers.Kinozal
                         CookieContainer = cookieJar
                     };
 
-                    clientHandler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
                     using (var client = new NetHttpClient(clientHandler))
                     {
                         client.Timeout = TimeSpan.FromSeconds(10);

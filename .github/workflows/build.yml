@@ -28,6 +28,31 @@ permissions:
   id-token: write
 
 jobs:
+  dotnet-tests:
+    name: .NET unit and security regressions
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      JACRED_CATALOG_BACKEND: filedb
+      JACRED_BUNNY_CRON: "0"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Test original contracts, SQL transport and TLS validation
+        run: dotnet test tests/JacRed.Tests/JacRed.Tests.csproj --configuration Release --logger trx --results-directory artifacts/unit-tests
+      - name: Retain non-secret test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-unit-test-results
+          path: artifacts/unit-tests/*.trx
+          if-no-files-found: ignore
+          retention-days: 7
+
   web-quality:
     name: Web quality gates
     permissions:

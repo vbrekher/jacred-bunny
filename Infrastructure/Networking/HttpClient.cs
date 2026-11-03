@@ -103,11 +103,7 @@ namespace JacRed.Infrastructure.Networking
             var handler = new SocketsHttpHandler
             {
                 AutomaticDecompression = decompression,
-                AllowAutoRedirect = allowAutoRedirect,
-                SslOptions =
-                {
-                    RemoteCertificateValidationCallback = static (_, _, _, _) => true
-                }
+                AllowAutoRedirect = allowAutoRedirect
             };
 
             if (proxy != null)

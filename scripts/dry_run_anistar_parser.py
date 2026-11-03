@@ -46,8 +46,6 @@ PIR_RE = re.compile(r'<div class="li_swing">\s*([0-9]+)\s*</div>', re.I)
 
 def fetch(url: str, cookie: str = "") -> str:
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     headers = {"User-Agent": UA, "Accept-Encoding": "gzip"}
     if cookie:
         headers["Cookie"] = cookie

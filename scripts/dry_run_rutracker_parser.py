@@ -190,8 +190,6 @@ def probe_tree(mp: Dict[str, Tuple[List[str], str, bool]], host: str) -> int:
 
 def fetch(url: str) -> str:
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
     with urllib.request.urlopen(req, context=ctx, timeout=45) as resp:
         ctype = (resp.headers.get("Content-Type") or "").lower()

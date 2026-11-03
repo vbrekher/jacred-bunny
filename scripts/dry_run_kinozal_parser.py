@@ -69,11 +69,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FIXTURE_DIR = REPO_ROOT / "tests" / "JacRed.Tests" / "Fixtures" / "Kinozal"
 
 
-def build_opener(insecure_ssl: bool = True):
+def build_opener(insecure_ssl: bool = False):
     ctx = ssl.create_default_context()
     if insecure_ssl:
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+        raise ValueError("Insecure TLS is not supported")
     jar = CookieJar()
     return urllib.request.build_opener(
         urllib.request.HTTPCookieProcessor(jar),

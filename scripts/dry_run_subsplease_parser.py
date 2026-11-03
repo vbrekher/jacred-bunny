@@ -43,8 +43,6 @@ SHOW_LINK_RE = re.compile(r'href=["\']/shows/([^"\'/]+)/?["\']', re.I)
 
 def fetch(url: str, accept_json: bool = False) -> str:
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     headers = {"User-Agent": UA, "Accept-Encoding": "gzip"}
     if accept_json:
         headers["Accept"] = "application/json"

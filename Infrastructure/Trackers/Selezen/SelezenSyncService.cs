@@ -73,7 +73,6 @@ namespace JacRed.Infrastructure.Trackers.Selezen
 
                 using (var clientHandler = new System.Net.Http.HttpClientHandler() { AllowAutoRedirect = false })
                 {
-                    clientHandler.ServerCertificateCustomValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
                     using (var client = new System.Net.Http.HttpClient(clientHandler))
                     {
                         client.Timeout = TimeSpan.FromSeconds(15);

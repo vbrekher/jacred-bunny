@@ -154,8 +154,6 @@ def looks_like_login(html: str) -> bool:
 
 def make_opener(cookie_jar: Optional[http.cookiejar.CookieJar] = None) -> urllib.request.OpenerDirector:
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     handlers: List[urllib.request.BaseHandler] = [urllib.request.HTTPSHandler(context=ctx)]
     if cookie_jar is not None:
         handlers.append(urllib.request.HTTPCookieProcessor(cookie_jar))
@@ -198,8 +196,6 @@ def login(host: str, user: str, password: str) -> urllib.request.OpenerDirector:
             return None
 
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     login_opener = urllib.request.build_opener(
         urllib.request.HTTPSHandler(context=ctx),
         urllib.request.HTTPCookieProcessor(jar),

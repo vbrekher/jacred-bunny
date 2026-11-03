@@ -95,8 +95,6 @@ def score_page(html: str) -> Tuple[int, int, List[str]]:
 
 def build_opener():
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     jar = CookieJar()
     return urllib.request.build_opener(
         urllib.request.HTTPCookieProcessor(jar),
