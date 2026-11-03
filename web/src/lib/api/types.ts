@@ -866,6 +866,11 @@ export interface components {
              * @description Corresponding public source for this fork build
              */
             sourceUrl?: string;
+            /**
+             * @description Authoritative catalog backend used by the running process
+             * @enum {string}
+             */
+            catalogBackend?: "filedb" | "bunny-sql";
             gitBranch?: string;
             buildDate?: string;
         };

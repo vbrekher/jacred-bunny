@@ -1,4 +1,5 @@
 """Archive integrity checks; these fixtures are not production acceptance."""
+import hashlib
 import gzip
 import json
 from pathlib import Path
@@ -10,7 +11,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'bunny'))
 from native import NativeError
-from backup import export_snapshot,verify_archive,sha_file,Storage
+from backup import export_snapshot,verify_archive,sha_file,Storage,Backups
 
 
 class SnapshotTests(unittest.TestCase):
@@ -21,7 +22,9 @@ class SnapshotTests(unittest.TestCase):
         self.addCleanup(self.db.close)
         self.db.executescript('CREATE TABLE native_schema_migrations(name TEXT,sha256 TEXT);')
         for name in ('0001_catalog.sql','0002_search_fts5.sql'):
-            self.db.executescript((ROOT/'bunny-native/migrations'/name).read_text())
+            content=(ROOT/'bunny-native/migrations'/name).read_text()
+            self.db.executescript(content)
+            self.db.execute('INSERT INTO native_schema_migrations VALUES(?,?)',(name,hashlib.sha256(content.encode()).hexdigest()))
         self.query=lambda statement,args=():[dict(row) for row in self.db.execute(statement,args).fetchall()]
         self.sql=type('Reader',(),{'query':staticmethod(self.query)})()
 
@@ -60,6 +63,30 @@ class SnapshotTests(unittest.TestCase):
         records[0]=(json.dumps(header)+'\n').encode()
         self.path.write_bytes(gzip.compress(b''.join(records)))
         with self.assertRaisesRegex(NativeError,'footer'):verify_archive(self.path,sha_file(self.path))
+
+    def test_runtime_archive_includes_versions_and_commit_receipts(self):
+        name='0004_catalog_commits.sql';content=(ROOT/'bunny-native/migrations'/name).read_text()
+        self.db.executescript(content)
+        self.db.execute('INSERT INTO native_schema_migrations VALUES(?,?)',(name,hashlib.sha256(content.encode()).hexdigest()))
+        self.db.execute("INSERT INTO catalog_bucket_versions VALUES('deleted:deleted',7)")
+        self.db.execute("INSERT INTO catalog_commits(commit_id,bucket_key,content_sha256,revision) VALUES(?,?,?,?)",('a'*32,'deleted:deleted','b'*64,7))
+        summary=export_snapshot(self.sql,self.path,{})
+        checked=verify_archive(self.path,summary['gzip_sha256'])
+        self.assertEqual(checked['header']['schema'],'jacred-sql-backup/v2')
+        self.assertEqual(checked['counts']['catalog_bucket_versions'],1)
+        self.assertEqual(checked['counts']['catalog_commits'],1)
+        self.assertTrue(checked['header']['coverage']['catalog_versions_and_commits'])
+
+    def test_unknown_migration_is_not_silently_omitted_from_backup(self):
+        self.db.execute("INSERT INTO native_schema_migrations VALUES('9999_unknown.sql',?)",('a'*64,))
+        with self.assertRaisesRegex(NativeError,'migration set'):export_snapshot(self.sql,self.path,{})
+        self.assertFalse(self.path.exists())
+
+    def test_unresolved_restore_intent_cannot_create_another_database(self):
+        for status in ('creating','created'):
+            probe=object.__new__(Backups);probe.state={'temporary_resources':[{'status':status}]}
+            with self.assertRaisesRegex(NativeError,'Unresolved restore'):
+                probe.restore_test('catalog-20261103T000000Z-1234abcd')
 
     def test_public_storage_and_foreign_hosts_rejected(self):
         with self.assertRaises(NativeError):Storage({'PullZones':[{'Id':1}]})

@@ -14,6 +14,7 @@ public class HealthControllerConfTests
         var result = Assert.IsType<JsonResult>(new HealthController().Version());
         var json = JsonSerializer.SerializeToElement(result.Value);
         Assert.Equal(VersionInfo.GitFullSha, json.GetProperty("gitFullSha").GetString());
+        Assert.Equal("filedb", json.GetProperty("catalogBackend").GetString());
         Assert.Equal(VersionInfo.SourceUrl, json.GetProperty("sourceUrl").GetString());
         Assert.Matches("^[a-f0-9]{40}$", VersionInfo.GitFullSha);
         Assert.Equal("https://github.com/vbrekher/jacred-bunny/tree/" + VersionInfo.GitFullSha, VersionInfo.SourceUrl);

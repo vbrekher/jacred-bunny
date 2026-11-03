@@ -17,6 +17,7 @@ from native import NativeError, SQL, SQLSession, NoRedirect, atomic_private, loa
 from operations import Operations
 
 TABLES=('buckets','bucket_aliases','torrents','track_file_inventory','native_imports')
+RUNTIME_TABLES=TABLES+('catalog_bucket_versions','catalog_commits')
 COVERAGE={'sql_catalog':True,'legacy_filedb':False,'legacy_tracks_objects':False,'runtime_config':False,'worker_jobs':False}
 
 
@@ -38,12 +39,17 @@ def export_snapshot(sql, path, metadata):
     counts={};digest=hashlib.sha256();tables={}
     try:
         schema={x['name']:x['sha256'] for x in sql.query('SELECT name,sha256 FROM native_schema_migrations ORDER BY name')}
-        for name in TABLES:
+        if set(schema)=={'0001_catalog.sql','0002_search_fts5.sql'}:
+            table_names=TABLES;archive_schema='jacred-sql-backup/v1'
+        elif set(schema)=={'0001_catalog.sql','0002_search_fts5.sql','0004_catalog_commits.sql'}:
+            table_names=RUNTIME_TABLES;archive_schema='jacred-sql-backup/v2'
+        else:raise NativeError('Unsupported backup migration set; no partial schema snapshot accepted')
+        for name in table_names:
             info=sql.query('PRAGMA table_info('+quote(name)+')')
             if not info:raise NativeError('Catalog table missing from snapshot schema')
             tables[name]={'columns':[x['name'] for x in info],
                           'order':[x['name'] for x in sorted(info,key=lambda x:x['pk']) if x['pk']]}
-        header={'kind':'header','schema':'jacred-sql-backup/v1','coverage':COVERAGE,
+        header={'kind':'header','schema':archive_schema,'coverage':dict(COVERAGE,catalog_versions_and_commits=archive_schema.endswith('/v2')),
                 'metadata':metadata,'migration_sha256':schema,'tables':tables}
         with os.fdopen(fd,'wb') as raw:
             fd=None
@@ -66,7 +72,7 @@ def export_snapshot(sql, path, metadata):
                     counts[name]=count
                 write({'kind':'end','counts':counts,'content_sha256':digest.hexdigest()},False)
             raw.flush();os.fsync(raw.fileno())
-        return {'counts':counts,'content_sha256':digest.hexdigest(),'gzip_sha256':sha_file(path),'bytes':path.stat().st_size,'coverage':COVERAGE}
+        return {'counts':counts,'content_sha256':digest.hexdigest(),'gzip_sha256':sha_file(path),'bytes':path.stat().st_size,'coverage':header['coverage']}
     except BaseException:
         if fd is not None:os.close(fd)
         if path.exists():path.unlink()
@@ -75,7 +81,7 @@ def export_snapshot(sql, path, metadata):
 
 def verify_archive(path, expected_sha256, max_expanded=4*1024**3):
     if sha_file(path)!=expected_sha256:raise NativeError('Backup compressed checksum mismatch')
-    digest=hashlib.sha256();counts={name:0 for name in TABLES};header=None;ended=False;expanded=0
+    digest=hashlib.sha256();counts={};header=None;ended=False;expanded=0;table_names=()
     try:
         with gzip.open(path,'rb') as stream:
             while True:
@@ -86,14 +92,19 @@ def verify_archive(path, expected_sha256, max_expanded=4*1024**3):
                 row=json.loads(line)
                 if ended:raise NativeError('Backup has trailing records')
                 if header is None:
-                    if row.get('kind')!='header' or row.get('schema')!='jacred-sql-backup/v1' or set(row.get('tables',{}))!=set(TABLES):
+                    schema=row.get('schema')
+                    table_names=TABLES if schema=='jacred-sql-backup/v1' else RUNTIME_TABLES if schema=='jacred-sql-backup/v2' else ()
+                    if row.get('kind')!='header' or not table_names or set(row.get('tables',{}))!=set(table_names):
                         raise NativeError('Unsupported backup schema')
+                    expected_migrations={'0001_catalog.sql','0002_search_fts5.sql'} | ({'0004_catalog_commits.sql'} if schema.endswith('/v2') else set())
+                    if set(row.get('migration_sha256',{})) != expected_migrations:raise NativeError('Backup schema/migration mismatch')
+                    counts={name:0 for name in table_names}
                     header=row;digest.update(line);continue
                 if row.get('kind')=='end':
                     if row.get('counts')!=counts or row.get('content_sha256')!=digest.hexdigest():raise NativeError('Backup footer mismatch')
                     ended=True;continue
                 name=row.get('table')
-                if row.get('kind')!='row' or name not in TABLES or len(row.get('values',[]))!=len(header['tables'][name]['columns']):
+                if row.get('kind')!='row' or name not in table_names or len(row.get('values',[]))!=len(header['tables'][name]['columns']):
                     raise NativeError('Invalid backup row')
                 for value in row['values']:SQL.decode(value)
                 counts[name]+=1;digest.update(line)
@@ -175,6 +186,8 @@ class Backups(Operations):
 
     def restore_test(self,backup_id,keep=False):
         if not re.fullmatch(r'catalog-[0-9TZ]+-[0-9a-f]{8}',backup_id):raise NativeError('Invalid backup ID')
+        if any(entry.get('status') in ('creating','created') for entry in self.state.get('temporary_resources',[])):
+            raise NativeError('Unresolved restore database intent; reconcile or clean up before creating another database')
         from native import read_private
         receipt=read_private(self.directory/'backups'/(backup_id+'.json'))
         if (receipt.get('owner')!=self.state['owner'] or receipt.get('database_id')!=self.state['resources']['database']['id'] or
@@ -203,8 +216,9 @@ class Backups(Operations):
                 token=self.api('PUT','/database/v2/databases/'+ident+'/auth/generate',{'authorization':'full-access','expires_at':None})['token']
                 sql=SQL(target['url'],token)
                 sql.migrate([payload/name for name in sorted(expected)])
-                columns={table:[x['name'] for x in sql.query('PRAGMA table_info('+quote(table)+')')] for table in TABLES}
-                if any(columns[table]!=checked['header']['tables'][table]['columns'] for table in TABLES):raise NativeError('Restore column layout mismatch')
+                table_names=checked['header']['tables']
+                columns={table:[x['name'] for x in sql.query('PRAGMA table_info('+quote(table)+')')] for table in table_names}
+                if any(columns[table]!=checked['header']['tables'][table]['columns'] for table in table_names):raise NativeError('Restore column layout mismatch')
                 with gzip.open(archive,'rt',encoding='utf-8') as stream:
                     for line in stream:
                         row=json.loads(line)
@@ -221,7 +235,7 @@ class Backups(Operations):
                 fts=sql.query("SELECT count(*) AS n FROM torrent_fts WHERE torrent_fts MATCH ?",('JacRed',))[0]['n']
                 result={'backup_id':backup_id,'restored_database_id':ident,'restored_counts':restored['counts'],
                     'content_sha256_verified':True,'fts_query_completed':True,'fts_probe_matches':fts,
-                    'elapsed_seconds':time.monotonic()-started,'coverage':COVERAGE,'production_restore_acceptance':False}
+                    'elapsed_seconds':time.monotonic()-started,'coverage':checked['header']['coverage'],'production_restore_acceptance':False}
                 entry['restore_verified']=True;self.save()
                 return result
             finally:
@@ -229,4 +243,10 @@ class Backups(Operations):
                     current=self.api('GET','/database/v2/databases/'+ident)['db']
                     if current['name']!=name:raise NativeError('Restore database changed; refusing cleanup')
                     self.api('DELETE','/database/v2/databases/'+ident)
-                    entry['status']='deleted_after_restore_test';self.save()
+                    try:
+                        self.api('GET','/database/v2/databases/'+ident)
+                    except NativeError as error:
+                        if 'HTTP 404' not in str(error):raise
+                        entry['status']='deleted_confirmed_404';self.save()
+                    else:
+                        raise NativeError('Restore database deletion not confirmed; reconcile saved ID before retry')

@@ -32,3 +32,19 @@ class HealthTests(unittest.TestCase):
             with patch.object(cli.urllib.request,'build_opener',return_value=Mock(open=open_request)):
                 result=cli.native_health(deploy)
             self.assertFalse(result['infrastructureReady'])
+
+    def test_file_backend_cannot_pass_sql_runtime_readiness(self):
+        with tempfile.TemporaryDirectory() as root:
+            deploy=Mock();deploy.secret_path=Path(root)/'credentials.json'
+            native.atomic_private(deploy.secret_path,{'api_key':'test-api','admin_key':'test-admin'})
+            deploy.state={'source_sha':'a'*40,'catalog_backend':'bunny-sql','resources':{'worker':{'id':'owned'}}}
+            deploy.verify.return_value={'displayEndpoint':{'type':'cdn','address':'mc-fixture.bunny.run'}}
+            deploy.sql_client.return_value.query.side_effect=[[{'n':3}],[{'n':1}]]
+            def opened(req,timeout):
+                if '/health' in req.full_url:return Response(b'{"status":"OK"}')
+                if '/version' in req.full_url:return Response(json.dumps({'gitSha':'a'*40,'catalogBackend':'filedb'}).encode())
+                return Response(b'[]')
+            with patch.object(cli.urllib.request,'build_opener',return_value=Mock(open=opened)):
+                result=cli.native_health(deploy)
+            self.assertFalse(result['worker_catalog_backend_matches'])
+            self.assertFalse(result['infrastructureReady'])

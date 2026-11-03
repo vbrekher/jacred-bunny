@@ -573,6 +573,10 @@ def native_health(deploy):
     observations["worker_healthy"] = code == 200 and isinstance(health, dict) and health.get("status") == "OK"
     code, version = get("/version")
     sha = version.get("gitSha", "") if isinstance(version, dict) else ""
+    expected_backend = deploy.state.get("catalog_backend", "filedb")
+    actual_backend = version.get("catalogBackend") if isinstance(version,dict) else None
+    observations["worker_catalog_backend"] = actual_backend
+    observations["worker_catalog_backend_matches"] = actual_backend == expected_backend if expected_backend == "bunny-sql" else actual_backend in (None,"filedb")
     observations["server_git_sha"] = sha if re.fullmatch(r"[0-9a-f]{8,40}", sha) else None
     observations["worker_source_matches"] = bool(observations["server_git_sha"] and deploy.state["source_sha"].startswith(sha))
     code, search = get("/api/v1.0/torrents?search=JacRedHealthProbe" + secrets.token_hex(8))
@@ -585,10 +589,10 @@ def native_health(deploy):
         sql = deploy.sql_client(create=False)
         observations["sql_migration_count"] = sql.query("SELECT count(*) AS n FROM native_schema_migrations")[0]["n"]
         observations["catalog_torrent_count"] = sql.query("SELECT count(*) AS n FROM torrents")[0]["n"]
-        observations["sql_schema_ready"] = observations["sql_migration_count"] >= 2
+        observations["sql_schema_ready"] = observations["sql_migration_count"] >= (3 if expected_backend == "bunny-sql" else 2)
     except NativeError:
         observations["sql_schema_ready"] = False
-    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"])
+    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"] and observations["worker_catalog_backend_matches"])
     observations["catalog_acceptance"] = "NOT_ESTABLISHED"
     return observations
 
@@ -619,6 +623,10 @@ def _native_install(args):
         return
     key = account_key()
     api = NativeAPI(key)
+    deploy = Deployment(args.state_dir, api)
+    backend = payload.get("catalog_backend", "filedb")
+    if deploy.state and deploy.state.get("catalog_backend", "filedb") != backend:
+        raise NativeError("Catalog authority change requires an explicit verified migration; install cannot silently switch backends")
     limits = api("GET", "/mc/limits")
     rates = current_pricing()  # Refuse unknown/changed billing formats before creation.
     cost = staging_cost_plan(limits, args.hours, args.data_gb, rates=rates)
@@ -651,15 +659,25 @@ def _native_install(args):
     if time.time() >= deploy.state["stop_at"]:
         raise NativeError("Existing staging window expired; use an explicitly bounded start window")
     deploy.state["cost_plan"] = cost
+    deploy.state["catalog_backend"] = backend
+    deploy.state["payload_schema"] = payload["schema"]
     deploy.save()
     print("Verified release files, current pricing, image digest and quota. Creating/resuming isolated staging.")
     deploy.provision_data_plane()
-    changed = deploy.migrate([args.payload_dir / name for name in ("0001_catalog.sql", "0002_search_fts5.sql")])
+    changed = deploy.migrate([args.payload_dir / name for name in sorted(payload["files"]) if name.endswith(".sql")])
     print("SQL migrations applied:", len(changed))
     deploy.wire_edge(args.payload_dir / "edge.js", payload["files"]["edge.js"])
     deploy.start_watchdog()
     credentials = read_private(deploy.secret_path)
     body = build_payload("AMS", image, registry, credentials["api_key"], credentials["admin_key"], args.data_gb, digest=digest)
+    if backend == "bunny-sql":
+        database = deploy.verify("database")
+        body["containerTemplates"][0]["environmentVariables"] += [
+            {"name":"JACRED_CATALOG_BACKEND","value":"bunny-sql"},
+            {"name":"JACRED_DATABASE_URL","value":database["url"]},
+            {"name":"JACRED_DATABASE_READ_TOKEN","value":credentials["database_read_token"]},
+            {"name":"JACRED_DATABASE_WRITE_TOKEN","value":credentials["database_write_token"]},
+        ]
     deploy.provision_worker(body)
     deploy.bound_staging_cdn()
     worker = deploy.verify("worker")
@@ -675,7 +693,7 @@ def _native_install(args):
         time.sleep(5)
     deploy.record_infrastructure_health(health)
     print(json.dumps(health, indent=2))
-    print("Infrastructure installed; FileDB compatibility API is active. SQL collector cutover and catalog/client acceptance remain required.")
+    print("Infrastructure installed; catalog backend:", backend, ". Catalog/client/production acceptance remains required.")
 
 
 def native_update(args):
@@ -701,6 +719,8 @@ def native_update(args):
         manifest=load_payload(target)
         if args.source_sha and manifest["source_sha"] != args.source_sha:
             raise NativeError("Payload source differs from requested SHA")
+        if manifest.get("catalog_backend", "filedb") != deploy.state.get("catalog_backend", "filedb"):
+            raise NativeError("Update/rollback cannot change catalog authority; explicit verified migration required")
         if not args.apply:
             print(json.dumps({"apply":False,"from_source":deploy.state["source_sha"],"to_source":manifest["source_sha"],
                               "resource_ids_preserved":True,"sql_rollback":False},indent=2))

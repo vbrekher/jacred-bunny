@@ -49,6 +49,7 @@ namespace JacRed.Controllers
                 ["gitSha"] = VersionInfo.GitSha,
                 ["gitFullSha"] = VersionInfo.GitFullSha,
                 ["sourceUrl"] = VersionInfo.SourceUrl,
+                ["catalogBackend"] = JacRed.Infrastructure.Persistence.Native.NativeCatalogRuntime.Enabled ? "bunny-sql" : "filedb",
                 ["gitBranch"] = VersionInfo.GitBranch,
                 ["buildDate"] = VersionInfo.BuildDate
             });
