@@ -131,7 +131,9 @@ internal static class LegacyArchive
         if (sourceSha.Length != 40 || sourceSha.Any(c => !Uri.IsHexDigit(c)))
             throw new InvalidDataException("Legacy export requires a build source identity");
         var inventory = Inventory(dataRoot, configRoot, byteLimit, fileLimit);
-        if (!inventory.Any(x => x.Name == "Data/masterDb.bz") || !inventory.Any(x => x.Name == "config/init.yaml"))
+        if (!inventory.Any(x => x.Name.StartsWith("Data/masterDb", StringComparison.Ordinal)
+            && x.Name.EndsWith(".bz", StringComparison.Ordinal) && x.Name.Count(c => c == '/') == 1)
+            || !inventory.Any(x => x.Name == "config/init.yaml"))
             throw new InvalidDataException("Legacy export requires original master and configuration");
         var output = System.IO.Path.Combine(outputRoot, "legacy.tar.gz");
         var files = new List<LegacyArchiveFile>();

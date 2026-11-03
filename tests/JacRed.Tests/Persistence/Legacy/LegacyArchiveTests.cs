@@ -77,6 +77,15 @@ public sealed class LegacyArchiveTests : IDisposable
     }
 
     [Fact]
+    public async Task Daily_original_master_is_preserved_without_selecting_or_rewriting_it()
+    {
+        File.Move(Path.Combine(Data, "masterDb.bz"), Path.Combine(Data, "masterDb_04-11-2026.bz"));
+        var result = await LegacyArchive.Create(Data, Config, Private, Source, default);
+        Assert.Contains(result.Files, f => f.Path == "Data/masterDb_04-11-2026.bz");
+        Assert.False(File.Exists(Path.Combine(Data, "masterDb.bz")));
+    }
+
+    [Fact]
     public async Task Cancellation_removes_partial_archive()
     {
         using var cancellation = new CancellationTokenSource();
