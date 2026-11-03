@@ -22,6 +22,43 @@ UA = "JacRed-bunny/0.2 (+https://github.com/vbrekher/jacred-bunny)"
 class DeploymentError(Exception):
     pass
 
+def account_key():
+    """Reuse the official CLI profile without putting account keys in argv."""
+    if os.environ.get("BUNNYNET_API_KEY"):
+        return os.environ["BUNNYNET_API_KEY"]
+    paths = [Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "bunnynet.json",
+             Path.home() / ".bunnynet.json", Path("/etc/bunnynet.json")]
+    for path in paths:
+        if path.is_file() and not path.is_symlink():
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                value = data.get("profiles", {}).get(os.environ.get("BUNNYNET_PROFILE", "default"), {}).get("api_key")
+                if isinstance(value, str) and value:
+                    return value
+            except (OSError, ValueError, AttributeError):
+                raise DeploymentError("Cannot read Bunny CLI profile") from None
+    if not sys.stdin.isatty():
+        raise DeploymentError("No Bunny CLI profile or BUNNYNET_API_KEY in noninteractive mode")
+    return ask("Bunny account API key", hidden=True)
+
+
+def deployment_plan(data_gb=1, hours=1):
+    if type(data_gb) is not int or not 1 <= data_gb <= 100:
+        raise DeploymentError("Data allocation must be 1–100 GB")
+    if type(hours) not in (int, float) or not 0 < hours <= 24:
+        raise DeploymentError("Staging duration must be >0 and <=24 hours")
+    # Account maximum observed via /mc/limits, not a resource reservation.
+    # Conservative compute envelope; actual consumption and overhead vary.
+    return {"regions": 1, "replicas": 1, "data_gb": data_gb, "config_gb": 1,
+            "hours": hours, "hard_cost_limit": False,
+            "compute_envelope_usd_per_hour": 8 * 0.02 + 32 * 0.005,
+            "volume_usd_per_month": (data_gb + 1) * 0.10,
+            "network_cost": "metered separately; not bounded by this estimate",
+            "price_checked": "2026-11-03",
+            "source": "https://bunny.net/docs/magic-containers/pricing.md",
+            "native_stack": "NOT_YET_PROVISIONED"}
+
+
 def ask(label, default=None, hidden=False):
     suffix = " [" + str(default) + "]" if default is not None else ""
     value = (getpass.getpass(label + suffix + ": ") if hidden else input(label + suffix + ": ")).strip()
@@ -188,7 +225,9 @@ def extract_id(data):
                 return data[name]
     raise DeploymentError("App create response omitted ID. Inspect Bunny account before retrying.")
 
-def build_payload(region, image, registry, api_key, dev_key, data_size):
+def build_payload(region, image, registry, api_key, dev_key, data_size, digest=None):
+    if digest is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+        raise DeploymentError("Invalid immutable image digest")
     if not re.fullmatch(r"[1-9][0-9]*", str(registry)):
         raise DeploymentError("Bunny requires numeric imageRegistryId, not github")
     return {
@@ -197,6 +236,7 @@ def build_payload(region, image, registry, api_key, dev_key, data_size):
         "regionSettings": {"allowedRegionIds": [region], "requiredRegionIds": [region]},
         "containerTemplates": [{
             "name": "jacred", **image_parts(image), "imageRegistryId": str(registry),
+            **({"imageDigest": digest} if digest else {}),
             "environmentVariables": [
                 {"name": "JACRED_BUNNY_API_KEY", "value": api_key},
                 {"name": "JACRED_BUNNY_DEV_KEY", "value": dev_key},
@@ -318,7 +358,7 @@ def setup(args):
         raise DeploymentError("Local installation already configured: use status/start/stop/credentials.")
     print("\nJacRed Bunny — automatic Magic Containers installation")
     print("No Docker/.NET required on this computer. Bunny account key stays in local mode-600 config.")
-    key = ask("Bunny account API key", hidden=True)
+    key = account_key()
     if not key:
         raise DeploymentError("Bunny account API key required")
     ensure_no_duplicate(key)
@@ -338,7 +378,7 @@ def setup(args):
     if not 1 <= args.data_gb <= 1000:
         raise DeploymentError("Data volume size must be 1..1000 GB")
     api_secret, dev_secret = secrets.token_urlsafe(42), secrets.token_urlsafe(42)
-    body = build_payload(region, args.image, registry, api_secret, dev_secret, args.data_gb)
+    body = build_payload(region, args.image, registry, api_secret, dev_secret, args.data_gb, digest=digest)
     print("\nPlan: 1 Magic Container, 1 region, HTTPS, 2 persistent volumes.")
     print("Region:", region, "| FileDB:", args.data_gb, "GB | config: 1 GB")
     print("Storage allocation approximately $%.2f/month, PLUS compute and traffic." % ((args.data_gb + 1) * 0.10))
@@ -390,7 +430,7 @@ def status(show_keys=False):
         probe(current)
 
 def doctor():
-    key = load_config()["api_key"] if CONFIG.exists() else ask("Bunny account key (read-only)", hidden=True)
+    key = load_config()["api_key"] if CONFIG.exists() else account_key()
     apps = same_apps(key)
     print("JacRed Bunny apps found:", len(apps))
     for item in apps:
@@ -458,6 +498,9 @@ def main():
     s.add_argument("--image", default=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE))
     s.add_argument("--data-gb", type=int, default=10)
     s.add_argument("--no-deploy", action="store_true")
+    plan = commands.add_parser("plan", help="Offline allocation/cost estimate; creates nothing")
+    plan.add_argument("--data-gb", type=int, default=1)
+    plan.add_argument("--hours", type=float, default=1)
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     args = parser.parse_args()
@@ -466,6 +509,8 @@ def main():
             setup(argparse.Namespace(image=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE), data_gb=10, no_deploy=False))
         elif args.action == "setup":
             setup(args)
+        elif args.action == "plan":
+            print(json.dumps(deployment_plan(args.data_gb, args.hours), indent=2))
         elif args.action == "status": status()
         elif args.action == "credentials": status(show_keys=True)
         elif args.action == "doctor": doctor()
