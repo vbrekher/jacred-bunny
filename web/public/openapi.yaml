@@ -130,6 +130,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/VersionResponse"
 
+  /internal/version:
+    get:
+      tags: [System]
+      summary: Compute an atomic SQL catalog snapshot checksum
+      description: Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Bounded transport fails closed for oversized snapshots; this is not full production acceptance.
+      operationId: internalSnapshotVersion
+      security:
+        - DevKeyHeader: []
+        - DevKeyQuery: []
+      responses:
+        "200":
+          description: Service-computed snapshot proof
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sourceSha, catalogBackend, algorithm, snapshotSha256, counts, atomicRead, productionReady]
+                properties:
+                  sourceSha: { type: string }
+                  catalogBackend: { type: string, enum: [bunny-sql] }
+                  algorithm: { type: string, enum: [jacred-sql-relational-snapshot/v1] }
+                  snapshotSha256: { type: string, pattern: '^[a-f0-9]{64}$' }
+                  counts:
+                    type: object
+                    additionalProperties: { type: integer, format: int64 }
+                  atomicRead: { type: boolean, enum: [true] }
+                  productionReady: { type: boolean, enum: [false] }
+        "401":
+          description: Administrative access denied
+        "501":
+          description: FileDB authority does not provide this SQL proof
+        "503":
+          description: Snapshot unavailable, oversized, timed out or integrity verification failed
+
   /lastupdatedb:
     get:
       tags: [System]

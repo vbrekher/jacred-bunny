@@ -1,0 +1,218 @@
+{
+  "scope": "Actual Magic Container and Bunny Edge HTTPS service-computed SQL snapshot attestation, not general large-catalog or production acceptance",
+  "source_sha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+  "image_digest": "sha256:4f4cfad0dffd4e7e0a2f7730cd01d72e9f9fbfa642e8ed2361d782edc106d985",
+  "bundle_sha256": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+  "edge_release_id": 1276179,
+  "expected_relational_sha256": "a13cbbc824685f29dfa370298e9f78fc56e6efb8557e5b67ff470834ada63736",
+  "original_json_snapshot_sha256": "f1a37cecebe3a78027f3e017a9ef46176d0d8e569140734b51616bae50c52bc7",
+  "all_service_proofs_match_independent_snapshot": true,
+  "operator_fake_query_checksum_ignored": true,
+  "results": [
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.13791275898984168
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.0847323560010409
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.0888288959977217
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "a13cbbc824685f29dfa370298e9f78fc56e6efb8557e5b67ff470834ada63736",
+        "counts": {
+          "buckets": 20,
+          "bucket_aliases": 20,
+          "torrents": 20,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 20,
+          "catalog_commits": 20
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.11264063700218685
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "a13cbbc824685f29dfa370298e9f78fc56e6efb8557e5b67ff470834ada63736",
+        "counts": {
+          "buckets": 20,
+          "bucket_aliases": 20,
+          "torrents": 20,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 20,
+          "catalog_commits": 20
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.09980220900615677
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.12591198000882287
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.24633977400662843
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.2808124430011958
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "a13cbbc824685f29dfa370298e9f78fc56e6efb8557e5b67ff470834ada63736",
+        "counts": {
+          "buckets": 20,
+          "bucket_aliases": 20,
+          "torrents": 20,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 20,
+          "catalog_commits": 20
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.11301908000314143
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "a13cbbc824685f29dfa370298e9f78fc56e6efb8557e5b67ff470834ada63736",
+        "counts": {
+          "buckets": 20,
+          "bucket_aliases": 20,
+          "torrents": 20,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 20,
+          "catalog_commits": 20
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.11136119200091343
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    }
+  ],
+  "production_acceptance": false,
+  "cdn_header_correction": {
+    "description": "JacRed staging no-store 3a57864f1105",
+    "zones": {
+      "worker_cdn": {
+        "zone_id": 6920854,
+        "phase": "confirmed",
+        "guid": "292bfcc4-9ad8-4f1b-a039-a2a7e42507e6"
+      },
+      "edge_cdn": {
+        "zone_id": 6920852,
+        "phase": "confirmed",
+        "guid": "b42ed35e-b414-4904-b1cc-0080ddee193c"
+      }
+    }
+  },
+  "post_test_worker_status": "inactive",
+  "limitations": [
+    "Initial implementation rejects snapshots exceeding 8 MiB transport response; paginated read session unfinished",
+    "General legacy receipt conversion/FileDB attestation unfinished",
+    "CDN no-store rules were applied to existing owned staging through a journalled control-plane script; CLI integration still required",
+    "Known inherited tracker TLS bypasses remain open; no production readiness claim"
+  ],
+  "initial_cloud_probe_failures": [
+    "Correct snapshot/body but CDN rewrote Cache-Control to no-cache",
+    "One immediate retry before startup readiness returned a non-auth status; rerun waits for confirmed readiness"
+  ]
+}

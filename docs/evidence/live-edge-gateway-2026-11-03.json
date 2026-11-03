@@ -1317,5 +1317,11 @@
     ]
   },
   "actual_cost": "COST_UNKNOWN: no complete account usage telemetry attributed to this test",
-  "deployment_scope": "Existing owned SQL staging, exact CI image and bundle; advanced development SQL/gateway payload, not public-release fresh installer acceptance"
+  "deployment_scope": "Existing owned SQL staging, exact CI image and bundle; advanced development SQL/gateway payload, not public-release fresh installer acceptance",
+  "correction_2026_11_03": {
+    "previous_no_store_claim": "unsupported: all 101 captured no_store fields were false; CDN rewrote the header to no-cache",
+    "unchanged_valid_scope": "101 matching status/body comparisons, auth denial, row persistence and UI evidence remain valid",
+    "remediation_evidence": "service-snapshot-attestation-2026-11-03.json",
+    "full_security_gate": "FAIL"
+  }
 }

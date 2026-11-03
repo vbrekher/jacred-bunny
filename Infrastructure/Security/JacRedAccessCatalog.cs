@@ -36,6 +36,7 @@ namespace JacRed.Infrastructure.Security
             new("/api/v1.0/config/schema", JacRedAccessPolicy.ConfigApi, "ConfigController"),
 
             // Dev admin
+            new("/internal/version", JacRedAccessPolicy.DevAdmin, "InternalVersionController", "Atomic SQL catalog snapshot checksum"),
             new("/dev/updateSize", JacRedAccessPolicy.DevAdmin, "DevMaintenanceController"),
             new("/dev/FindCorrupt", JacRedAccessPolicy.DevAdmin, "DevDiagnosticsController"),
             new("/dev/TracksStats", JacRedAccessPolicy.DevAdmin, "DevTracksController"),

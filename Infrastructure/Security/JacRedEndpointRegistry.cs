@@ -27,7 +27,8 @@ namespace JacRed.Infrastructure.Security
             return path.StartsWith("/cron/", StringComparison.OrdinalIgnoreCase)
                 || path.Equals("/jsondb", StringComparison.OrdinalIgnoreCase)
                 || path.StartsWith("/jsondb/", StringComparison.OrdinalIgnoreCase)
-                || path.StartsWith("/dev/", StringComparison.OrdinalIgnoreCase);
+                || path.StartsWith("/dev/", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith("/internal/", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsRestrictedAdminPath(string path)

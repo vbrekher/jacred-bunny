@@ -35,6 +35,33 @@ public sealed class NativeCatalogStoreTests : IDisposable
         store = new NativeCatalogStore(client);
     }
 
+    [Fact]
+    public async Task Snapshot_is_stable_and_rejects_corrupt_rows_and_bucket_receipts()
+    {
+        var bucket=await store.ReadBucket("snow:snow");
+        var torrent=Torrent();
+        await store.WriteBucket(bucket,new Dictionary<string,TorrentDetails>{{torrent.url,torrent}},Guid.NewGuid().ToString("N"));
+        var first=await store.SnapshotProof();
+        Assert.Equal(1,first.Counts["torrents"]);
+        Assert.Equal(first.Sha256,(await store.SnapshotProof()).Sha256);
+        Assert.Matches("^[0-9a-f]{64}$",first.Sha256);
+        var exported=await client.Transaction(NativeCatalogStore.SnapshotTables.Select(x=>new SqlStatement("SELECT * FROM "+x.Table+" ORDER BY "+x.Order)).ToArray(),write:false);
+        var snapshot=Path.Combine(directory,"canonical.json");
+        File.WriteAllText(snapshot,System.Text.Json.JsonSerializer.Serialize(new { schema="jacred-canonical-golden-snapshot/v1",tables=NativeCatalogStore.SnapshotTables.Select((x,i)=>(x.Table,exported[i].Rows)).ToDictionary(x=>x.Table,x=>x.Rows) }));
+        using var verifier=new Process { StartInfo=new ProcessStartInfo("python3") { RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false } };
+        verifier.StartInfo.ArgumentList.Add(Path.Combine(FindRoot(),"tools/bunny_snapshot_checksum.py"));
+        verifier.StartInfo.ArgumentList.Add(snapshot);verifier.Start();
+        var output=await verifier.StandardOutput.ReadToEndAsync();await verifier.WaitForExitAsync();
+        Assert.Equal(0,verifier.ExitCode);
+        Assert.Equal(first.Sha256,System.Text.Json.JsonDocument.Parse(output).RootElement.GetProperty("snapshotSha256").GetString());
+        await client.Query(new("UPDATE buckets SET torrent_count=99"));
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.SnapshotProof());
+        await client.Query(new("UPDATE buckets SET torrent_count=1"));
+        await client.Query(new("UPDATE torrents SET raw_json='corrupt-private-payload'"));
+        var error=await Assert.ThrowsAsync<NativeSqlException>(()=>store.SnapshotProof());
+        Assert.DoesNotContain("corrupt-private-payload",error.Message);
+    }
+
     static string FindRoot()
     {
         for (var current = new DirectoryInfo(AppContext.BaseDirectory); current != null; current = current.Parent)
