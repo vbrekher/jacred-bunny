@@ -133,4 +133,44 @@ class SplitTests(unittest.TestCase):
                 self.assertNotIn(payload,sql.read_bytes())
             self.assertTrue((base/"data"/"tracks"/"one").exists())
 
+
+    def test_shard_jsonl_is_accepted_by_remote_loader_dry_run(self):
+        import shutil
+        import subprocess
+        if not shutil.which("node"):self.skipTest("Node.js unavailable")
+        with tempfile.TemporaryDirectory() as d:
+            base=Path(d);source=sample(base)
+            split(source,base/"parts",2)
+            payload=base/"shard.jsonl"
+            data=export_stage(base/"parts"/"shard-0.sqlite",payload)
+            remote=ROOT/"bunny-native"/"remote-import.mjs"
+            result=subprocess.run(["node",str(remote),"--file",str(payload),
+                "--sha256",data["sha256"]],text=True,capture_output=True,timeout=15)
+            self.assertEqual(result.returncode,0,result.stderr)
+            obj=json.loads(result.stdout)
+            self.assertEqual(obj["status"],"BUNNY_REMOTE_DRY_RUN_NO_NETWORK")
+            self.assertEqual(obj["remote_backend"],"NOT_TESTED")
+
+    def test_corrupt_shard_jsonl_identity_is_refused_without_network(self):
+        import shutil
+        import subprocess
+        if not shutil.which("node"):self.skipTest("Node.js unavailable")
+        with tempfile.TemporaryDirectory() as d:
+            base=Path(d);source=sample(base)
+            split(source,base/"parts",2)
+            payload=base/"shard.jsonl"
+            export_stage(base/"parts"/"shard-0.sqlite",payload)
+            lines=payload.read_text("utf-8").splitlines()
+            header=json.loads(lines[0])
+            header["shard_index"]=17
+            lines[0]=json.dumps(header,separators=(",",":"),sort_keys=True)
+            payload.write_text("\n".join(lines)+"\n",encoding="utf-8")
+            sha=hashlib.sha256(payload.read_bytes()).hexdigest()
+            remote=ROOT/"bunny-native"/"remote-import.mjs"
+            result=subprocess.run(["node",str(remote),"--file",str(payload),
+                "--sha256",sha],text=True,capture_output=True,timeout=15)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn("BUNNY_REMOTE_IMPORT_REFUSED",result.stderr)
+            self.assertNotIn("magnet:?",result.stderr)
+
 if __name__=="__main__":unittest.main()
