@@ -1,0 +1,14 @@
+{
+  "source_sha": "198eff03bc75c1db6a67464df5f59a26ff72b14f",
+  "scope": "Real Bunny SQL read-only native bucket/index and snapshot slice; not large live catalog or deployed worker acceptance",
+  "bucket_count": 22,
+  "torrent_count": 22,
+  "all_native_row_hashes_match_sql": true,
+  "canonical_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "canonical_unchanged": true,
+  "elapsed_seconds": 34.793461,
+  "production_acceptance": false,
+  "independent_private_snapshot_match": true,
+  "reproduction_harness": "tests/LiveSqlReads",
+  "database_id": "db_01M6GX4WFVENZXB9M4F0AVFE1C"
+}

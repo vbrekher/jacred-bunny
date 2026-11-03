@@ -19,7 +19,7 @@
     {
       "gate": "REAL SQL",
       "status": "FAIL",
-      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete. Exact-source isolated Bunny SQL probe additionally committed 1200 rows/4915200 payload bytes, verified late-page rollback and cleanup, and preserved all seven canonical tables."
+      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete. Exact-source isolated Bunny SQL probe additionally committed 1200 rows/4915200 payload bytes, verified late-page rollback and cleanup, and preserved all seven canonical tables. Exact-source native bucket/index read-only slice additionally verified all 22 real row hashes and the unchanged independent snapshot; large live capacity remains incomplete."
     },
     {
       "gate": "TRACKERS 25",
@@ -75,6 +75,7 @@
     "scope": "Local source checks; all CI through PR #29; paged read changes local full suite only until their CI completes"
   },
   "recent_evidence": [
+    "evidence/paged-read-real-sql-2026-11-03.json",
     "evidence/paged-read-source-2026-11-03.json",
     "evidence/paged-write-real-sql-2026-11-03.json",
     "evidence/paged-write-source-2026-11-03.json",
