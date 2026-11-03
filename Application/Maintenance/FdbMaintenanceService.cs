@@ -453,7 +453,7 @@ namespace JacRed.Application.Maintenance
                     foreach (var (url, t, newKey) in toMigrate)
                     {
                         fdb.Database.Remove(url);
-                        FileDB.MigrateTorrentToNewKey(t, newKey);
+                        fdb.MoveTorrentToNewKey(t, newKey);
                         fixedCounts.migrated++;
                         changed = true;
                     }
@@ -550,7 +550,7 @@ namespace JacRed.Application.Maintenance
                     foreach (var (url, t, newKey) in toMigrate)
                     {
                         fdb.Database.Remove(url);
-                        FileDB.MigrateTorrentToNewKey(t, newKey);
+                        fdb.MoveTorrentToNewKey(t, newKey);
                         fixedCounts.migrated++;
                         changed = true;
                     }

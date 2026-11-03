@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JacRed.Infrastructure.Utils;
+using JacRed.Infrastructure.Persistence.Native;
 using JacRed.Infrastructure.Networking;
 using JacRed.Infrastructure.Logging;
 using JacRed.Models;
@@ -20,7 +21,46 @@ namespace JacRed.Infrastructure.Persistence
         /// $"{search_name}:{search_originalname}"
         /// Верхнее время изменения
         /// </summary>
-        public static ConcurrentDictionary<string, MasterDbShard> masterDb = new ConcurrentDictionary<string, MasterDbShard>();
+        static ConcurrentDictionary<string, MasterDbShard> masterIndex = new ConcurrentDictionary<string, MasterDbShard>();
+        static readonly object NativeIndexLock = new object();
+        static long nativeIndexRefreshAt;
+        public static ConcurrentDictionary<string, MasterDbShard> masterDb
+        {
+            get
+            {
+                if (NativeCatalogRuntime.Enabled)
+                {
+                    lock (NativeIndexLock)
+                    {
+                        if (Environment.TickCount64 >= nativeIndexRefreshAt)
+                        {
+                            var refreshed = NativeCatalogRuntime.ReadIndex();
+                            if (refreshed.Count != masterIndex.Count || refreshed.Keys.Except(masterIndex.Keys, StringComparer.Ordinal).Any())
+                            {
+                                masterIndex = refreshed;
+                                Interlocked.Increment(ref searchKeysVersion);
+                            }
+                            else
+                            {
+                                foreach (var shard in refreshed) masterIndex[shard.Key] = shard.Value;
+                            }
+                            nativeIndexRefreshAt = Environment.TickCount64 + 1000;
+                        }
+                    }
+                }
+                return masterIndex;
+            }
+            set
+            {
+                if (NativeCatalogRuntime.Enabled) throw new NativeSqlException("Native catalog index must come from SQL");
+                masterIndex = value;
+            }
+        }
+
+        static void InvalidateNativeIndex()
+        {
+            lock (NativeIndexLock) nativeIndexRefreshAt = 0;
+        }
 
         // Search aliases depend on shard keys, not on their timestamps or contents.
         static long searchKeysVersion;
@@ -43,6 +83,12 @@ namespace JacRed.Infrastructure.Persistence
 
         static FileDB()
         {
+            if (NativeCatalogRuntime.Enabled)
+            {
+                masterIndex = NativeCatalogRuntime.ReadIndex();
+                nativeIndexRefreshAt = Environment.TickCount64 + 1000;
+                return;
+            }
             if (File.Exists("Data/masterDb.bz"))
                 masterDb = JsonStream.Read<ConcurrentDictionary<string, MasterDbShard>>("Data/masterDb.bz");
 
@@ -90,6 +136,7 @@ namespace JacRed.Infrastructure.Persistence
         #region pathDb / keyDb
         static string pathDb(string key)
         {
+            if (NativeCatalogRuntime.Enabled) throw new NativeSqlException("Native catalog has no authoritative local shard path");
             string md5key = HashTo.md5(key);
 
             if (AppInit.conf.fdbPathLevels == 2)
@@ -145,6 +192,7 @@ namespace JacRed.Infrastructure.Persistence
         /// <summary>Перенос торрента в бакет с ключом newKey (после смены name/originalname). Вызывается из FileDB и из DevMaintenanceService.UpdateSearchName.</summary>
         public static void MigrateTorrentToNewKey(TorrentDetails t, string newKey)
         {
+            if (NativeCatalogRuntime.Enabled) throw new NativeSqlException("Native moves must use the owning write scope");
             using (var fdb = OpenWrite(newKey))
             {
                 fdb.AddOrUpdate(t);
@@ -154,6 +202,7 @@ namespace JacRed.Infrastructure.Persistence
         /// <summary>Удаляет ключ из masterDb (например после миграции, когда бакет опустел). Вызывать только если бакет действительно пуст.</summary>
         public static void RemoveKeyFromMasterDb(string key)
         {
+            if (NativeCatalogRuntime.Enabled) { InvalidateNativeIndex(); return; }
             if (string.IsNullOrEmpty(key))
                 return;
             if (masterDb.TryRemove(key, out _))
@@ -172,6 +221,7 @@ namespace JacRed.Infrastructure.Persistence
         /// </summary>
         public static void SetShard(string key, DateTime updateTime)
         {
+            if (NativeCatalogRuntime.Enabled) { InvalidateNativeIndex(); return; }
             if (string.IsNullOrEmpty(key))
                 return;
 
@@ -214,6 +264,8 @@ namespace JacRed.Infrastructure.Persistence
         /// <summary>Always returns a snapshot — never expose live Database to concurrent readers.</summary>
         public static IReadOnlyDictionary<string, TorrentDetails> OpenRead(string key, bool update_lastread = false, bool cache = true)
         {
+            if (NativeCatalogRuntime.Enabled)
+                return NativeCatalogRuntime.ReadStore.ReadBucket(key).GetAwaiter().GetResult().Torrents;
             if (openWriteTask.TryGetValue(key, out WriteTaskModel val))
             {
                 if (update_lastread)
@@ -258,6 +310,7 @@ namespace JacRed.Infrastructure.Persistence
 
         public static FileDB OpenWrite(string key)
         {
+            if (NativeCatalogRuntime.Enabled) return OpenNativeWrite(NativeCatalogRuntime.WriteStore, key);
             while (true)
             {
                 if (openWriteTask.TryGetValue(key, out WriteTaskModel existing))
@@ -325,6 +378,7 @@ namespace JacRed.Infrastructure.Persistence
         #region SaveChangesToFile
         public static void SaveChangesToFile()
         {
+            if (NativeCatalogRuntime.Enabled) return; // Every native bucket commit is already durable in SQL.
             try
             {
                 JsonStream.Write("Data/masterDb.bz", masterDb);

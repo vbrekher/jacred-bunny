@@ -1,0 +1,96 @@
+{
+  "schema": "jacred-native-sql-runtime-evidence/v1",
+  "date": "2026-11-03",
+  "scope": "Local original .NET parser/collector/query processes using a real isolated Bunny Database; no deployed MC HTTP acceptance",
+  "source_baseline": "f26203d5092e5d5c3852b4d1df5f8c664484cb42",
+  "implementation_under_test": "development worktree; exact runtime file checksums below",
+  "runtime_file_sha256": {
+    "Infrastructure/Persistence/Native/BunnySqlClient.cs": "29db42fd982ddd4ea7fdaed87b39a607114a9a690a4885d577e1636225e67421",
+    "Infrastructure/Persistence/Native/NativeCatalogStore.cs": "5b7a7c7fe0f526f605008323ef736524f68537114a55e09ba8d1e4b4a4638d6a",
+    "Infrastructure/Persistence/Native/NativeCatalogRuntime.cs": "b45dd7b6b8caefdda04732a5022ce011bc9ac3f356ae379e9fe58a6c18b35e32",
+    "Infrastructure/Persistence/FileDB/FileDB.cs": "7cb10e18cde7bc853b134822b71b5c7f7f4bebf03855818a4f45824ac876b2c3",
+    "Infrastructure/Persistence/FileDB/FileDB.MasterDb.cs": "4fce4bf2b3d2ccfc0fff3fb725cb98a8567c1cc93eafe51d5f6c6e6b7e2fb474",
+    "Application/Index/FastDbIndex.cs": "6f119086446c96bba93a1219b5b5c631bc66bf3356278e22877cbd56960e9856",
+    "JacRed.csproj": "63243e09e9d4c2a776b3674197d61adb54cee0e2d1be0da1c6a8a8b335023f79"
+  },
+  "required_migrations": {
+    "0001_catalog.sql": "e3aad13389a7efa63bb665f13341eba87d3fb69d771152acaf723be0b613b1df",
+    "0002_search_fts5.sql": "9bd74eaf74022d1f80f3fb0dc58ea39edc4e37ce512deaf3cce9e2d731a46628",
+    "0004_catalog_commits.sql": "d60665d6f529d67d3e6d4a89183fe9690d1d286e2e9c9ff235e23c777d8ac73c"
+  },
+  "public_source_capture": {
+    "captured_at": "2026-11-03T16:12:29.049805+00:00",
+    "tracker": "subsplease",
+    "requests": [
+      {
+        "url": "https://subsplease.org/robots.txt",
+        "status": 200,
+        "bytes": 115,
+        "sha256": "a31f891b9d0c7e8d22e028987d3ef04342544b0318ff51ba2d0d722c5e5e96ed"
+      },
+      {
+        "url": "https://subsplease.org/api/?f=latest&tz=UTC",
+        "status": 200,
+        "bytes": 58548,
+        "sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4"
+      }
+    ],
+    "bypass": false,
+    "status": "CAPTURED"
+  },
+  "real_source_to_query": {
+    "kind": "LIVE_ORIGINAL_RUNTIME_SQL_ACCEPTANCE_SLICE",
+    "database_id": "db_01M6H3QFD0KV84KP9ZK3TM5HD3",
+    "source_schema_migrations": 3,
+    "runs": [
+      {
+        "kind": "LIVE_BUNNY_ORIGINAL_PARSER_TO_SQL_QUERY",
+        "synthetic": false,
+        "source_snapshot_sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4",
+        "original_parser_records": 20,
+        "selected_records": 3,
+        "search_result_count": 1,
+        "query_body_sha256": "396f9395df99780338eb2ac030c4f9f2a1c0311a1a14c7d12cc0723d59afe116",
+        "process_mode": "write",
+        "local_filedb_fallback": false,
+        "production_acceptance": false
+      },
+      {
+        "kind": "LIVE_BUNNY_ORIGINAL_PARSER_TO_SQL_QUERY",
+        "synthetic": false,
+        "source_snapshot_sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4",
+        "original_parser_records": 20,
+        "selected_records": 3,
+        "search_result_count": 1,
+        "query_body_sha256": "396f9395df99780338eb2ac030c4f9f2a1c0311a1a14c7d12cc0723d59afe116",
+        "process_mode": "read",
+        "local_filedb_fallback": false,
+        "production_acceptance": false
+      }
+    ],
+    "restart_body_checksum_matches": true,
+    "cleanup": "deleted_confirmed_404",
+    "production_acceptance": false
+  },
+  "preliminary_typed_transport_probe": {
+    "kind": "LIVE_BUNNY_DOTNET_CATALOG_PRIMITIVE",
+    "synthetic": true,
+    "canonical_fields_verified": true,
+    "fts_probe_matches": 1,
+    "read_only_write_denied": true,
+    "stale_writer_rejected": true,
+    "atomic_rollback_verified": true,
+    "concurrent_winners": 1,
+    "exact_int64_and_blob": true,
+    "cleanup": "deleted_confirmed_404"
+  },
+  "limitations": [
+    "Only three selected releases from one tracker were persisted; no 25-tracker readiness claim.",
+    "This does not compare original and native HTTP bodies on 100 golden cases.",
+    "All temporary live databases were removed; no persistent public demo is established.",
+    "Default installer payload still contains migrations 1-2; the new SQL runtime requires coordinated payload/rollout work.",
+    "Tracks/config/durable jobs/complete maintenance/sharded runtime/full backups remain incomplete.",
+    "Grouped moves are covered by real SQLite semantics; a live Bunny grouped-move fault case remains required."
+  ],
+  "production_acceptance": false
+}

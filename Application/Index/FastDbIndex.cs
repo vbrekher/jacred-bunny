@@ -19,6 +19,11 @@ namespace JacRed.Application.Index
 
         public Dictionary<string, List<string>> Get(bool update = false)
         {
+            if (JacRed.Infrastructure.Persistence.Native.NativeCatalogRuntime.Enabled && !update)
+            {
+                RebuildIfChanged();
+                return _fastdb;
+            }
             if (_fastdb != null && !update)
                 return _fastdb;
 
