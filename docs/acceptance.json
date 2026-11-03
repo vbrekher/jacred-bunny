@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #30 passed, with 1032 .NET tests locally and in the full CI job. Exact source 742e34c3/digest-pinned native image and matching Edge bundle deployed. Full reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #31 passed. Current local source checks include 1049 .NET and 188 Python tests. The deployed image remains 742e34c3; new LAN/CORS hardening still needs its own CI/deployment acceptance. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -39,7 +39,7 @@
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live auth/spoofed-proxy denials and CDN no-store checks verified; earlier unsupported no-store claim remains explicitly corrected. TLS bypasses removed and exact-image SubsPlease collection verified. Announce SSRF/UDP/passkey protections have source and local transport tests only; full deployed audit, scans, 429/500/RBAC and all adapters remain incomplete."
+      "reason": "Live auth/spoofed-proxy denials and CDN no-store checks verified; earlier unsupported no-store claim remains explicitly corrected. TLS bypasses removed and exact-image SubsPlease collection verified. Announce SSRF/UDP/passkey protections have source and local transport tests only; full deployed audit, scans, 429/500/RBAC and all adapters remain incomplete. A real dummy-config loopback HTTP probe confirmed cross-origin administrative secret disclosure through LAN trust; source hardening now requires configured devkey on every network. Exact-source 8cab97bc after-fix HTTP denies missing/wrong/search keys and permits explicit dev keys; keyless foreign/opaque contexts are denied. New code is not yet deployed; full audits remain open."
     },
     {
       "gate": "CLIENTS",
@@ -68,13 +68,14 @@
     }
   ],
   "source_checks": {
-    "python": 184,
+    "python": 188,
     "edge_node": 101,
-    "dotnet": 1032,
+    "dotnet": 1049,
     "web": 73,
-    "scope": "Local source checks and all CI through PR #30; exact native image deployed for scoped auth/snapshot/cache checks only"
+    "scope": "Local source checks; CI through PR #31; configured-key LAN/CORS hardening not yet deployed or CI-accepted"
   },
   "recent_evidence": [
+    "evidence/lan-admin-key-boundary-2026-11-03.json",
     "evidence/live-paged-runtime-2026-11-03.json",
     "evidence/paged-read-real-sql-2026-11-03.json",
     "evidence/paged-read-source-2026-11-03.json",

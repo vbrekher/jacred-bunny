@@ -245,6 +245,71 @@ public class JacRedAccessEvaluatorTests
         });
     }
 
+    [Theory]
+    [InlineData("127.0.0.1")][InlineData("10.0.0.5")][InlineData("::1")]
+    public void Configured_devkey_cannot_be_bypassed_by_direct_local_client(string address)
+    {
+        WithDevKey("secret-dev-key",()=>
+        {
+            var evaluator=CreateEvaluator();var context=CreateContext(IPAddress.Parse(address));
+            foreach(var path in new[]{ConfigPath,DevPath,"/internal/version","/cron/subsplease/parse"})
+            {
+                var result=evaluator.EvaluatePath(path,context);Assert.False(result.IsAllowed);Assert.Equal(401,result.DenyStatusCode);
+            }
+            context.Request.Headers["X-Dev-Key"]="wrong";
+            Assert.False(evaluator.EvaluatePath(ConfigPath,context).IsAllowed);
+            context.Request.Headers["X-Dev-Key"]="secret-dev-key";
+            context.Request.Headers.Origin="https://foreign.invalid";
+            Assert.True(evaluator.EvaluatePath(ConfigPath,context).IsAllowed);
+        });
+    }
+
+    [Theory]
+    [InlineData("Origin","https://foreign.invalid")]
+    [InlineData("Origin","null")]
+    [InlineData("Origin","http://localhost:9118")]
+    [InlineData("Origin","http://user@localhost:9117")]
+    [InlineData("Origin","http://localhost:9117/path")]
+    [InlineData("Sec-Fetch-Site","cross-site")]
+    [InlineData("Sec-Fetch-Site","same-site")]
+    [InlineData("Sec-Fetch-Site","unknown")]
+    [InlineData("Referer","https://foreign.invalid/page")]
+    public void Keyless_LAN_mode_rejects_foreign_or_opaque_browser_context(string header,string value)
+    {
+        WithDevKey(null,()=>
+        {
+            var context=CreateContext(IPAddress.Loopback,(header,value));
+            context.Request.Scheme="http";context.Request.Host=new HostString("localhost",9117);
+            var result=CreateEvaluator().EvaluatePath(ConfigPath,context);
+            Assert.False(result.IsAllowed);Assert.Equal(403,result.DenyStatusCode);
+        });
+    }
+
+    [Fact]
+    public void Keyless_LAN_same_origin_browser_keeps_legacy_access()
+    {
+        WithDevKey(null,()=>
+        {
+            var context=CreateContext(IPAddress.Loopback,("Origin","http://localhost:9117"),("Referer","http://localhost:9117/settings"),("Sec-Fetch-Site","same-origin"));
+            context.Request.Scheme="http";context.Request.Host=new HostString("localhost",9117);
+            Assert.True(CreateEvaluator().EvaluatePath(ConfigPath,context).IsAllowed);
+        });
+    }
+
+    [Theory]
+    [InlineData("http","localhost:9117","http://LOCALHOST:9117")]
+    [InlineData("https","localhost","https://localhost:443")]
+    [InlineData("http","[::1]:9117","http://[::1]:9117")]
+    [InlineData("https","xn--e1afmkfd.xn--p1ai","https://пример.рф")]
+    public void Keyless_same_origin_matching_handles_default_ports_IPv6_and_IDN(string scheme,string host,string origin)
+    {
+        WithDevKey(null,()=>
+        {
+            var context=CreateContext(IPAddress.Loopback,("Origin",origin));context.Request.Scheme=scheme;context.Request.Host=new HostString(host);
+            Assert.True(CreateEvaluator().EvaluatePath(ConfigPath,context).IsAllowed);
+        });
+    }
+
     static JacRedAccessEvaluator CreateEvaluator()
         => new(new JacRedApiKeyValidator(), new JacRedDevKeyValidator());
 

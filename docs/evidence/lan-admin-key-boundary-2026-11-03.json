@@ -1,0 +1,231 @@
+{
+  "scope": "Actual local HTTP administrative config boundary with dummy keys only; no real credentials, cloud requests or deployed image acceptance",
+  "before": {
+    "scope": "Actual loopback HTTP config API with dummy secrets, FileDB mode, no cloud resources or real credentials",
+    "source_sha": "d23e192a80621ef1d467731bbb11c0049fc30b03",
+    "label": "before",
+    "results": [
+      {
+        "case": "local-no-key",
+        "http": 200,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "foreign-no-key",
+        "http": 200,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "foreign-wrong-key",
+        "http": 200,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "foreign-explicit-key",
+        "http": 200,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      }
+    ],
+    "production_acceptance": false
+  },
+  "after": {
+    "scope": "Actual loopback HTTP config API with dummy secrets, FileDB mode, no cloud resources or real credentials",
+    "source_sha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+    "label": "after",
+    "keyless_mode": false,
+    "results": [
+      {
+        "case": "local-no-key",
+        "http": 401,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-no-key",
+        "http": 401,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-wrong-key",
+        "http": 401,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-explicit-key",
+        "http": 200,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "same-origin-no-key",
+        "http": 401,
+        "reflected_origin": "http://127.0.0.1:19186",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "opaque-origin",
+        "http": 401,
+        "reflected_origin": "null",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "cross-site-no-origin",
+        "http": 401,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "local-search-key",
+        "http": 401,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-query-devkey",
+        "http": 200,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": true,
+        "dummy_search_secret_exposed": true
+      }
+    ],
+    "production_acceptance": false
+  },
+  "keyless_legacy": {
+    "scope": "Actual loopback HTTP config API with dummy secrets, FileDB mode, no cloud resources or real credentials",
+    "source_sha": "8cab97bcc976540670bc6f30b3cd6e312dca65cd",
+    "label": "keyless",
+    "keyless_mode": true,
+    "results": [
+      {
+        "case": "local-no-key",
+        "http": 200,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "foreign-no-key",
+        "http": 403,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-wrong-key",
+        "http": 403,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "foreign-explicit-key",
+        "http": 403,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "same-origin-no-key",
+        "http": 200,
+        "reflected_origin": "http://127.0.0.1:19186",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "opaque-origin",
+        "http": 403,
+        "reflected_origin": "null",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "cross-site-no-origin",
+        "http": 403,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      },
+      {
+        "case": "local-search-key",
+        "http": 200,
+        "reflected_origin": null,
+        "allow_credentials": null,
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": true
+      },
+      {
+        "case": "foreign-query-devkey",
+        "http": 403,
+        "reflected_origin": "https://attacker.invalid",
+        "allow_credentials": "true",
+        "dummy_admin_secret_exposed": false,
+        "dummy_search_secret_exposed": false
+      }
+    ],
+    "production_acceptance": false
+  },
+  "dotnet_tests": {
+    "passed": 1049,
+    "failed": 0,
+    "skipped": 0,
+    "new_cases": 17,
+    "log": "lan-origin-verified-full-tests.log"
+  },
+  "python_tests": {
+    "passed": 188,
+    "failed": 0,
+    "new_cron_helper_cases": 4,
+    "log": "lan-origin-python-tests.log"
+  },
+  "old_policy_regression": {
+    "failed": 3,
+    "passed": 0,
+    "reason": "Old LAN trust accepted configured-key admin requests without a valid key",
+    "log": "lan-origin-before-fix-regression.log"
+  },
+  "maintenance_helper": "Reads current managed YAML key; stdin curl config, fixed loopback URL, proxy disabled, no key in argv/URL; invalid fields fail before network",
+  "limitations": [
+    "HTTP origin/header behavior is verified; this is not a physical browser/client or deployed MC/Edge acceptance",
+    "Configured devkey is mandatory everywhere; keyless legacy LAN remains a trusted-network mode and cannot authenticate metadata-free clients",
+    "Full RBAC/CORS/dependency/history/license/429/500 audit remains open"
+  ],
+  "production_acceptance": false
+}

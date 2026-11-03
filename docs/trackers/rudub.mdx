@@ -66,7 +66,7 @@ Rudub:
 
 ```bash
 curl "http://localhost:9117/cron/rudub/parse?limit_page=10"
-# LAN или X-Dev-Key: проставить год у уже сохранённых раздач (без скачивания .torrent)
+# С настроенным X-Dev-Key: проставить год у уже сохранённых раздач (без скачивания .torrent)
 curl "http://localhost:9117/dev/FixRudubRelased"
 tail -f /opt/jacred/Data/log/rudub.log
 ```

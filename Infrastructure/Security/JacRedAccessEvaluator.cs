@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace JacRed.Infrastructure.Security
 {
@@ -59,12 +60,34 @@ namespace JacRed.Infrastructure.Security
 
         static bool IsDevEndpointAccessAllowed(IClientNetworkContext network, HttpContext httpContext)
         {
-            if (IsTrustedLanClient(network, httpContext))
-                return true;
-            // Empty/missing devkey = LAN-only (Data/example.conf); do not treat as world-open.
-            if (string.IsNullOrEmpty(AppInit.conf?.devkey))
+            // A configured administrative key is authoritative on every network.
+            // Browser requests to localhost/LAN must not inherit owner privileges.
+            if (!string.IsNullOrEmpty(AppInit.conf?.devkey))
+                return JacRedKeyUtils.DevKeyMatches(httpContext, AppInit.conf.devkey);
+            return IsTrustedLanClient(network, httpContext) && IsTrustedBrowserContext(httpContext.Request);
+        }
+
+        static bool IsTrustedBrowserContext(HttpRequest request)
+        {
+            string site=request.Headers["Sec-Fetch-Site"].ToString();
+            if(site.Length>0 && !site.Equals("same-origin",StringComparison.OrdinalIgnoreCase) && !site.Equals("none",StringComparison.OrdinalIgnoreCase))
                 return false;
-            return JacRedKeyUtils.DevKeyMatches(httpContext, AppInit.conf.devkey);
+            string origin=request.Headers.Origin.ToString();
+            if(origin.Length>0 && !MatchesOrigin(origin,request,originOnly:true))return false;
+            string referer=request.Headers.Referer.ToString();
+            return referer.Length==0 || MatchesOrigin(referer,request,originOnly:false);
+        }
+
+        static bool MatchesOrigin(string value,HttpRequest request,bool originOnly)
+        {
+            if(!Uri.TryCreate(value,UriKind.Absolute,out var uri) ||
+                uri.Scheme is not ("http" or "https") || !string.IsNullOrEmpty(uri.UserInfo) ||
+                (originOnly && (uri.AbsolutePath!="/" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))))
+                return false;
+            if(!Uri.TryCreate(request.Scheme+"://"+request.Host.ToUriComponent()+"/",UriKind.Absolute,out var target) || !string.IsNullOrEmpty(target.UserInfo))
+                return false;
+            return uri.Scheme.Equals(target.Scheme,StringComparison.OrdinalIgnoreCase) &&
+                uri.IdnHost.Equals(target.IdnHost,StringComparison.OrdinalIgnoreCase) && uri.Port==target.Port;
         }
 
         /// <summary>

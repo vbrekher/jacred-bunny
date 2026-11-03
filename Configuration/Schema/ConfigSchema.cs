@@ -37,7 +37,7 @@ namespace JacRed.Configuration.Schema
                         Field("listenip", "string", "IP прослушивания", "any или конкретный IP"),
                         Field("listenport", "int", "Порт", "1–65535", min: 1, max: 65535),
                         Field("apikey", "password", "API ключ", "Пусто — без проверки", sensitive: true),
-                        Field("devkey", "password", "Dev ключ", "LAN или ключ для /dev/, /cron/, /jsondb, /api/v1.0/config/* из интернета и через туннель", sensitive: true),
+                        Field("devkey", "password", "Dev ключ", "Если задан, обязателен в любой сети для /dev/, /cron/, /internal/, /jsondb и конфигурации; без ключа — доверенный LAN-режим", sensitive: true),
                         Field("web", "bool", "Веб-интерфейс", "Раздавать статику (PWA)")
                     }),
                     Group("api", "API и дубликаты", null, new[]

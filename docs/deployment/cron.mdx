@@ -126,7 +126,7 @@ crontab -l
 http://127.0.0.1:9117/cron/kinozal/parse?devkey=YOUR_DEV_KEY
 ```
 
-Эндпоинты `/cron/*` требуют прямого LAN-доступа или `devkey`. Через reverse proxy ключ нужен и в локальной сети. Подробнее: [аутентификация](/authentication) и [Cron API](/api-reference/cron).
+Если `devkey` задан, он обязателен для `/cron/*` в любой сети. Без него сохраняется только доверенный прямой LAN-режим с проверкой браузерного контекста. Подробнее: [аутентификация](/authentication) и [Cron API](/api-reference/cron).
 
 <Warning>
   Не запускайте два `ParseAllTask` одного трекера одновременно. Это приведёт к конкурентной записи в FileDB.
