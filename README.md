@@ -37,6 +37,24 @@ no production cutover, live Bunny data acceptance or claim of search parity.
 
 **[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
 
+## v0.5.3 — Golden HTTP evidence and read-only multi-Bunny Database audit
+
+This release adds an operator-initiated, strictly read-only **multi-DB
+acceptance checker**. It validates common snapshot identity, manifests,
+row totals and FTS5 on 2–4 databases, with explicit opt-in full payload SHA256
+and shard bucket-routing audits. It reports query counts/timing as *client
+measurements*, never claims Bunny billing charges or production availability.
+
+Captured original .NET vs Edge HTTP fixtures now support operator-declared
+source identities. Strict parity gates reject self-comparison, mismatched
+source snapshots and empty-only search results, without exposing magnets.
+macOS JSONL splitter tests now close all opened streams.
+
+[Русский · v0.5.3: полный порядок проверки](docs/BUNNY_NATIVE_v0.5.3_IMPLEMENTATION.ru.md)
+
+**No live Bunny database or original .NET golden acceptance has been run by this release.**
+Production .NET remains authoritative and cutover is disabled.
+
 ## v0.5.2 — SQL shard query fanout and source-derived result merge
 
 The Bunny-native Edge preview now supports 2–4 separate **server-only** SQL

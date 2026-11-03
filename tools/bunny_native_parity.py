@@ -84,15 +84,94 @@ def compare(legacy,candidate):
             "response_order_checked":True,
             "body_values_logged":False}
 
+def validate_evidence_capture(path,expected_role):
+    """Operator-declared provenance; NOT a cryptographic live-server attestation."""
+    try:
+        payload=json.loads(Path(path).read_text("utf-8"))
+    except (OSError,ValueError) as exc:
+        raise InvalidFixture("Missing private capture") from exc
+    meta=payload.get("provenance") if isinstance(payload,dict) else None
+    if not isinstance(meta,dict) or meta.get("source_role")!=expected_role or \
+       meta.get("provenance_kind")!="operator_declared_not_remote_attested":
+        raise InvalidFixture("No independently declared provenance")
+    for field in ("master_sha256","origin_fingerprint","cases_sha256"):
+        value=meta.get(field)
+        if not isinstance(value,str) or len(value)!=64 or \
+           any(c not in "0123456789abcdef" for c in value):
+            raise InvalidFixture("Malformed provenance")
+    if not isinstance(meta.get("captured_at"),str):
+        raise InvalidFixture("Missing capture timestamp")
+    return payload,meta
+
+def positive_search_count(payload):
+    """Search result must include a real (nonempty) hit, not only metadata."""
+    positive=0
+    for case in payload.get("cases",[]):
+        if not isinstance(case,dict) or case.get("status")!=200:
+            continue
+        path=case.get("path","")
+        if not isinstance(path,str) or not (
+            "/results?" in path or "/api/v1/search?" in path or
+            "/api/v1.0/torrents?" in path or
+            (path.startswith("/torznab/api?") and "t=search" in path)
+        ):
+            continue
+        if case.get("type")=="json":
+            try:
+                obj=json.loads(case.get("body",""))
+            except (TypeError,ValueError):
+                continue
+            hits=obj.get("Results",[]) if isinstance(obj,dict) else obj
+            if isinstance(hits,list) and len(hits)>0:
+                positive+=1
+        elif case.get("type")=="xml":
+            try:
+                root=ET.fromstring(case.get("body",""))
+            except (TypeError,ET.ParseError):
+                continue
+            if root.findall(".//item"):
+                positive+=1
+    return positive
+
+def evidence_gate(original_path,edge_path,matched):
+    """Reject self-comparisons, stale/mixed declared snapshots and empty demos."""
+    original,oa=validate_evidence_capture(original_path,"original")
+    edge,eb=validate_evidence_capture(edge_path,"edge")
+    if oa["origin_fingerprint"]==eb["origin_fingerprint"]:
+        raise InvalidFixture("Source endpoints cannot be identical")
+    if oa["master_sha256"]!=eb["master_sha256"]:
+        raise InvalidFixture("Operator-declared snapshots differ")
+    if oa["cases_sha256"]!=eb["cases_sha256"]:
+        raise InvalidFixture("Request set differs")
+    if positive_search_count(original)<1 or positive_search_count(edge)<1:
+        raise InvalidFixture("No positive search results in either capture")
+    if matched.get("status")!="PASS":
+        return {"status":"FAIL","cases":matched.get("cases",0),
+                "mismatches":matched.get("mismatches",0),
+                "production_cutover_authorized":False}
+    return {
+        "status":"OPERATOR_DECLARED_HTTP_GOLDEN_MATCH_NOT_LIVE_CERTIFICATION",
+        "cases":matched["cases"],"mismatches":0,
+        "distinct_source_origins":True,
+        "declared_source_snapshot_match":True,
+        "positive_search_verified":True,
+        "independent_live_host_attestation":"NOT_AVAILABLE",
+        "production_cutover_authorized":False
+    }
+
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--legacy",type=Path,required=True)
     parser.add_argument("--edge",type=Path,required=True)
+    parser.add_argument("--require-evidence",action="store_true",help="Require distinct source provenance and positive search")
     a=parser.parse_args(argv)
     try:
         result=compare(load(a.legacy),load(a.edge))
+        if a.require_evidence:
+            result=evidence_gate(a.legacy,a.edge,result)
         print(json.dumps(result,sort_keys=True))
-        return 0 if result["status"]=="PASS" else 3
+        return 0 if result["status"] in ("PASS",
+            "OPERATOR_DECLARED_HTTP_GOLDEN_MATCH_NOT_LIVE_CERTIFICATION") else 3
     except InvalidFixture:
         print('{"status":"REFUSED","reason":"INVALID_PRIVATE_GOLDEN_FIXTURE"}',
               file=sys.stderr)
