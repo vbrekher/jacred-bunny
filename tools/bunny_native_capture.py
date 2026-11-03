@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Explicit opt-in private HTTP golden capture; no requests without --run."""
-import argparse,json,os,re,sys,tempfile
+import argparse,json,os,re,sys,tempfile,hashlib
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.request import Request,build_opener,HTTPRedirectHandler
@@ -64,6 +65,8 @@ def private_output(path,result):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run",action="store_true")
+    p.add_argument("--source-role",choices=["original","edge"])
+    p.add_argument("--master-sha256")
     p.add_argument("--base-url",required=True)
     p.add_argument("--cases",required=True)
     p.add_argument("--output",required=True)
@@ -71,12 +74,29 @@ def main():
     opts=p.parse_args()
     try:
         template=validate(opts.base_url,opts.cases)
+        if bool(opts.source_role)!=bool(opts.master_sha256):
+            raise Refused()
+        if opts.master_sha256 and not re.fullmatch("[0-9a-f]{64}",opts.master_sha256):
+            raise Refused()
         if not opts.run:
             print('{"status":"DRY_RUN_NO_NETWORK","cases":'+str(len(template["cases"]))+'}')
             return 0
         key=os.environ.get(opts.token_env,"")
         if len(key)<16:raise Refused()
         data=capture(opts.base_url,template["cases"],key)
+        if opts.source_role:
+            # This is an OPERATOR DECLARATION; it does not independently
+            # establish the source's database hash or genuine live identity.
+            data["provenance"]={
+                "source_role":opts.source_role,
+                "master_sha256":opts.master_sha256,
+                "origin_fingerprint":hashlib.sha256(
+                    opts.base_url.rstrip("/").encode("utf-8")).hexdigest(),
+                "cases_sha256":hashlib.sha256(
+                    Path(opts.cases).read_bytes()).hexdigest(),
+                "captured_at":datetime.now(timezone.utc).isoformat(),
+                "provenance_kind":"operator_declared_not_remote_attested"
+            }
         private_output(opts.output,data)
         print('{"status":"PRIVATE_CAPTURE_COMPLETE","contents":"DO_NOT_UPLOAD"}')
         return 0
