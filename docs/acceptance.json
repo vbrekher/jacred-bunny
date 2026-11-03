@@ -9,12 +9,12 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "CI through PR #26 passed, including the new .NET regression job. Current source adds bounded public announce probes; exact final test totals are recorded in scoped evidence. Full reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #27 passed. Current local full suite has 1020 .NET tests, including consistent paged SQL snapshot regressions. Complete reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases: 105 exact baseline matches, two build-version-only differences; all 107 local gateway/native matches. Live Edge/native: 101 JSON and six XML cases match. All required routes, richer datasets/fuzz and large-catalog service attestation remain incomplete. Protected service-computed SQL digest now matches the independent real snapshot through MC and Edge; bounded 20-row scope only."
+      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete."
     },
     {
       "gate": "REAL SQL",
@@ -64,17 +64,19 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #26 merged with green checks; exact TLS-hardened source/digest staging tested. No tagged v1.0.0 release, complete release acceptance or public production landing page yet."
+      "reason": "PRs through #27 merged with green checks. Exact TLS-hardened staging image tested; paged snapshot changes have local source evidence only. No tagged v1.0.0 release, complete acceptance or public production landing page yet."
     }
   ],
   "source_checks": {
     "python": 184,
     "edge_node": 101,
-    "dotnet": 1008,
+    "dotnet": 1020,
     "web": 73,
-    "scope": "Local source checks; CI through TLS PR #26; announce changes local full suite only until their CI completes"
+    "scope": "Local source checks; all CI through PR #27; paged snapshot changes local full suite only until their CI completes"
   },
   "recent_evidence": [
+    "evidence/paged-snapshot-real-sql-2026-11-03.json",
+    "evidence/paged-snapshot-source-2026-11-03.json",
     "evidence/public-tracker-probe-source-2026-11-03.json",
     "evidence/tls-live-collector-2026-11-03.json",
     "evidence/cli-no-store-policy-2026-11-03.json",

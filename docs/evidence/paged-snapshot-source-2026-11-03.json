@@ -1,0 +1,42 @@
+{
+  "scope": "Local SQL snapshot session and paging source validation on actual persistent SQLite connections; no deployed large Bunny catalog claim",
+  "dotnet_tests": {
+    "passed": 1020,
+    "failed": 0,
+    "skipped": 0,
+    "log": "sql-snapshot-verified-full-tests.log",
+    "new_cases": 12
+  },
+  "large_fixture": {
+    "synthetic": true,
+    "buckets": 24,
+    "torrents": 48,
+    "canonical_file_bytes_greater_than": 8388608,
+    "old_single_response_fails_specifically_at_response_size_guard": true,
+    "paged_digest_matches_independent_python_verifier": true,
+    "supplementary_unicode_url_ordering_preserved": true
+  },
+  "session_checks": [
+    "Concurrent committed writer stays outside an already-read snapshot",
+    "Rotating batons used in serialized concurrent query calls",
+    "Missing baton prevents any further query replay",
+    "Failed BEGIN is not accepted",
+    "Unsafe base_url is rejected before credential send",
+    "Cancellation still performs separately bounded close",
+    "Unconfirmed close prevents proof return"
+  ],
+  "paging": {
+    "max_candidate_rows": 64,
+    "estimated_response_byte_target": 1048576,
+    "single_row_response_cap": 8388608,
+    "algorithm_unchanged": "jacred-sql-relational-snapshot/v1"
+  },
+  "limitations": [
+    "A single row still must fit one bounded response",
+    "Per-bucket URL/hash receipt metadata still fits one bounded response and is sorted in memory",
+    "Proof execution retains time bounds; durable asynchronous proof jobs and full large-catalog capacity acceptance remain open",
+    "No paged write implementation yet; existing 900-row/1000-statement/4 MiB write bounds remain",
+    "No new deployed MC/Edge image acceptance in this source evidence"
+  ],
+  "production_acceptance": false
+}

@@ -134,7 +134,7 @@ paths:
     get:
       tags: [System]
       summary: Compute an atomic SQL catalog snapshot checksum
-      description: Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Bounded transport fails closed for oversized snapshots; this is not full production acceptance.
+      description: Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Pages share one SQL read transaction with bounded transport. Single-row and per-bucket receipt metadata limits still fail closed. Only one proof runs per process; this is not full production acceptance.
       operationId: internalSnapshotVersion
       security:
         - DevKeyHeader: []
@@ -159,6 +159,8 @@ paths:
                   productionReady: { type: boolean, enum: [false] }
         "401":
           description: Administrative access denied
+        "429":
+          description: Another snapshot proof is already running
         "501":
           description: FileDB authority does not provide this SQL proof
         "503":
