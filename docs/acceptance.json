@@ -4,67 +4,80 @@
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
-  "live_worker_source_sha": "97b22ee77d046f9ade64fe9b3926b16c8b611e9f",
+  "live_worker_source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
   "gates": [
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "CI and 946 .NET tests passed for PR #10; native foundation CI pending; reproducible release artifact and scans incomplete."
+      "reason": "PRs #19–21 merged after successful CI; exact CI image/digest and matching Edge bundle deployed. 169 Python, 101 Edge Node, 962 .NET and 73 web checks recorded. Complete reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "Existing 91 Edge tests pass; 100-case immutable original/live golden corpus has not run."
+      "reason": "107 immutable-snapshot local HTTP cases: 105 exact baseline matches, two build-version-only differences; all 107 local gateway/native matches. Live Edge/native: 101 JSON and six XML cases match. All required routes, richer datasets/fuzz and service-computed snapshot attestation remain incomplete."
     },
     {
       "gate": "REAL SQL",
       "status": "FAIL",
-      "reason": "Live CRUD/FTS5/transaction/least-privilege smoke passed with synthetic rows; real catalog, multi-DB fanout and recovery untested."
+      "reason": "Original in-cloud collector wrote 20 real SubsPlease records to Bunny SQL; native/Edge reads and all row checksums verified after image update and restart. Complete 2+ DB live fanout/failure recovery and actual attributed usage metrics remain incomplete."
     },
     {
       "gate": "TRACKERS 25",
       "status": "FAIL",
-      "reason": "All 25 source IDs retained. HEAD-only reachability: 22 LIMITED, 3 UPSTREAM_UNAVAILABLE from operator machine. No parser readiness or source-to-SQL acceptance."
+      "reason": "All 25 source IDs retained. Earlier HEAD observations are not parser readiness. Actual source-to-SQL and query proof exists for SubsPlease; complete per-adapter live samples, auth setup and objective readiness matrix remain incomplete."
     },
     {
       "gate": "DURABILITY",
       "status": "FAIL",
-      "reason": "Storage PUT/GET checksum verified; real backup restore into a new DB and restart preservation gates not complete."
+      "reason": "Real SQL catalog backup in Bunny Storage restored into a new DB after verified source loss; query checksum preserved. SQL MC restart preserved 20 real rows. General reimport, Tracks/config/jobs recovery and all-component restart gates remain incomplete."
     },
     {
       "gate": "WORKERS",
       "status": "FAIL",
-      "reason": "SQL collector, durable queue integration and 24h live soak incomplete."
+      "reason": "Original collector runs against SQL in the owned Magic Container. Durable scheduler leases/cursors/retries/crash resume, full concurrency acceptance and 24h live soak remain incomplete."
     },
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live missing-key 401 and no-cache responses verified; full scans/429/SSRF/RBAC matrix incomplete."
+      "reason": "Live Edge rejects anonymous/wrong-key administrative/search requests and spoofed local proxy identity; no-store and scoped SQL tokens verified. Full 429/500/SSRF/TLS/RBAC/history/secret/license/container scans remain incomplete."
     },
     {
       "gate": "CLIENTS",
       "status": "FAIL",
-      "reason": "Real browser UI checked; actual Lampa/Tizen/Prowlarr/Sonarr/Radarr/TorrServer integration untested."
+      "reason": "Actual English/Russian native and Jackett web search verified through Edge, including saved-key retry fix. Six Torznab XML protocol cases pass. Actual Lampa/Tizen/Prowlarr/Sonarr/Radarr applications and separate TorrServer integration remain incomplete."
     },
     {
       "gate": "INSTALLER",
       "status": "FAIL",
-      "reason": "One CLI run created all four isolated services; repeat preserved IDs and skipped migrations. Real expiry stop and bounded restart verified. Public default bootstrap, catalog fixture, all commands, update/rollback and owned cleanup incomplete."
+      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete."
     },
     {
       "gate": "OPERATIONS",
       "status": "FAIL",
-      "reason": "Owned worker expiry watchdog and CDN byte caps verified live; published current prices fetched during install. Full usage accounting, alerting, RPO/RTO and DR incomplete."
+      "reason": "Live warmed Edge latency measured for 101 cases (p50/p95/p99 in evidence); bounded worker stop confirmed. Actual attributed cost is COST_UNKNOWN. Complete bytes/cost telemetry, alerting, controlled cold-start measurements and full rollback/restore operations remain incomplete."
     },
     {
       "gate": "DOCUMENTATION",
       "status": "FAIL",
-      "reason": "English root README and real empty-catalog screenshots added; equivalent full RU/EN/NL sets incomplete."
+      "reason": "English root README, real SQL/Edge product screenshots and dated scoped evidence updated; equivalent complete RU/EN/NL documentation and public product presentation remain incomplete."
     },
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PR #10 merged after CI; native foundation PR pending; no v1.0.0 release or production launch."
+      "reason": "PRs through #21 merged with green checks; exact source/digest gateway staging tested. No tagged v1.0.0 release, complete release acceptance or public production landing page yet."
     }
+  ],
+  "source_checks": {
+    "python": 169,
+    "edge_node": 101,
+    "dotnet": 962,
+    "web": 73,
+    "scope": "Local source checks and CI evidence through gateway source; not full live gates"
+  },
+  "recent_evidence": [
+    "evidence/live-edge-gateway-2026-11-03.json",
+    "evidence/http-gateway-parity-2026-11-03.json",
+    "evidence/live-sql-worker-2026-11-03.json",
+    "evidence/native-runtime-backup-v2-2026-11-03.json"
   ]
 }
