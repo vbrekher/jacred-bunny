@@ -36,10 +36,18 @@ def export_stage(database, output):
                 manifest=conn.execute("SELECT master_sha256 FROM native_imports WHERE id=1").fetchone()
                 if not manifest or not isinstance(manifest[0],str):
                     raise Refused("Stage import provenance unavailable")
-                stream.write(encode({"kind":"header","schema":"jacred-bunny-v0.4",
-                    "master_sha256":manifest[0],
-                    "bucket_count":stats["buckets"],"torrent_count":stats["torrents"],
-                    "track_file_count":stats["track_files_inventory_only"]}))
+                header={"kind":"header","schema":"jacred-bunny-v0.4",
+                        "master_sha256":manifest[0],
+                        "bucket_count":stats["buckets"],"torrent_count":stats["torrents"],
+                        "track_file_count":stats["track_files_inventory_only"]}
+                # Optional v0.5.2 shard identity, included only if verified in SQL.
+                shard_exists=conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='native_shard_manifest'").fetchone()[0]
+                if shard_exists:
+                    shard=conn.execute("SELECT shard_index,shard_count,master_sha256 FROM native_shard_manifest WHERE id=1").fetchone()
+                    if shard is None or shard[2]!=manifest[0] or not 2<=shard[1]<=4 or not 0<=shard[0]<shard[1]:
+                        raise Refused("Invalid shard source identity")
+                    header.update({"shard_index":shard[0],"shard_count":shard[1]})
+                stream.write(encode(header))
                 specs=[
                     ("bucket","SELECT bucket_key,key_md5,update_time,file_time,shard_sha256,torrent_count FROM buckets ORDER BY bucket_key",
                      ("bucket_key","key_md5","update_time","file_time","shard_sha256","torrent_count")),
