@@ -44,7 +44,7 @@ async function validateFile(file,expected) {
       header=record;first=false;continue;
     }
     if(record.kind==="end"){
-      if(ended||JSON.stringify(record.counts)!==JSON.stringify(totals))
+      if(ended||Object.keys(totals).some(k=>record.counts?.[k]!==totals[k]))
         throw Error("Export trailer mismatch");
       ended=true;continue;
     }
