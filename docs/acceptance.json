@@ -1,0 +1,70 @@
+{
+  "schema": "jacred-bunny-acceptance/v1",
+  "checked_at": "2026-11-03",
+  "production_ready": false,
+  "status": "IN_PROGRESS",
+  "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
+  "live_worker_source_sha": "97b22ee77d046f9ade64fe9b3926b16c8b611e9f",
+  "gates": [
+    {
+      "gate": "SOURCE",
+      "status": "FAIL",
+      "reason": "CI and 946 .NET tests passed for PR #10; native foundation CI pending; reproducible release artifact and scans incomplete."
+    },
+    {
+      "gate": "FEATURE PARITY",
+      "status": "FAIL",
+      "reason": "Existing 91 Edge tests pass; 100-case immutable original/live golden corpus has not run."
+    },
+    {
+      "gate": "REAL SQL",
+      "status": "FAIL",
+      "reason": "Live CRUD/FTS5/transaction/least-privilege smoke passed with synthetic rows; real catalog, multi-DB fanout and recovery untested."
+    },
+    {
+      "gate": "TRACKERS 25",
+      "status": "FAIL",
+      "reason": "All 25 source IDs retained. HEAD-only reachability: 22 LIMITED, 3 UPSTREAM_UNAVAILABLE from operator machine. No parser readiness or source-to-SQL acceptance."
+    },
+    {
+      "gate": "DURABILITY",
+      "status": "FAIL",
+      "reason": "Storage PUT/GET checksum verified; real backup restore into a new DB and restart preservation gates not complete."
+    },
+    {
+      "gate": "WORKERS",
+      "status": "FAIL",
+      "reason": "SQL collector, durable queue integration and 24h live soak incomplete."
+    },
+    {
+      "gate": "SECURITY",
+      "status": "FAIL",
+      "reason": "Live missing-key 401 and no-cache responses verified; full scans/429/SSRF/RBAC matrix incomplete."
+    },
+    {
+      "gate": "CLIENTS",
+      "status": "FAIL",
+      "reason": "Real browser UI checked; actual Lampa/Tizen/Prowlarr/Sonarr/Radarr/TorrServer integration untested."
+    },
+    {
+      "gate": "INSTALLER",
+      "status": "FAIL",
+      "reason": "Legacy CLI safety improved; journalled native resource provisioning added; complete fresh native one-command install untested."
+    },
+    {
+      "gate": "OPERATIONS",
+      "status": "FAIL",
+      "reason": "20 sequential MC health latency samples recorded; product usage accounting, alerts and DR incomplete."
+    },
+    {
+      "gate": "DOCUMENTATION",
+      "status": "FAIL",
+      "reason": "English root README and real empty-catalog screenshots added; equivalent full RU/EN/NL sets incomplete."
+    },
+    {
+      "gate": "RELEASE",
+      "status": "FAIL",
+      "reason": "PR #10 merged after CI; native foundation PR pending; no v1.0.0 release or production launch."
+    }
+  ]
+}

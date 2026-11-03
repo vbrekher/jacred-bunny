@@ -76,8 +76,17 @@ def trackers(root):
             continue
         active.update(re.findall(r"/cron/([a-z0-9_-]+)/", line.lower()))
     out = []
+    directories = {}
+    for item in (root / "Infrastructure/Trackers").iterdir():
+        if item.is_dir() and not item.is_symlink():
+            folded = item.name.casefold()
+            if folded in directories:
+                raise ValueError("Ambiguous tracker directory case")
+            directories[folded] = item
     for slug in slugs:
-        directory = root / "Infrastructure/Trackers" / ({"nnmclub": "NNMClub"}.get(slug,slug.capitalize()))
+        directory = directories.get(slug.casefold())
+        if directory is None:
+            raise ValueError("Missing tracker directory: " + slug)
         out.append({"id": slug, "parsers": sorted(x.relative_to(root).as_posix() for x in directory.glob("*Parser*.cs")),
                     "sync_services": sorted(x.relative_to(root).as_posix() for x in directory.glob("*SyncService.cs")),
                     "active_in_host_crontab": slug in active, "live": "NOT_TESTED"})

@@ -1,0 +1,24 @@
+{
+  "checked_at": "2026-11-03",
+  "production_security_pass": false,
+  "edge_production_dependency_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "patched_advisory": "GHSA-rmxm-3fg6-px4f",
+  "override": "@hono/node-server@2.1.3",
+  "edge_bundle_unchanged": true,
+  "gitleaks_version": "8.30.1",
+  "historical_findings": 56,
+  "historical_triage": "IN_REVIEW",
+  "created_staging_secret_matches_in_git_history": 0,
+  "limitations": [
+    "No full container scan or SAST acceptance yet",
+    "Historical fixtures and example placeholders need individual triage",
+    "No full least-privilege/cache/SSRF/RBAC acceptance yet"
+  ]
+}

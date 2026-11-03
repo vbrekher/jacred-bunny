@@ -159,6 +159,36 @@ class InstallerTests(unittest.TestCase):
             with self.assertRaises(cli.DeploymentError):
                 cli.deployment_plan(data_gb=gb, hours=1)
 
+    def test_api_redirect_does_not_forward_account_key(self):
+        from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+        from threading import Thread
+        captured = []
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path.startswith('/mc/'):
+                    self.send_response(302)
+                    self.send_header('Location', '/captured')
+                    self.end_headers()
+                else:
+                    captured.append(self.headers.get('AccessKey'))
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(b'{}')
+            def log_message(self, *args):
+                pass
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with patch.object(cli, 'API', 'http://127.0.0.1:' + str(server.server_port)):
+                with self.assertRaises(cli.DeploymentError):
+                    cli.request('GET', '/mc/regions', 'test-key-only')
+            self.assertEqual(captured, [])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
     def test_self_test(self):
         cli.self_test()
 

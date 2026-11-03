@@ -1,0 +1,13 @@
+{
+  "kind": "LIVE_INFRASTRUCTURE_SMOKE",
+  "dataset": "synthetic; NOT real catalog acceptance",
+  "at": "2026-11-03T13:37:28.252Z",
+  "crud": true,
+  "fts5": true,
+  "update": true,
+  "transactionRollback": true,
+  "readOnlyRead": true,
+  "readOnlyWriteDenied": true,
+  "delete": true,
+  "success": true
+}

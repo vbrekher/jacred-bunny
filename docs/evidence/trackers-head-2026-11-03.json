@@ -1,0 +1,517 @@
+{
+  "schema": "jacred-tracker-reachability/v1",
+  "checked_at": "2026-11-03T13:52:56.800951+00:00",
+  "live": true,
+  "parser_acceptance_pass": false,
+  "trackers": [
+    {
+      "id": "anibelka",
+      "parsers": [
+        "Infrastructure/Trackers/Anibelka/AnibelkaParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Anibelka/AnibelkaSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://anibelka.com",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Anibelka/AnibelkaParser.cs": "548596bdcc0655d4d8a811b210be4747ce8ede2b38a040462cee415f8d6253b9",
+        "Infrastructure/Trackers/Anibelka/AnibelkaSyncService.cs": "a3249844c0abbf9183f82a62b81a075af2604e35b82b5298c3f6db5cfbac9642"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "anidub",
+      "parsers": [
+        "Infrastructure/Trackers/Anidub/AnidubParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Anidub/AnidubSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://tr.anidub.com",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Anidub/AnidubParser.cs": "dc57faf94d0dd17e5141223bb4078b5c4fe735b7f320ca9b57e4d12ccbcf6004",
+        "Infrastructure/Trackers/Anidub/AnidubSyncService.cs": "ad0ae3d543e1e98e2e1aae5b7968e3a7be8336f699413b389bfa15fc85997805"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "anifilm",
+      "parsers": [
+        "Infrastructure/Trackers/Anifilm/AnifilmParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Anifilm/AnifilmSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://anifilm.pro",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Anifilm/AnifilmParser.cs": "2317aeddbd2bda69a8601e56d6ce1c983dd7bfce8bc1343f49b5071b4d59b998",
+        "Infrastructure/Trackers/Anifilm/AnifilmSyncService.cs": "b2f7943ae22a66131d060565b27cb784aa452759de6017fc271584e0ccc66978"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "aniliberty",
+      "parsers": [
+        "Infrastructure/Trackers/Aniliberty/AnilibertyParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Aniliberty/AnilibertySyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://aniliberty.top",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Aniliberty/AnilibertyParser.cs": "f5285fc1923cd1e94d3d99ce2053dccd73ecdc7d45f1592bf810fe228f078620",
+        "Infrastructure/Trackers/Aniliberty/AnilibertySyncService.cs": "9f2b6bde5e555cd0b91425aeb9e5c3074638a193ff05dbf8f2cfdc3eb2bcba79"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "animelayer",
+      "parsers": [
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://animelayer.ru",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerParser.cs": "343064e8107020d415f915e8d9f9a0f739d467c2a4a8cdb31abdbb492a3214e5",
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerSyncService.cs": "9309833e4992df645928104afc00da160db019de1cc0481100871a4edda92be6"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "anistar",
+      "parsers": [
+        "Infrastructure/Trackers/Anistar/AnistarParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Anistar/AnistarSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://anistar.org",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Anistar/AnistarParser.cs": "7c7414b49317890c270e6e18aef3d1578e1a0833094d02df67e59f898943ae14",
+        "Infrastructure/Trackers/Anistar/AnistarSyncService.cs": "b9ccc6e75b73495e87ccfcf491323433431a68039af3d7f0e3f146adaa1e9788"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "baibako",
+      "parsers": [
+        "Infrastructure/Trackers/Baibako/BaibakoParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Baibako/BaibakoSyncService.cs"
+      ],
+      "active_in_host_crontab": false,
+      "host": "http://baibako.tv",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Baibako/BaibakoParser.cs": "216bb8f26a2c5d19d5cbfc7ab3119e2ca514b387824b516fafe47fdd5b337a2d",
+        "Infrastructure/Trackers/Baibako/BaibakoSyncService.cs": "b09ac61d10154abcee7a6ff192ba3d3f43f0e988bd978087f776fbb8104ee5c6"
+      },
+      "status": "UPSTREAM_UNAVAILABLE",
+      "http_status": null,
+      "observation": "HEAD network/TLS timeout or connection failure from this machine",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "bitru",
+      "parsers": [
+        "Infrastructure/Trackers/Bitru/BitruApiParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Bitru/BitruApiSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://bitru.org",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Bitru/BitruApiParser.cs": "22daca449a2cb5724d638476b9f5bcb88556f26e422a6c34f37a638792b8c3be",
+        "Infrastructure/Trackers/Bitru/BitruApiSyncService.cs": "4d9e9b4b5bce6c9411e351684153a8a7f9c50cb87e66289cec9eebf98061e9c8"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "kinozal",
+      "parsers": [
+        "Infrastructure/Trackers/Kinozal/KinozalParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Kinozal/KinozalSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://kinozal.guru",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Kinozal/KinozalParser.cs": "b52f3a3b02b7aea11286800869cc17f66efb1bbe16f9661c46c2eb41c88ebcde",
+        "Infrastructure/Trackers/Kinozal/KinozalSyncService.cs": "8af29db482e05cf1c8e974451e6e4d18335f6cbcf3bc7b8152c98101c48e53c3"
+      },
+      "status": "LIMITED",
+      "http_status": 302,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "knaben",
+      "parsers": [
+        "Infrastructure/Trackers/Knaben/KnabenParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Knaben/KnabenSyncService.cs"
+      ],
+      "active_in_host_crontab": false,
+      "host": "https://api.knaben.org",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Knaben/KnabenParser.cs": "13896bf536b90812176251c7ff8c63316b488f9d8bedaf606513cc71684bcde9",
+        "Infrastructure/Trackers/Knaben/KnabenSyncService.cs": "ded87acce8f88a10eebfda58987ac023c67e2851de02656622471164449b6e2f"
+      },
+      "status": "LIMITED",
+      "http_status": 404,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "korsars",
+      "parsers": [
+        "Infrastructure/Trackers/Korsars/KorsarsParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Korsars/KorsarsSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://korsars.pro",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Korsars/KorsarsParser.cs": "d336dd36cc1197087ecc0e28cccab33d34d0f632512a1d10b31601859c091254",
+        "Infrastructure/Trackers/Korsars/KorsarsSyncService.cs": "687414a1ead21b96ea702fce16c76bab08c0e7def68502178f681cd5dc58fae3"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "leproduction",
+      "parsers": [
+        "Infrastructure/Trackers/Leproduction/LeproductionParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Leproduction/LeproductionSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://www.le-production.online",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Leproduction/LeproductionParser.cs": "22297a35b08769f29a81d5a67071c28e230823cf2962bf004f50b0144d4a2e65",
+        "Infrastructure/Trackers/Leproduction/LeproductionSyncService.cs": "931250bf8249d6afb68263e890599dbd0a3a1150c029b4a0aebd89d518ce2a9f"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "lostfilm",
+      "parsers": [
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.Collectors.cs",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.Ids.cs",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.NewPage.cs",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.VPage.cs",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Lostfilm/LostfilmSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://www.lostfilm.tv",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.Collectors.cs": "5c3309c3ea94383a15ab9a4a414598599186a4048bbbdd5edce25e5477f11666",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.Ids.cs": "7da74003d00840cda4a93228edba7f0e314e5969b70ebda30083acf2aa33982b",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.NewPage.cs": "4cf0c524eb1801d50dd90b16a72be7ad4a4c235f3edd9c2033d52c96a4b021f6",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.VPage.cs": "d06a140d66b28e01c85d2a12ddf483d81ee5abe0b2683a3672e58f9f387384dd",
+        "Infrastructure/Trackers/Lostfilm/LostfilmParser.cs": "a3812705ce4fe927bcc50df3a167ca2d110a4b04422c492cc313bb273261e16f",
+        "Infrastructure/Trackers/Lostfilm/LostfilmSyncService.cs": "fc014272ee875fc955af47eb3e9de38c76777687d83ff065ead080c49227ea69"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "mazepa",
+      "parsers": [
+        "Infrastructure/Trackers/Mazepa/MazepaParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Mazepa/MazepaSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://mazepa.to",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Mazepa/MazepaParser.cs": "a180b98a015b960f9375ec56a256477d1f63cb224ff71f4d013348717d63e69f",
+        "Infrastructure/Trackers/Mazepa/MazepaSyncService.cs": "7c0276e9c5224f58c10910016e6f47641fdb531ea84a1d0f608d809c8ac95fad"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "megapeer",
+      "parsers": [
+        "Infrastructure/Trackers/Megapeer/MegapeerParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Megapeer/MegapeerSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "http://megapeer.vip",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Megapeer/MegapeerParser.cs": "613c785cea251f825dfae2d689059ff31a856d8daef3e211c6a0e19a72cc2669",
+        "Infrastructure/Trackers/Megapeer/MegapeerSyncService.cs": "24f6790793ccea98af39b0fd03777b02c39098fc8cb9847b24772149cc330f90"
+      },
+      "status": "LIMITED",
+      "http_status": 301,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "nnmclub",
+      "parsers": [
+        "Infrastructure/Trackers/NNMClub/NNMClubParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/NNMClub/NNMClubSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://nnmclub.to",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/NNMClub/NNMClubParser.cs": "c2d7bc9a6b9adb485fc906b1e81b498109af076b72c557ac16cbc4c91752962f",
+        "Infrastructure/Trackers/NNMClub/NNMClubSyncService.cs": "ec8f12a99389ae97b659bbb3f541a4168d20bce7f26dfa51ea847fbc2e73aaa2"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "rudub",
+      "parsers": [
+        "Infrastructure/Trackers/Rudub/RudubParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Rudub/RudubSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://r4.rudub.world",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Rudub/RudubParser.cs": "a6c725e0d7e87f33ea0ba21980038eae3c0cf2d3ee7f9cef472ff0d2e78a05ba",
+        "Infrastructure/Trackers/Rudub/RudubSyncService.cs": "f86b6042ccbf50cec0cfa2584f3b48bc6b8752cd29b47569ba650e2eeeae7836"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "rutor",
+      "parsers": [
+        "Infrastructure/Trackers/Rutor/RutorParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Rutor/RutorSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "http://rutor.info",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Rutor/RutorParser.cs": "71839913312b4362b0ce4db1cae70b3aefc5db014618be930a73bf3098a6d488",
+        "Infrastructure/Trackers/Rutor/RutorSyncService.cs": "7324445585fdd8dbf41969fa754b4fa9cf86a30801fa2f9a33ba38f941f0bc05"
+      },
+      "status": "UPSTREAM_UNAVAILABLE",
+      "http_status": 501,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "rutracker",
+      "parsers": [
+        "Infrastructure/Trackers/Rutracker/RutrackerParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Rutracker/RutrackerSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://rutracker.org",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Rutracker/RutrackerParser.cs": "5d21c59f66d5da04a2813dfb8fc9c6ef81fc160bafbf8d96d760aa237b523c67",
+        "Infrastructure/Trackers/Rutracker/RutrackerSyncService.cs": "fe30c197f178596cf040277f7128b2035335aa392d3822c4088e66268c1cf71f"
+      },
+      "status": "LIMITED",
+      "http_status": 301,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "selezen",
+      "parsers": [
+        "Infrastructure/Trackers/Selezen/SelezenParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Selezen/SelezenSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://use.selezen.club",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Selezen/SelezenParser.cs": "70cdf2bc1156414c91762ad7d006d2511ec0f88e0adf5032275f70a28435455b",
+        "Infrastructure/Trackers/Selezen/SelezenSyncService.cs": "60c5462139b1d0c881d6e78705fd9306f4aa3b9080060199e03bcec50269584f"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "subsplease",
+      "parsers": [
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://subsplease.org",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseParser.cs": "90a82301f005e9fe45292c5c32edc8134f981e9bd9a84a3334d2d396612b92b7",
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseSyncService.cs": "34c4402767e101e5055fbade1c4423b8feb2a62c2ae32cb4f6683769a45a3500"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "toloka",
+      "parsers": [
+        "Infrastructure/Trackers/Toloka/TolokaParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Toloka/TolokaSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://toloka.to",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Toloka/TolokaParser.cs": "b4eb422990b536fa15bae0a9a877a6c92523b4ee9e65c5fd1d3a4a22ac098922",
+        "Infrastructure/Trackers/Toloka/TolokaSyncService.cs": "281b2792402891ae1e1f69875abd7f30db2b13d5708b6fea69f80cdcb6d41867"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "torrentby",
+      "parsers": [
+        "Infrastructure/Trackers/TorrentBy/TorrentByParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/TorrentBy/TorrentBySyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://torrent.by",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/TorrentBy/TorrentByParser.cs": "8baa0638ffc8be9543e38ebdd40fc2de70a4db30b8d9ee822f7218dcfe4f1db4",
+        "Infrastructure/Trackers/TorrentBy/TorrentBySyncService.cs": "12a0c890bacef60da6460b3c56f6a340d98474901e1640f08b568fb616554097"
+      },
+      "status": "UPSTREAM_UNAVAILABLE",
+      "http_status": null,
+      "observation": "HEAD network/TLS timeout or connection failure from this machine",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "ultradox",
+      "parsers": [
+        "Infrastructure/Trackers/Ultradox/UltradoxParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Ultradox/UltradoxSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://ultradox.vip",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Ultradox/UltradoxParser.cs": "7b3ec8b1528402e69af451f77ecd2d9ffab0d36ee21fe9d994ac36758ce3f210",
+        "Infrastructure/Trackers/Ultradox/UltradoxSyncService.cs": "6ed76771fb1e0a870e4e6ed4f76e8e069a07ff77e7adbf41efef5385abf05a2b"
+      },
+      "status": "LIMITED",
+      "http_status": 307,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    },
+    {
+      "id": "viruseproject",
+      "parsers": [
+        "Infrastructure/Trackers/Viruseproject/ViruseprojectParser.cs"
+      ],
+      "sync_services": [
+        "Infrastructure/Trackers/Viruseproject/ViruseprojectSyncService.cs"
+      ],
+      "active_in_host_crontab": true,
+      "host": "https://viruseproject.tv",
+      "parser_ready": false,
+      "source_sha256": {
+        "Infrastructure/Trackers/Viruseproject/ViruseprojectParser.cs": "d8e463f5023fcdde2a6339bc2a7d2863b1f2b8efb364876dcb0d18dd2761853a",
+        "Infrastructure/Trackers/Viruseproject/ViruseprojectSyncService.cs": "b77339bdd23cc56bf17e35cbf59ba8d80e78a45e376f7b263ef4c807df533a47"
+      },
+      "status": "LIMITED",
+      "http_status": 200,
+      "observation": "One unauthenticated HEAD; redirects not followed; parser and ingestion NOT_TESTED",
+      "parser_live": "NOT_TESTED"
+    }
+  ],
+  "limitations": "HEAD reachability from the operator machine is not a Bunny worker parser test, authorized account test, or source-to-SQL acceptance."
+}

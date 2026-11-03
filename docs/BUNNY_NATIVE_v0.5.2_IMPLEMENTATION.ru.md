@@ -63,13 +63,15 @@
 
 Список переменных Edge Scripting при реальном отдельном staging (значения ниже лишь шаблон):
 
-    JACRED_EDGE_PREVIEW_ENABLED=true
-    JACRED_EDGE_API_KEY=<SEPARATE_RANDOM_LONG_KEY>
-    JACRED_SQL_SHARD_IDS=0,1
-    JACRED_SQL_SHARD_0_URL=libsql://<FIRST-TEST-DB>.lite.bunnydb.net
-    JACRED_SQL_SHARD_0_TOKEN=<READ_ONLY_TOKEN_0>
-    JACRED_SQL_SHARD_1_URL=libsql://<SECOND-TEST-DB>.lite.bunnydb.net
-    JACRED_SQL_SHARD_1_TOKEN=<READ_ONLY_TOKEN_1>
+```text
+JACRED_EDGE_PREVIEW_ENABLED=true
+JACRED_EDGE_API_KEY=<SEPARATE_RANDOM_LONG_KEY>
+JACRED_SQL_SHARD_IDS=0,1
+JACRED_SQL_SHARD_0_URL=libsql://<FIRST-TEST-DB>.lite.bunnydb.net
+JACRED_SQL_SHARD_0_TOKEN=<READ_ONLY_TOKEN_0>
+JACRED_SQL_SHARD_1_URL=libsql://<SECOND-TEST-DB>.lite.bunnydb.net
+JACRED_SQL_SHARD_1_TOKEN=<READ_ONLY_TOKEN_1>
+```
 
 Вместо значений заполняйте Bunny Dashboard Secrets. Не сохраняйте токены в GitHub. Для трёх баз IDS=0,1,2; для четырёх IDS=0,1,2,3. Все базы обязаны иметь манифест исходного masterDb с одинаковым SHA256, а индекс и shard_count должны совпадать с конфигурацией.
 
