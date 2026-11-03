@@ -121,3 +121,9 @@ The local integration evidence in [`http-gateway-parity-2026-11-03.json`](../doc
 The measured warmed request sample has p50 393 ms, p95 704 ms and maximum 1119 ms (101 Edge requests); it is not a controlled cold-start measurement or 24-hour soak. An initial read-only probe encountered a connection reset; the complete subsequent run is retained separately rather than counting the failed attempt as a PASS. No complete account usage attribution is available: actual test cost is `COST_UNKNOWN`. The worker was explicitly stopped and confirmed inactive after the bounded window. These are staging services, not an always-on public demo.
 
 This proves a scoped live gateway pilot. General nonempty catalog migration, service-computed snapshot attestation, large-catalog bounds, all clients, all 25 functional trackers, durable scheduler state, full disaster recovery and production acceptance remain open.
+
+## Immutable payload history
+
+The advanced CLI stores verified payloads under `payload-objects/<manifest-identity>` and records both payload identities before update mutations. The identity includes the catalog backend and Edge mode, so two configurations of the same source/image/bundle cannot overwrite each other. Existing source-keyed release caches and history remain readable. New rollback receipts identify the exact prior manifest; repeating a completed rollback preserves the stopped lifecycle.
+
+A same-source Edge mode change is an update, rather than a repeated no-op. Its previous payload remains available after publish failures and interrupted updates. A gateway release is only accepted when the verified owned Edge endpoint reports the exact full worker source/backend and accepts an authenticated search. These checks remain infrastructure checks, not production or full catalog acceptance.
