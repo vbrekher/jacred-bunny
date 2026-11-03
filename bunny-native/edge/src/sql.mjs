@@ -46,3 +46,57 @@ export async function searchSql(db,{query,tracker=null,limit=30,offset=0}){
     return data;
   });
 }
+
+
+import {normalizeJacRed} from "./parity.mjs";
+
+// MasterDB/fastdb-alias search: use exact normalized bucket names first,
+// then bounded substring fallback. FTS5 alone cannot find compact aliases
+// like "щелкунчик" vs "шелкунчик" produced by StringConvert.SearchName.
+export async function searchLegacy(db,{query,title=null,titleOriginal=null,
+  tracker=null,maxCandidates=200}){
+  if(!Number.isInteger(maxCandidates)||maxCandidates<1||maxCandidates>200)
+    throw new RangeError("Candidate budget must be 1..200");
+  const input=[title,titleOriginal].filter(Boolean);
+  const names=[...new Set((input.length?input:[query])
+    .map(normalizeJacRed).filter(Boolean))];
+  if(names.length===0)return [];
+  if(names.some(n=>n.length>180))throw new RangeError("Query is too long");
+  const hasCard=input.length>0;
+  async function gather(exact){
+    let clause;
+    let args;
+    if(exact){
+      clause="a.alias IN ("+names.map(()=>"?").join(",")+")";
+      args=names;
+    }else{
+      clause="("+names.map(()=>"a.alias LIKE ?").join(" OR ")+")";
+      args=names.map(n=>"%"+n+"%");
+    }
+    const sql="SELECT t.raw_json,t.source_url FROM torrents t WHERE EXISTS ("+
+      "SELECT 1 FROM bucket_aliases a WHERE a.bucket_key=t.bucket_key AND "+
+      clause+")"+(tracker?" AND LOWER(t.tracker_name)=?":"")+
+      " ORDER BY t.bucket_key,t.source_url LIMIT ?";
+    if(tracker)args.push(tracker.toLowerCase());
+    args.push(maxCandidates+1);
+    const rows=await db.prepare(sql).bind(...args).all();
+    if(!Array.isArray(rows))throw Error("Unexpected SQL row format");
+    if(rows.length>maxCandidates)throw new Error("Query exceeds candidate safety budget");
+    return rows.map(row=>{
+      if(typeof row.raw_json!=="string")throw Error("Missing payload JSON");
+      const body=JSON.parse(row.raw_json);
+      if(!body||typeof body!=="object"||Array.isArray(body))
+        throw Error("Invalid database payload");
+      // Original FileDB is a Dictionary<source_url,TorrentDetails>. Source
+      // dictionary key must remain accessible even when JSON omits t.url.
+      if(!body.url && typeof row.source_url==="string")body.url=row.source_url;
+      if(!body.url)throw Error("Record without URL key");
+      return body;
+    });
+  }
+  const exact=await gather(true);
+  // Card searches are keyed to exact master aliases. Only use partial
+  // fallback when none matched, to avoid polluting exact card results.
+  if(exact.length)return exact;
+  return gather(false);
+}
