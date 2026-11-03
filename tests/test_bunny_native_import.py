@@ -192,7 +192,7 @@ class Importer(unittest.TestCase):
             self.assertEqual(row["file_time"],"133123456789012345")
             self.assertEqual(data[-1]["kind"],"end")
             self.assertEqual(hashlib.sha256(export.read_bytes()).hexdigest(),result["sha256"])
-            with self.assertRaises(a.Refused):export_stage(staged,export)
+            with self.assertRaisesRegex(Exception,"Export target exists"):export_stage(staged,export)
 
     def test_remote_dry_run_without_bunny_or_npm(self):
         import shutil
