@@ -6,6 +6,7 @@ string table=Environment.GetEnvironmentVariable("JACRED_TEST_TABLE")??"";
 if(!Regex.IsMatch(table,"^jacred_acceptance_[a-f0-9]{32}$"))throw new Exception("Invalid private probe identity");
 string url=Environment.GetEnvironmentVariable("JACRED_DATABASE_URL")??throw new Exception("Missing SQL URL");
 string token=Environment.GetEnvironmentVariable("JACRED_DATABASE_WRITE_TOKEN")??throw new Exception("Missing scoped SQL writer");
+if(!Regex.IsMatch(token,@"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$"))throw new Exception("Only scoped SQL JWTs are accepted; never provide an account API key");
 string schema="CREATE TABLE "+table+"(id INTEGER PRIMARY KEY,value TEXT)";
 using var client=new BunnySqlClient(url,token);
 var existing=await client.Query(new SqlStatement("SELECT sql FROM sqlite_master WHERE name=?",table));
