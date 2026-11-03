@@ -1,0 +1,179 @@
+{
+  "schema": "jacred-live-sql-worker-evidence/v1",
+  "date": "2026-11-03",
+  "implementation": "development CLI; exact CI image a8d0c3c; locally reconstructed source-matching v2 descriptor, not public tagged bootstrap acceptance",
+  "resources": {
+    "database": {
+      "id": "db_01M6GX4WFVENZXB9M4F0AVFE1C",
+      "name": "jacred-6a3535da"
+    },
+    "storage": {
+      "id": 2034483,
+      "name": "jacred-6a3535da"
+    },
+    "edge": {
+      "id": 100730,
+      "name": "jacred-6a3535da"
+    },
+    "worker": {
+      "id": "OnCopUramoFnaJG",
+      "name": "jacred-6a3535da"
+    },
+    "edge_cdn": {
+      "id": 6920852,
+      "name": "jacred-6a3535da"
+    },
+    "worker_cdn": {
+      "id": 6920854,
+      "name": "mc-gy6p4c5g8c"
+    }
+  },
+  "transition_scope": "Verified empty owned staging only; general nonempty legacy migration remains required",
+  "legacy_source_proof": {
+    "scope": "empty owned staging only",
+    "legacy_source_sha": "a8d0c3ca1f047449e20ff854979903b03792daf6",
+    "observed_at": "2026-11-03T17:25:27.225624+00:00",
+    "report_finished_at": "2026-11-03T17:25:27.0892267Z",
+    "catalog_keys": 0,
+    "torrents": 0,
+    "orphan_shards": 0,
+    "track_files": 0,
+    "sync_disabled": true,
+    "tracks_disabled": true,
+    "cron_disabled": true
+  },
+  "provider_behavior": {
+    "container_patch_autoactivated_exact_approved_target": true,
+    "first_inactive_only_assumption_rejected": true,
+    "target_stopped_and_resumed_without_replaying_patch": true
+  },
+  "cutover": {
+    "changed": true,
+    "catalog_backend": "bunny-sql",
+    "scope": "empty owned staging transition only",
+    "legacy_rollback_allowed": false,
+    "health": {
+      "productionReady": false,
+      "infrastructureReady": true,
+      "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+      "worker_health_http": 200,
+      "worker_healthy": true,
+      "worker_catalog_backend": "bunny-sql",
+      "worker_catalog_backend_matches": true,
+      "server_git_sha": "a8d0c3ca",
+      "worker_source_matches": true,
+      "authenticated_search_http": 200,
+      "worker_search_key_valid": true,
+      "admin_schema_http": 200,
+      "worker_admin_key_valid": true,
+      "sql_migration_count": 3,
+      "catalog_torrent_count": 0,
+      "sql_schema_ready": true,
+      "catalog_acceptance": "NOT_ESTABLISHED"
+    }
+  },
+  "repeat_cutover": {
+    "changed": false,
+    "catalog_backend": "bunny-sql",
+    "runtime_health_checked": false
+  },
+  "actual_cloud_collector": {
+    "kind": "LIVE_MC_ORIGINAL_COLLECTOR_SQL_QUERY",
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "source_sha": "a8d0c3ca1f047449e20ff854979903b03792daf6",
+    "catalog_backend": "bunny-sql",
+    "index_http": 200,
+    "index_response": "ok",
+    "rows_before": 0,
+    "rows_after": 20,
+    "elapsed_seconds": 1.6745994560042163,
+    "production_acceptance": false,
+    "search_http": 200,
+    "search_count": 1,
+    "selected_source_url_present": true
+  },
+  "snapshot": {
+    "kind": "LIVE_SQL_CANONICAL_SNAPSHOT",
+    "snapshot_sha256": "f1a37cecebe3a78027f3e017a9ef46176d0d8e569140734b51616bae50c52bc7",
+    "counts": {
+      "buckets": 20,
+      "bucket_aliases": 20,
+      "torrents": 20,
+      "track_file_inventory": 0,
+      "native_imports": 0,
+      "catalog_bucket_versions": 20,
+      "catalog_commits": 20
+    },
+    "origin": "actual MC original SubsPlease collector→Bunny SQL; exported once to original FileDB layouts for parity",
+    "synthetic": false,
+    "production_acceptance": false
+  },
+  "snapshot_integrity": {
+    "raw_rows_verified": 20,
+    "bucket_counts_and_hashes_verified": 20,
+    "both_original_filedb_layouts_exported": true
+  },
+  "restart": {
+    "kind": "LIVE_SQL_MC_RESTART_PERSISTENCE",
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "source_sha": "a8d0c3ca1f047449e20ff854979903b03792daf6",
+    "catalog_backend": "bunny-sql",
+    "sql_rows_preserved": 20,
+    "all_row_checksums_unchanged": true,
+    "search_response_checksum_unchanged": true,
+    "search_response_sha256": "d62aebe4105df9b9f63226f657431ee7d4dbdef4b06f98034396b0cd2af38a20",
+    "search_count": 1,
+    "elapsed_seconds": 31.736141038985807,
+    "health": {
+      "productionReady": false,
+      "infrastructureReady": true,
+      "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+      "worker_health_http": 200,
+      "worker_healthy": true,
+      "worker_catalog_backend": "bunny-sql",
+      "worker_catalog_backend_matches": true,
+      "server_git_sha": "a8d0c3ca",
+      "worker_source_matches": true,
+      "authenticated_search_http": 200,
+      "worker_search_key_valid": true,
+      "admin_schema_http": 200,
+      "worker_admin_key_valid": true,
+      "sql_migration_count": 3,
+      "catalog_torrent_count": 20,
+      "sql_schema_ready": true,
+      "catalog_acceptance": "NOT_ESTABLISHED"
+    },
+    "production_acceptance": false
+  },
+  "browser": {
+    "actual_native_search_result": 1,
+    "actual_jackett_search_result": 1,
+    "languages_observed": [
+      "en",
+      "ru"
+    ],
+    "nl_implemented": false,
+    "screenshots": [
+      "../images/sql-live-search-en.png",
+      "../images/sql-live-search-ru.png",
+      "../images/sql-live-jackett-ru.png"
+    ],
+    "known_defects": [
+      "Saving API key and Retry left the same query error cached; page reload recovered. Fix still required.",
+      "Cold-load source-version fetch can keep fork-root fallback link; exact-source link observed on initial successful load."
+    ]
+  },
+  "runtime_source_sha256": {
+    "bunny/cli.py": "86f1cb9200a34694e2f325954e72e66f3b5e6a9da3cada075d3a5821cc2014db",
+    "bunny/native.py": "978619b1493f7d028dba6f05f682b5bfc587ad6da137b388a244652ec64db391",
+    "bunny/operations.py": "2b79b89b3db65302e172a7af97006ba010c184bfa6a10792ed2902f786bb586d"
+  },
+  "limitations": [
+    "Not a nonempty legacy migration or fresh public installer gate.",
+    "Not 100-case HTTP golden parity or client/emulator acceptance.",
+    "Only one tracker latest-page collection validated; no 25-ready claim.",
+    "Edge remains preview subset; full original API gateway remains required.",
+    "Tracks/config/jobs/full recovery/security/soak/translations/release gates remain open."
+  ],
+  "production_acceptance": false
+}
