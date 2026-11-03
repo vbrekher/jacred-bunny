@@ -35,7 +35,7 @@ info:
     | `X-Dev-Key` header | /dev/, /cron/, /jsondb, `/api/v1.0/config/*` из интернета или через туннель |
     | `devkey` query | Same as `X-Dev-Key` (`?devkey=`) |
 
-    **Config API** (`/api/v1.0/config/*`): LAN-клиент **или** `X-Dev-Key` / `?devkey=`.
+    **Config API** (`/api/v1.0/config/*`): настроенный `devkey` обязателен в любой сети; без ключа — доверенная LAN.
     Same-host reverse proxy (Cloudflare Tunnel, nginx) **сам по себе не заменяет** devkey.
 
     **Sync** (`/sync/*`): middleware пропускает без ключей; данные sync требуют `opensync: true` в конфиге.
@@ -79,7 +79,7 @@ tags:
   - name: Sync
     description: Remote sync protocol (requires opensync)
   - name: Config
-    description: init.yaml / init.conf read/write (LAN or X-Dev-Key / ?devkey=)
+    description: init.yaml / init.conf read/write (configured devkey required everywhere; otherwise trusted keyless LAN)
   - name: Web
     description: PWA HTML shells
 
@@ -1032,7 +1032,7 @@ paths:
       summary: Get current configuration
       description: |
         Returns parsed config as JSON object and serialized content (secrets included).
-        **LAN or valid X-Dev-Key** (same-host proxy alone is not sufficient).
+        **Configured devkey required on every network; otherwise trusted keyless LAN** (same-host proxy alone is not sufficient).
       operationId: configGet
       security:
         - DevKeyHeader: []
@@ -1060,7 +1060,7 @@ paths:
     post:
       tags: [Config]
       summary: Save configuration
-      description: Writes to init.yaml or init.conf. Hot-reload within ~10s. **LAN or valid X-Dev-Key.**
+      description: Writes to init.yaml or init.conf. Hot-reload within ~10s. **Configured devkey required on every network; otherwise trusted keyless LAN.**
       operationId: configSave
       security:
         - DevKeyHeader: []
@@ -1087,7 +1087,7 @@ paths:
     get:
       tags: [Config]
       summary: Form schema for settings UI
-      description: "**LAN or valid X-Dev-Key** (same-host proxy alone is not sufficient)."
+      description: "**Configured devkey required on every network; otherwise trusted keyless LAN** (same-host proxy alone is not sufficient)."
       operationId: configSchema
       security:
         - DevKeyHeader: []
@@ -1113,7 +1113,7 @@ paths:
     post:
       tags: [Config]
       summary: Validate configuration without saving
-      description: "**LAN or valid X-Dev-Key.**"
+      description: "**Configured devkey required on every network; otherwise trusted keyless LAN.**"
       operationId: configValidate
       security:
         - DevKeyHeader: []
@@ -1140,7 +1140,7 @@ paths:
     post:
       tags: [Config]
       summary: Diff proposed config vs current
-      description: Used by settings UI before save confirmation. **LAN or valid X-Dev-Key.**
+      description: Used by settings UI before save confirmation. **Configured devkey required on every network; otherwise trusted keyless LAN.**
       operationId: configDiff
       security:
         - DevKeyHeader: []
@@ -1167,7 +1167,7 @@ paths:
     post:
       tags: [Config]
       summary: Serialize form data to YAML/JSON
-      description: Form ↔ raw editor sync (settings UI). **LAN or valid X-Dev-Key.**
+      description: Form ↔ raw editor sync (settings UI). **Configured devkey required on every network; otherwise trusted keyless LAN.**
       operationId: configRender
       security:
         - DevKeyHeader: []
@@ -1203,7 +1203,7 @@ paths:
     post:
       tags: [Config]
       summary: Parse YAML/JSON text to JSON object
-      description: "**LAN or valid X-Dev-Key.**"
+      description: "**Configured devkey required on every network; otherwise trusted keyless LAN.**"
       operationId: configParse
       security:
         - DevKeyHeader: []
@@ -1243,7 +1243,7 @@ paths:
     post:
       tags: [Config]
       summary: Pretty-print config after AppInit normalization
-      description: Validates, normalizes through AppInit model, returns formatted YAML/JSON. **LAN or valid X-Dev-Key.**
+      description: Validates, normalizes through AppInit model, returns formatted YAML/JSON. **Configured devkey required on every network; otherwise trusted keyless LAN.**
       operationId: configFormat
       security:
         - DevKeyHeader: []
@@ -1371,7 +1371,7 @@ components:
       type: apiKey
       in: header
       name: X-Dev-Key
-      description: Admin/dev key — required from internet or tunnel when `devkey` is set; LAN clients may omit it.
+      description: Admin/dev key — required on every network when `devkey` is set, including localhost and LAN.
     DevKeyQuery:
       type: apiKey
       in: query
@@ -1604,7 +1604,7 @@ components:
     ConfigUnauthorized:
       description: Invalid or missing devkey
     ConfigForbidden:
-      description: Forbidden (LAN trusted client or valid X-Dev-Key / ?devkey= required)
+      description: Forbidden (configured devkey required, or trusted direct LAN in keyless legacy mode)
 
   schemas:
     TrackerSlug:
@@ -1935,7 +1935,7 @@ components:
           format: date-time
         data:
           type: object
-          description: Parsed config (includes secrets; LAN or devkey)
+          description: Parsed config (includes secrets; configured devkey required everywhere)
           additionalProperties: true
         content:
           type: string

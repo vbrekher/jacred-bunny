@@ -1,7 +1,7 @@
 ---
 title: "Config API JacRed"
 sidebarTitle: "Config API"
-description: "GET/POST /api/v1.0/config управляет конфигурацией JacRed программно. Требует LAN-доступа или заголовка X-Dev-Key. Поддерживает чтение, сохранение, валидацию и diff."
+description: "GET/POST /api/v1.0/config управляет конфигурацией JacRed программно. Настроенный devkey обязателен в любой сети. Поддерживает чтение, сохранение, валидацию и diff."
 keywords: ["JacRed API", "Config API", "API", "self-hosted"]
 ---
 
@@ -9,7 +9,7 @@ Config API позволяет читать и изменять конфигур�
 
 ## Доступ
 
-Все эндпоинты Config API требуют либо LAN-доступа (локальная сеть), либо заголовка `X-Dev-Key: YOUR_DEV_KEY`.
+Если `devkey` задан, все эндпоинты Config API требуют `X-Dev-Key: YOUR_DEV_KEY` или `?devkey=` в любой сети. Без ключа сохраняется только доверенный прямой LAN-режим с проверкой браузерного контекста.
 
 ## Получить конфиг
 

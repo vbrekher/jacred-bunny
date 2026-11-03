@@ -559,13 +559,13 @@ export interface paths {
         /**
          * Get current configuration
          * @description Returns parsed config as JSON object and serialized content (secrets included).
-         *     **LAN or valid X-Dev-Key** (same-host proxy alone is not sufficient).
+         *     **Configured devkey required on every network; otherwise trusted keyless LAN** (same-host proxy alone is not sufficient).
          */
         get: operations["configGet"];
         put?: never;
         /**
          * Save configuration
-         * @description Writes to init.yaml or init.conf. Hot-reload within ~10s. **LAN or valid X-Dev-Key.**
+         * @description Writes to init.yaml or init.conf. Hot-reload within ~10s. **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configSave"];
         delete?: never;
@@ -583,7 +583,7 @@ export interface paths {
         };
         /**
          * Form schema for settings UI
-         * @description **LAN or valid X-Dev-Key** (same-host proxy alone is not sufficient).
+         * @description **Configured devkey required on every network; otherwise trusted keyless LAN** (same-host proxy alone is not sufficient).
          */
         get: operations["configSchema"];
         put?: never;
@@ -605,7 +605,7 @@ export interface paths {
         put?: never;
         /**
          * Validate configuration without saving
-         * @description **LAN or valid X-Dev-Key.**
+         * @description **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configValidate"];
         delete?: never;
@@ -625,7 +625,7 @@ export interface paths {
         put?: never;
         /**
          * Diff proposed config vs current
-         * @description Used by settings UI before save confirmation. **LAN or valid X-Dev-Key.**
+         * @description Used by settings UI before save confirmation. **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configDiff"];
         delete?: never;
@@ -645,7 +645,7 @@ export interface paths {
         put?: never;
         /**
          * Serialize form data to YAML/JSON
-         * @description Form ↔ raw editor sync (settings UI). **LAN or valid X-Dev-Key.**
+         * @description Form ↔ raw editor sync (settings UI). **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configRender"];
         delete?: never;
@@ -665,7 +665,7 @@ export interface paths {
         put?: never;
         /**
          * Parse YAML/JSON text to JSON object
-         * @description **LAN or valid X-Dev-Key.**
+         * @description **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configParse"];
         delete?: never;
@@ -685,7 +685,7 @@ export interface paths {
         put?: never;
         /**
          * Pretty-print config after AppInit normalization
-         * @description Validates, normalizes through AppInit model, returns formatted YAML/JSON. **LAN or valid X-Dev-Key.**
+         * @description Validates, normalizes through AppInit model, returns formatted YAML/JSON. **Configured devkey required on every network; otherwise trusted keyless LAN.**
          */
         post: operations["configFormat"];
         delete?: never;
@@ -1021,7 +1021,7 @@ export interface components {
             exists?: boolean;
             /** Format: date-time */
             lastModifiedUtc?: string;
-            /** @description Parsed config (includes secrets; LAN or devkey) */
+            /** @description Parsed config (includes secrets; configured devkey required everywhere) */
             data?: {
                 [key: string]: unknown;
             };
@@ -1263,7 +1263,7 @@ export interface components {
             };
             content?: never;
         };
-        /** @description Forbidden (LAN trusted client or valid X-Dev-Key / ?devkey= required) */
+        /** @description Forbidden (configured devkey required, or trusted direct LAN in keyless legacy mode) */
         ConfigForbidden: {
             headers: {
                 [name: string]: unknown;

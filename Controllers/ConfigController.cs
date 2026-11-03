@@ -11,7 +11,7 @@ namespace JacRed.Controllers
 {
     /// <summary>
     /// Configuration management API (init.yaml / init.conf).
-    /// LAN or X-Dev-Key when devkey is configured.
+    /// Configured devkey is required on every network; keyless legacy mode is direct LAN only.
     /// Uses Newtonsoft.Json end-to-end (System.Text.Json breaks JObject → [] on the client).
     /// </summary>
     [Route("/api/v1.0/config")]
@@ -57,7 +57,7 @@ namespace JacRed.Controllers
         public IActionResult Schema()
             => ConfigJson(new { ok = true, schema = ConfigSchema.Get() });
 
-        /// <summary>Get current configuration as JSON (secrets included; LAN or valid Dev-key).</summary>
+        /// <summary>Get current configuration as JSON (secrets included; configured Dev-key required).</summary>
         [HttpGet("")]
         [Produces("application/json")]
         public IActionResult Get([FromQuery] string format = null)
@@ -80,7 +80,7 @@ namespace JacRed.Controllers
                 schema = ConfigSchema.Get(),
                 examplePath = System.IO.File.Exists("Data/example.yaml") ? "Data/example.yaml" : "Data/example.conf",
                 sensitiveFields = ConfigSchema.SensitiveFieldNames,
-                note = "Полный конфиг. API доступен из локальной сети или с действительным Dev-ключом."
+                note = "Полный конфиг. Если devkey задан, он обязателен в любой сети. Режим без devkey доступен только в доверенной LAN."
             });
         }
 

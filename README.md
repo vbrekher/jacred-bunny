@@ -20,7 +20,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 | Component | Verified state |
 | --- | --- |
-| Original .NET application | 1,032 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
+| Original .NET application | 1,049 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
 | Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
 | Bunny Database | 22 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
 | Edge API | Original API gateway deployed to owned staging; 101 live HTTP comparisons and six Torznab XML cases passed |
