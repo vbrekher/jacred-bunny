@@ -22,6 +22,43 @@ UA = "JacRed-bunny/0.2 (+https://github.com/vbrekher/jacred-bunny)"
 class DeploymentError(Exception):
     pass
 
+def account_key():
+    """Reuse the official CLI profile without putting account keys in argv."""
+    if os.environ.get("BUNNYNET_API_KEY"):
+        return os.environ["BUNNYNET_API_KEY"]
+    paths = [Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "bunnynet.json",
+             Path.home() / ".bunnynet.json", Path("/etc/bunnynet.json")]
+    for path in paths:
+        if path.is_file() and not path.is_symlink():
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                value = data.get("profiles", {}).get(os.environ.get("BUNNYNET_PROFILE", "default"), {}).get("api_key")
+                if isinstance(value, str) and value:
+                    return value
+            except (OSError, ValueError, AttributeError):
+                raise DeploymentError("Cannot read Bunny CLI profile") from None
+    if not sys.stdin.isatty():
+        raise DeploymentError("No Bunny CLI profile or BUNNYNET_API_KEY in noninteractive mode")
+    return ask("Bunny account API key", hidden=True)
+
+
+def deployment_plan(data_gb=1, hours=1):
+    if type(data_gb) is not int or not 1 <= data_gb <= 100:
+        raise DeploymentError("Data allocation must be 1–100 GB")
+    if type(hours) not in (int, float) or not 0 < hours <= 24:
+        raise DeploymentError("Staging duration must be >0 and <=24 hours")
+    # Account maximum observed via /mc/limits, not a resource reservation.
+    # Conservative compute envelope; actual consumption and overhead vary.
+    return {"regions": 1, "replicas": 1, "data_gb": data_gb, "config_gb": 1,
+            "hours": hours, "hard_cost_limit": False,
+            "compute_envelope_usd_per_hour": 8 * 0.02 + 32 * 0.005,
+            "volume_usd_per_month": (data_gb + 1) * 0.10,
+            "network_cost": "metered separately; not bounded by this estimate",
+            "price_checked": "2026-11-03",
+            "source": "https://bunny.net/docs/magic-containers/pricing.md",
+            "native_stack": "NOT_YET_PROVISIONED"}
+
+
 def ask(label, default=None, hidden=False):
     suffix = " [" + str(default) + "]" if default is not None else ""
     value = (getpass.getpass(label + suffix + ": ") if hidden else input(label + suffix + ": ")).strip()
@@ -47,6 +84,8 @@ def request(method, path, key, payload=None):
         raise DeploymentError("Bunny network error (" + method + " " + path.split("?")[0] + ")") from None
 
 def save_config(c):
+    if CONFIG.is_symlink():
+        raise DeploymentError("Refusing symlink config")
     CONFIG.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(CONFIG.parent, 0o700)
     temp = CONFIG.with_suffix(".tmp")
@@ -186,7 +225,9 @@ def extract_id(data):
                 return data[name]
     raise DeploymentError("App create response omitted ID. Inspect Bunny account before retrying.")
 
-def build_payload(region, image, registry, api_key, dev_key, data_size):
+def build_payload(region, image, registry, api_key, dev_key, data_size, digest=None):
+    if digest is not None and not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+        raise DeploymentError("Invalid immutable image digest")
     if not re.fullmatch(r"[1-9][0-9]*", str(registry)):
         raise DeploymentError("Bunny requires numeric imageRegistryId, not github")
     return {
@@ -195,6 +236,7 @@ def build_payload(region, image, registry, api_key, dev_key, data_size):
         "regionSettings": {"allowedRegionIds": [region], "requiredRegionIds": [region]},
         "containerTemplates": [{
             "name": "jacred", **image_parts(image), "imageRegistryId": str(registry),
+            **({"imageDigest": digest} if digest else {}),
             "environmentVariables": [
                 {"name": "JACRED_BUNNY_API_KEY", "value": api_key},
                 {"name": "JACRED_BUNNY_DEV_KEY", "value": dev_key},
@@ -316,7 +358,7 @@ def setup(args):
         raise DeploymentError("Local installation already configured: use status/start/stop/credentials.")
     print("\nJacRed Bunny — automatic Magic Containers installation")
     print("No Docker/.NET required on this computer. Bunny account key stays in local mode-600 config.")
-    key = ask("Bunny account API key", hidden=True)
+    key = account_key()
     if not key:
         raise DeploymentError("Bunny account API key required")
     ensure_no_duplicate(key)
@@ -336,7 +378,7 @@ def setup(args):
     if not 1 <= args.data_gb <= 1000:
         raise DeploymentError("Data volume size must be 1..1000 GB")
     api_secret, dev_secret = secrets.token_urlsafe(42), secrets.token_urlsafe(42)
-    body = build_payload(region, args.image, registry, api_secret, dev_secret, args.data_gb)
+    body = build_payload(region, args.image, registry, api_secret, dev_secret, args.data_gb, digest=digest)
     print("\nPlan: 1 Magic Container, 1 region, HTTPS, 2 persistent volumes.")
     print("Region:", region, "| FileDB:", args.data_gb, "GB | config: 1 GB")
     print("Storage allocation approximately $%.2f/month, PLUS compute and traffic." % ((args.data_gb + 1) * 0.10))
@@ -352,7 +394,7 @@ def setup(args):
     ensure_no_duplicate(key)
     ident = create_app_safely(key, body, region, args.image, registry)
     config = {"api_key": key, "app_id": ident, "region": region, "image": args.image,
-              "image_digest_at_create": digest, "data_gb": args.data_gb,
+              "image_digest_at_create": digest, "registry_id": registry, "data_gb": args.data_gb,
               "jacred_api_key": api_secret, "jacred_dev_key": dev_secret, "url": None}
     save_config(config)  # Save ID BEFORE deploy, for recovery after failure.
     print("App created:", ident, "; credentials saved locally.")
@@ -364,7 +406,7 @@ def setup(args):
             print("Deploy failed; app ID is saved. Run jacred-bunny start:", exc, file=sys.stderr)
     config["url"] = fetch_endpoint(key, ident)
     save_config(config)
-    details(config, show_keys=True)
+    details(config, show_keys=False)
     if config.get("url"):
         probe(config["url"])
 
@@ -372,8 +414,8 @@ def probe(url):
     try:
         with urllib.request.urlopen(url + "/health", timeout=8) as response:
             print("Live health HTTP:", response.status)
-    except Exception:
-        print("Live health: not ready yet; check jacred-bunny status")
+    except (urllib.error.URLError, TimeoutError, OSError):
+        raise DeploymentError("Live health unavailable; check jacred-bunny status") from None
 
 def status(show_keys=False):
     c = load_config()
@@ -388,7 +430,7 @@ def status(show_keys=False):
         probe(current)
 
 def doctor():
-    key = load_config()["api_key"] if CONFIG.exists() else ask("Bunny account key (read-only)", hidden=True)
+    key = load_config()["api_key"] if CONFIG.exists() else account_key()
     apps = same_apps(key)
     print("JacRed Bunny apps found:", len(apps))
     for item in apps:
@@ -402,8 +444,29 @@ def doctor():
     except DeploymentError:
         print("Account limits API not available")
 
+def verified_owned_app(c):
+    """Revalidate remote identity before every mutation, including legacy installs."""
+    ident = c.get("app_id")
+    if not isinstance(ident, str) or not re.fullmatch(r"[A-Za-z0-9-]+", ident):
+        raise DeploymentError("Invalid saved app ID")
+    app = request("GET", "/mc/apps/" + ident, c["api_key"])
+    expected = image_parts(c["image"])
+    templates = app.get("containerTemplates") if isinstance(app, dict) else None
+    if (not isinstance(app, dict) or app.get("name") != APP_NAME or
+        not isinstance(templates, list) or len(templates) != 1 or
+        not isinstance(templates[0], dict) or templates[0].get("name") != "jacred" or
+        any(templates[0].get(k) != expected[k] for k in ("imageNamespace", "imageName", "imageTag")) or
+        c.get("region") not in (app.get("regionSettings") or {}).get("requiredRegionIds", [])):
+        raise DeploymentError("Remote app identity changed; refusing mutation")
+    registry = c.get("registry_id")
+    if registry is not None and str(templates[0].get("imageRegistryId")) != str(registry):
+        raise DeploymentError("Remote app registry changed; refusing mutation")
+    return app
+
+
 def lifecycle(action):
     c = load_config()
+    verified_owned_app(c)
     verb = "deploy" if action == "start" else "undeploy"
     request("POST", "/mc/apps/" + urllib.parse.quote(c["app_id"], safe="") + "/" + verb, c["api_key"])
     print(verb.upper(), "requested:", c["app_id"])
@@ -435,6 +498,9 @@ def main():
     s.add_argument("--image", default=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE))
     s.add_argument("--data-gb", type=int, default=10)
     s.add_argument("--no-deploy", action="store_true")
+    plan = commands.add_parser("plan", help="Offline allocation/cost estimate; creates nothing")
+    plan.add_argument("--data-gb", type=int, default=1)
+    plan.add_argument("--hours", type=float, default=1)
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     args = parser.parse_args()
@@ -443,6 +509,8 @@ def main():
             setup(argparse.Namespace(image=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE), data_gb=10, no_deploy=False))
         elif args.action == "setup":
             setup(args)
+        elif args.action == "plan":
+            print(json.dumps(deployment_plan(args.data_gb, args.hours), indent=2))
         elif args.action == "status": status()
         elif args.action == "credentials": status(show_keys=True)
         elif args.action == "doctor": doctor()

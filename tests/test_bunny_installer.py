@@ -111,6 +111,54 @@ class InstallerTests(unittest.TestCase):
                 with self.assertRaises(cli.DeploymentError):
                     cli.load_config()
 
+    def test_lifecycle_rejects_changed_remote_identity(self):
+        config = {"api_key": "private", "app_id": "owned-id", "region": "AMS",
+                  "image": cli.IMAGE, "registry_id": "11126"}
+        with patch.object(cli, "load_config", return_value=config), patch.object(
+                cli, "request", return_value={"name": "other-product"}) as req:
+            with self.assertRaises(cli.DeploymentError):
+                cli.lifecycle("stop")
+            self.assertTrue(all(x.args[0] == "GET" for x in req.call_args_list))
+
+    def test_health_failure_is_not_success(self):
+        with patch.object(cli.urllib.request, "urlopen", side_effect=TimeoutError):
+            with self.assertRaises(cli.DeploymentError):
+                cli.probe("https://mc-example.bunny.run")
+
+    def test_config_symlink_is_not_replaced(self):
+        with tempfile.TemporaryDirectory() as root:
+            target = Path(root) / "other-product.json"
+            target.write_text("do not change")
+            config = Path(root) / "config.json"
+            config.symlink_to(target)
+            with patch.object(cli, "CONFIG", config):
+                with self.assertRaises(cli.DeploymentError):
+                    cli.save_config({"api_key": "secret"})
+            self.assertEqual(target.read_text(), "do not change")
+
+    def test_verified_digest_is_pinned_in_payload(self):
+        digest = "sha256:" + "a" * 64
+        body = cli.build_payload("AMS", cli.IMAGE, "1156", "a"*40, "b"*40, 1, digest=digest)
+        self.assertEqual(body["containerTemplates"][0]["imageDigest"], digest)
+        for bad in ("main", "sha256:abc", "sha256:" + "z" * 64):
+            with self.assertRaises(cli.DeploymentError):
+                cli.build_payload("AMS", cli.IMAGE, "1156", "a"*40, "b"*40, 1, digest=bad)
+
+    def test_account_key_env_takes_precedence(self):
+        with patch.dict(os.environ, {"BUNNYNET_API_KEY": "test-key"}):
+            with patch.object(cli, "ask", side_effect=AssertionError("must not prompt")):
+                self.assertEqual(cli.account_key(), "test-key")
+
+    def test_plan_has_no_api_writes(self):
+        with patch.object(cli, "request", side_effect=AssertionError("offline plan")):
+            plan = cli.deployment_plan(data_gb=1, hours=1)
+        self.assertFalse(plan["hard_cost_limit"])
+        self.assertEqual(plan["regions"], 1)
+        self.assertEqual(plan["replicas"], 1)
+        for gb in (0, -1, 101, True):
+            with self.assertRaises(cli.DeploymentError):
+                cli.deployment_plan(data_gb=gb, hours=1)
+
     def test_self_test(self):
         cli.self_test()
 
