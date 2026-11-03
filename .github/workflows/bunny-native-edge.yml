@@ -1,4 +1,4 @@
-name: Bunny Native v0.5.2 Search and SQL Sharding
+name: Bunny Native v0.5.3 Golden and Live Acceptance
 
 on:
   workflow_dispatch:
@@ -12,6 +12,7 @@ on:
       - 'tools/bunny_native_split.py'
       - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
+      - 'tests/test_bunny_native_evidence.py'
       - 'tests/test_bunny_native_capture.py'
       - 'tests/test_bunny_native_split.py'
       - 'tests/test_bunny_native_import.py'
@@ -27,6 +28,7 @@ on:
       - 'tools/bunny_native_split.py'
       - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
+      - 'tests/test_bunny_native_evidence.py'
       - 'tests/test_bunny_native_capture.py'
       - 'tests/test_bunny_native_split.py'
       - '.github/workflows/bunny-native-edge.yml'
@@ -50,6 +52,7 @@ jobs:
           node --check bunny-native/edge/src/sql.mjs
           node --check bunny-native/edge/src/parity.mjs
           node --check bunny-native/edge/src/shards.mjs
+          node --check bunny-native/edge/src/acceptance.mjs
           python3 -m py_compile tools/bunny_native_split.py
           node --check bunny-native/edge/live-acceptance.mjs
           python3 -m py_compile bunny-native/edge/tests/fixtures/sqlite_bridge.py
@@ -72,7 +75,7 @@ jobs:
       - name: Save verified standalone Edge bundle (not deployed)
         uses: actions/upload-artifact@v4
         with:
-          name: jacred-native-v0.5.2-edge-bundle
+          name: jacred-native-v0.5.3-edge-bundle
           path: bunny-native/edge/dist/index.js
           retention-days: 14
       - name: Staged import regression after provenance transport change
@@ -80,8 +83,9 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_bunny_native_import.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_parity.py' -v
+          python3 -m unittest discover -s tests -p 'test_bunny_native_evidence.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_capture.py' -v
-          python3 -m unittest discover -s tests -p 'test_bunny_native_split.py' -v
+          python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_bunny_native_split.py' -v
       - name: Check source tracker roster has not drifted
         run: |
           python3 - <<'PY'
