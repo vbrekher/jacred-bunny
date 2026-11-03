@@ -1,0 +1,36 @@
+{
+  "scope": "Source and local persistent SQLite validation of atomic paged native SQL catalog writes; not deployed large Bunny catalog acceptance",
+  "dotnet_tests": {
+    "passed": 1027,
+    "failed": 0,
+    "skipped": 0,
+    "new_cases": 7,
+    "log": "paged-write-verified-full-tests.log"
+  },
+  "validated_cases": [
+    "1200-record bucket commits once across more than 1000 SQL statements",
+    "Bucket payload over 4 MiB round-trips without truncation",
+    "Same immutable receipt retried from newer snapshot returns recorded revision",
+    "Later-page SQL constraint failure rolls back all earlier pages",
+    "Later stale destination guard restores source deleted on preceding pages",
+    "Lost page response never commits; server stream expiry rolls back uncommitted data",
+    "Lost COMMIT response reconciles through receipt without duplicate rewrite",
+    "Oversized later statement rolls back earlier pages"
+  ],
+  "transaction_policy": {
+    "begin": "BEGIN IMMEDIATE",
+    "single_commit_after_all_pages": true,
+    "max_statements_per_transport_page": 512,
+    "target_page_bytes": 1048576,
+    "overall_write_timeout_seconds": 120,
+    "cleanup_timeout_seconds": 3,
+    "automatic_write_replay": false
+  },
+  "limitations": [
+    "Single statements still must fit bounded transport",
+    "Whole-bucket planning and existing per-bucket read/receipt metadata limits remain",
+    "Lost rotated baton may leave uncommitted locks until server stream expiry",
+    "Full nonempty migration, durable jobs and production large-catalog capacity remain open"
+  ],
+  "production_acceptance": false
+}

@@ -94,7 +94,7 @@ internal sealed partial class NativeCatalogStore
             return plans.Select(x => (long)receipts[x.Id]["revision"]).ToArray();
         }
         // One server transaction covers every revision guard, source removal and destination update.
-        await sql.Transaction(plans.SelectMany(x => x.Statements).ToArray(), write: true, cancellation).ConfigureAwait(false);
+        await sql.PagedWrite(plans.SelectMany(x => x.Statements).ToArray(), cancellation).ConfigureAwait(false);
         return plans.Select(x => x.Revision).ToArray();
     }
 
@@ -102,7 +102,7 @@ internal sealed partial class NativeCatalogStore
     {
         ValidateKey(snapshot.Key);
         if (!Guid.TryParseExact(commitId, "N", out _)) throw new NativeSqlException("A durable commit ID is required");
-        if (snapshot.Revision < 0 || snapshot.Revision == long.MaxValue || torrents.Count > 900)
+        if (snapshot.Revision < 0 || snapshot.Revision == long.MaxValue)
             throw new NativeSqlException("Bucket revision or bounded write size invalid");
         var encoded = new SortedDictionary<string, (TorrentDetails Torrent, string Json, string Hash)>(StringComparer.Ordinal);
         foreach (var pair in torrents)

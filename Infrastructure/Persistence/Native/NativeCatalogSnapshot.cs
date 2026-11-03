@@ -76,7 +76,7 @@ internal sealed partial class NativeCatalogStore
         return new("jacred-sql-relational-snapshot/v1",Convert.ToHexStringLower(digest.GetHashAndReset()),counts);
     }
     internal static async System.Collections.Generic.IAsyncEnumerable<IReadOnlyDictionary<string,object>> SnapshotRows(
-        BunnySqlClient.ReadSession session,string table,string order,
+        BunnySqlClient.SqlSession session,string table,string order,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellation=default)
     {
         // Identifiers originate from the fixed schema list, never HTTP input.
