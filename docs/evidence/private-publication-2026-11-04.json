@@ -1,0 +1,52 @@
+{
+  "schema": "jacred-private-publication-evidence/v1",
+  "checked_at": "2026-11-04",
+  "scope": "Actual temporary local filesystem regression; no network, Bunny write, customer data or deployed image acceptance",
+  "baseline_source_sha": "b3118c3b803a9920a50c1c81e27780ed4374eb79",
+  "reproduction": {
+    "command": "python3 -W error::ResourceWarning -m unittest discover -s tests -p test_private_publication.py",
+    "baseline_test_methods": 4,
+    "baseline_failed_subcases": 8,
+    "fixed_test_methods_passed": 5,
+    "fixed_test_methods_skipped": 0
+  },
+  "full_python_suite": {
+    "command": "python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_*.py'",
+    "passed": 193,
+    "skipped": 0,
+    "seconds": 8.433
+  },
+  "verified": [
+    "Import rejects dangling output symlinks with and without explicit replacement; no file created at symlink destination",
+    "Export rejects dangling output symlink; no private data created at destination",
+    "Default import preserves file created after source validation",
+    "JSONL export and HTTP capture preserve files and symlinks created before publication",
+    "Conflict cleanup removes temporary private files",
+    "Existing explicit replace behavior and 0600 artifact modes pass existing suite"
+  ],
+  "implementation": "Same-filesystem hard link atomically publishes the completed private inode without replacing any existing destination; explicit import --replace remains opt-in. Resolve parent paths without resolving output leaf. Refuse unsupported filesystem operations without replacement fallback.",
+  "boundaries": [
+    "Requires trusted local parent directories; not an adversarial shared-directory sandbox",
+    "Explicit --replace permits replacement and requires exclusive operator control of that target",
+    "No FileDB quiescence, cloud migration, Tracks/config backup, Linux fresh installation or production durability acceptance asserted"
+  ],
+  "sha256": {
+    "tools/bunny_native_import.py": "60eaf08d7fc013ae0166bc4e8b48c59227581c3dedf3f981d06c386c31a6edc7",
+    "tools/bunny_native_export.py": "6aa0f7f37c0a0bf85e754735bbc4ce634e8523413c1b72df4e9d977accc0940b",
+    "tools/bunny_native_capture.py": "be0b8ade7ed7580480462306d1e2a36f6ca7c05b17b80bfbea325929a837132f",
+    "tests/test_private_publication.py": "6725ca4c5cefdd94990175c8b332abec79d9064dd74c2e7786633faffad544e0",
+    "tools/bunny_native_split.py": "6eb2023e1bcc3083b09311dd3e9b2c8afb5cc0b7476bba3da501b56e562e7960"
+  },
+  "production_ready": false,
+  "uri_regression": {
+    "baseline_failed_subcases": 3,
+    "cases": [
+      "source#fragment.db",
+      "source?query.db",
+      "source%2Fescaped.db"
+    ],
+    "verified": "Check, query, export and two-way split preserve exact source identity and bytes, with no unintended files",
+    "reference": "https://www.sqlite.org/uri.html",
+    "implementation": "Use resolved Path.as_uri() with mode=ro; reserved filename bytes cannot become URI query/fragment/escape syntax"
+  }
+}

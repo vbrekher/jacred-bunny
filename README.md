@@ -32,6 +32,8 @@ The standard setup still installs the FileDB candidate. An explicit SQL pilot no
 
 TLS-hardened live collection and source announce-probe safeguards are recorded in the [changelog](CHANGELOG.md). Source SQL snapshot checks now page one consistent read session; a local dataset exceeding the former 8 MiB response limit matches an independent verifier. Catalog writes also use transport pages in one atomic transaction, retaining durable commit receipts. Bucket, index and receipt reads also page one consistent transaction. Per-row transport limits, whole-bucket memory, deadlines and complete large-catalog acceptance remain open.
 
+Private local migration and HTTP capture tools now refuse output symlinks and preserve files created during validation. [Filesystem regression evidence](docs/evidence/private-publication-2026-11-04.json) records the reproduced data-loss risk and 193 passing Python tests; general live FileDB migration remains incomplete.
+
 The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store checks matched the retained 22-record catalog. The subsequent collector call produced no fresh commits; it is not new write-path acceptance. [Current runtime evidence](docs/evidence/live-paged-runtime-2026-11-03.json).
 
 The subsequent administrative-key hardening image also passed a real nonempty MC/Edge search and config-schema permission checks. [Latest runtime evidence](docs/evidence/live-admin-key-boundary-2026-11-04.json). Compute remains bounded staging, not an always-on demo.

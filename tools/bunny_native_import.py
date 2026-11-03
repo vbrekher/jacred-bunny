@@ -127,7 +127,11 @@ def validate(con):
 
 def stage(data_root,out,cap=LIMIT,replace=False):
     data_root=data_root.resolve()
-    out=out.resolve()
+    # Resolve the directory, never the output leaf: a dangling symlink is still
+    # an occupied destination and must not redirect private data elsewhere.
+    out=Path(out)
+    if out.is_symlink():raise Refused("Output symlink refused")
+    out=out.parent.resolve()/out.name
     if out==data_root or data_root in out.parents:raise Refused("Output within source Data")
     if out.is_symlink():raise Refused("Output symlink refused")
     if out.exists() and not replace:raise Refused("Target exists; explicit --replace required")
@@ -177,9 +181,15 @@ def stage(data_root,out,cap=LIMIT,replace=False):
         outcome=validate(con)
         check_source(data_root,plan,cap)
         con.close();con=None
-        # Only after every check is the stage published. Caller is responsible for
-        # not concurrently editing an existing explicit --replace target.
-        os.replace(temp,out)
+        with temp.open('rb') as stream:os.fsync(stream.fileno())
+        # A same-filesystem hard link publishes the complete private inode
+        # atomically, refusing even a dangling symlink created after validation.
+        # Replacement remains an explicit, separate operator-authorized mode.
+        if replace:
+            os.replace(temp,out)
+        else:
+            try:os.link(temp,out)
+            except FileExistsError:raise Refused("Target exists; explicit --replace required") from None
         return {"status":"LOCAL_SQLITE_STAGE_PASS_NOT_BUNNY",**outcome,
                 "source_bytes":plan["source_bytes"],"sql_bytes":out.stat().st_size}
     finally:
@@ -187,13 +197,13 @@ def stage(data_root,out,cap=LIMIT,replace=False):
         if temp.exists():temp.unlink()
 
 def check_file(path):
-    con=sqlite3.connect("file:"+path.resolve().as_posix()+"?mode=ro",uri=True)
+    con=sqlite3.connect(path.resolve().as_uri()+"?mode=ro",uri=True)
     try:return validate(con)
     finally:con.close()
 
 def query_file(path,term,limit=20):
     if not 1<=limit<=100:raise Refused("Invalid limit")
-    con=sqlite3.connect("file:"+path.resolve().as_posix()+"?mode=ro",uri=True)
+    con=sqlite3.connect(path.resolve().as_uri()+"?mode=ro",uri=True)
     try:
         return [{"bucket":x[0],"tracker":x[1],"title":x[2],"sha256":x[3]} for x in con.execute(
             """SELECT t.bucket_key,t.tracker_name,t.title,t.raw_sha256 FROM torrent_fts

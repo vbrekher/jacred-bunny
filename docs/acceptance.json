@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #32 passed, with 1049 .NET and 188 Python tests. Exact source ef2cc77a/digest-pinned native image deployed with matching Edge bundle. Full reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #33 passed (1049 .NET, 188 Python). Current local Python source passes 193 tests, including private artifact publication and reserved SQLite filename regressions. Exact source ef2cc77a/digest-pinned native image deployed with matching Edge bundle. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -68,13 +68,14 @@
     }
   ],
   "source_checks": {
-    "python": 188,
+    "python": 193,
     "edge_node": 101,
     "dotnet": 1049,
     "web": 73,
-    "scope": "Local and complete CI through PR #32; exact hardening image deployed for scoped public-path acceptance"
+    "scope": "Current local Python 193; complete CI through PR #33 includes 1049 .NET/188 Python. Exact hardening image deployed for scoped public-path acceptance."
   },
   "recent_evidence": [
+    "evidence/private-publication-2026-11-04.json",
     "evidence/live-admin-key-boundary-2026-11-04.json",
     "evidence/lan-admin-key-boundary-2026-11-03.json",
     "evidence/live-paged-runtime-2026-11-03.json",

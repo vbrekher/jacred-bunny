@@ -51,6 +51,7 @@ def capture(base,cases,token):
 def private_output(path,result):
     target=Path(path)
     if target.is_symlink() or target.exists():raise Refused()
+    target=target.parent.resolve()/target.name
     target.parent.mkdir(parents=True,exist_ok=True)
     fd,tmp=tempfile.mkstemp(dir=target.parent,prefix=".jacred-golden-",suffix=".json")
     os.fchmod(fd,0o600)
@@ -58,7 +59,8 @@ def private_output(path,result):
         with os.fdopen(fd,"w",encoding="utf-8") as stream:
             json.dump(result,stream,ensure_ascii=False,indent=2)
             stream.write("\n");stream.flush();os.fsync(stream.fileno())
-        os.replace(tmp,target)
+        try:os.link(tmp,target)
+        except FileExistsError:raise Refused() from None
     finally:
         if os.path.exists(tmp):os.unlink(tmp)
 
