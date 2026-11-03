@@ -108,7 +108,8 @@ class SplitTests(unittest.TestCase):
                 bundle=base/f"private-{idx}.jsonl"
                 export_stage(base/"parts"/f"shard-{idx}.sqlite",bundle)
                 self.assertEqual(bundle.stat().st_mode & 0o777,0o600)
-                header=json.loads(bundle.open().readline())
+                with bundle.open(encoding="utf-8") as stream:
+                    header=json.loads(stream.readline())
                 self.assertEqual(header["shard_index"],idx)
                 self.assertEqual(header["shard_count"],2)
                 master.append(header["master_sha256"])
@@ -119,7 +120,8 @@ class SplitTests(unittest.TestCase):
             base=Path(d);source=sample(base)
             output=base/"original-private.jsonl"
             export_stage(source,output)
-            header=json.loads(output.open().readline())
+            with output.open(encoding="utf-8") as stream:
+                header=json.loads(stream.readline())
             self.assertNotIn("shard_index",header)
             self.assertNotIn("shard_count",header)
 
