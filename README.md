@@ -23,12 +23,12 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 | Original .NET application | 962 local tests passed; original collector/query running in a SQL-backed Magic Container pilot |
 | Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
 | Bunny Database | 20 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
-| Edge API | Preview remains gated (`503 NOT_READY`); full compatible gateway still required |
+| Edge API | Original API gateway deployed to owned staging; 101 live HTTP comparisons and six Torznab XML cases passed |
 | Bunny Storage | Checksum-verified SQL catalog restore after source loss; Tracks/config/jobs recovery remains open |
 | 25 original tracker adapters | Source roster preserved; live parser readiness is not established |
 | Native worker, durable scheduler and client acceptance | In progress; no production claim |
 
-The standard setup still installs the FileDB candidate. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 20 real releases and verified restart persistence. This is not production acceptance or a general nonempty legacy migration. [Live worker evidence and limits](docs/evidence/live-sql-worker-2026-11-03.json) identify the exact scope.
+The standard setup still installs the FileDB candidate. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 20 real releases and verified restart persistence. The original API also ran behind the real Bunny Edge gateway. This is not production acceptance or a general nonempty legacy migration. [Live gateway evidence and limits](docs/evidence/live-edge-gateway-2026-11-03.json) identify the exact scope. Staging compute is stopped after each bounded test window; these endpoints are not an always-on public demo.
 
 ## Install the FileDB deployment candidate
 
@@ -68,9 +68,9 @@ jacred-bunny native-staging plan
 flowchart LR
   Clients[Browser / Lampa / Torznab clients] --> MC[Magic Containers: original .NET API]
   MC --> FDB[Default candidate: persistent FileDB]
-  Clients --> Pilot[SQL pilot: original .NET collector/API]
+  Clients --> Gateway[Bunny Edge: original API gateway pilot]
+  Gateway --> Pilot[SQL pilot: original .NET collector/API]
   Pilot --> SQL[Bunny Database: authoritative pilot catalog]
-  Preview[Edge API preview: gated] --> SQL
   SQL -. SQL catalog backup/restore verified .-> Storage[Bunny Storage]
 ```
 
@@ -90,9 +90,9 @@ A single region and replica reduce exposure but do not create a hard spending li
 
 ## Real interface
 
-This is the real SQL-backed Magic Containers pilot after cloud collection and restart. The browser found an actual release through both native and Jackett APIs; it does not establish full client or 25-tracker acceptance. A same-query API-key retry defect was found and still needs fixing.
+This screenshot shows the real Bunny Edge endpoint serving a cloud-collected SQL release. English native search and Russian Jackett search worked. Saving the API key retried the same query without a reload, fixing the earlier browser defect. This does not establish full client or 25-tracker acceptance.
 
-![Real SQL-backed JacRed search showing an indexed release](docs/images/sql-live-search-en.png)
+![Real Bunny Edge JacRed search showing an indexed SQL release](docs/images/edge-live-search-en.png)
 
 ## Documentation and release status
 
