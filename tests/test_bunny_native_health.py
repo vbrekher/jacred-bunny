@@ -48,3 +48,24 @@ class HealthTests(unittest.TestCase):
                 result=cli.native_health(deploy)
             self.assertFalse(result['worker_catalog_backend_matches'])
             self.assertFalse(result['infrastructureReady'])
+
+    def test_gateway_release_requires_exact_edge_source_and_authenticated_search(self):
+        for failure in (None,'stale-source','wrong-key'):
+            with self.subTest(failure=failure),tempfile.TemporaryDirectory() as root:
+                deploy=Mock();deploy.secret_path=Path(root)/'credentials.json'
+                native.atomic_private(deploy.secret_path,{'api_key':'test-api','admin_key':'test-admin'})
+                deploy.state={'source_sha':'a'*40,'catalog_backend':'bunny-sql','edge_mode':'original-api-gateway','resources':{'worker':{'id':'owned'}}}
+                deploy.verify.side_effect=lambda kind:{'displayEndpoint':{'type':'cdn','address':'mc-fixture.bunny.run'}} if kind=='worker' else {'DefaultHostname':'https://owned-edge.bunny.run'}
+                deploy.sql_client.return_value.query.side_effect=[[{'n':3}],[{'n':20}]]
+                def opened(req,timeout):
+                    is_edge='owned-edge.' in req.full_url
+                    if '/version' in req.full_url:
+                        sha='b'*40 if is_edge and failure=='stale-source' else 'a'*40
+                        return Response(json.dumps({'gitSha':sha[:8],'gitFullSha':sha,'catalogBackend':'bunny-sql'}).encode())
+                    if is_edge and failure=='wrong-key':
+                        raise urllib.error.HTTPError(req.full_url,401,'Unauthorized',None,io.BytesIO(b''))
+                    if '/health' in req.full_url:return Response(b'{"status":"OK"}')
+                    return Response(b'[]')
+                with patch.object(cli.urllib.request,'build_opener',return_value=Mock(open=opened)):
+                    result=cli.native_health(deploy)
+                self.assertEqual(result['infrastructureReady'],failure is None)

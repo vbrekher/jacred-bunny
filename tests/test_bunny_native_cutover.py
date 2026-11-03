@@ -45,6 +45,8 @@ class CutoverTests(unittest.TestCase):
         self.assertEqual(len(self.sql.query('SELECT name FROM native_schema_migrations')),3)
         self.assertEqual({key:value['id'] for key,value in self.deploy.state['resources'].items()},ids)
         self.deploy.remember_payload(self.new)
+        manifest=json.loads((self.new/'manifest.json').read_text())
+        self.deploy.wire_edge(self.new/'edge.js',manifest['files']['edge.js'])
         self.deploy.finish_sql_cutover({'infrastructureReady':True,'worker_source_matches':True,'worker_catalog_backend':'bunny-sql'})
         with self.assertRaisesRegex(native.NativeError,'No confirmed previous'):self.deploy.rollback_payload()
         self.assertNotIn('pending_cutover',self.deploy.state)

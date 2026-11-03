@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 import shutil
 import secrets
+import tempfile
+import os
+import re
 import time
 import urllib.request
 import urllib.error
@@ -15,21 +18,56 @@ from native import Deployment, NativeError, atomic_private, fetch_public, load_p
 
 
 class Operations(Deployment):
+    @staticmethod
+    def payload_id(manifest):
+        normalized = dict(manifest, catalog_backend=manifest.get('catalog_backend','filedb'), edge_mode=manifest.get('edge_mode','preview'))
+        return hashlib.sha256(json.dumps(normalized,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+    def cached_payload(self, identity):
+        if not isinstance(identity,str) or not re.fullmatch(r'[0-9a-f]{64}',identity):
+            raise NativeError('Invalid immutable payload identity')
+        root=self.directory/'payload-objects'
+        path=root/identity
+        if root.is_symlink() or path.is_symlink():raise NativeError('Unsafe immutable payload cache')
+        if self.payload_id(load_payload(path))!=identity:raise NativeError('Immutable payload identity differs')
+        return path
+
     def remember_payload(self, directory):
-        manifest = load_payload(directory)
-        destination = self.directory / 'releases' / manifest['source_sha']
-        if destination.is_symlink():
-            raise NativeError('Unsafe release cache')
-        destination.mkdir(mode=0o700, parents=True, exist_ok=True)
-        for name in ['manifest.json', *manifest['files']]:
-            if (destination/name).is_symlink():
-                raise NativeError('Unsafe cached payload symlink')
-            if (Path(directory)/name).resolve() != (destination/name).resolve():
-                shutil.copyfile(Path(directory)/name, destination/name)
-        load_payload(destination)
-        return destination
+        manifest=load_payload(directory);identity=self.payload_id(manifest)
+        root=self.directory/'payload-objects';destination=root/identity
+        if root.is_symlink():raise NativeError('Unsafe immutable payload cache')
+        root.mkdir(mode=0o700,parents=True,exist_ok=True)
+        if destination.exists() or destination.is_symlink():return self.cached_payload(identity)
+        with tempfile.TemporaryDirectory(prefix='.payload-',dir=root) as temporary:
+            staging=Path(temporary)/'verified';staging.mkdir(mode=0o700)
+            for name in ['manifest.json',*manifest['files']]:shutil.copyfile(Path(directory)/name,staging/name)
+            if self.payload_id(load_payload(staging))!=identity:raise NativeError('Payload changed while caching')
+            os.replace(staging,destination)
+        return self.cached_payload(identity)
+
+    def previous_payload(self, pending):
+        if pending.get('from_payload_id'):return self.cached_payload(pending['from_payload_id'])
+        source=pending['from_source']
+        if not re.fullmatch(r'[0-9a-f]{40}',source):raise NativeError('Invalid previous source identity')
+        return self.remember_payload(self.directory/'releases'/source)
+
+    def payload_matches_current(self, manifest):
+        return (manifest['source_sha']==self.state['source_sha'] and manifest['image']['digest']==self.state['image_digest'] and
+            manifest['files']['edge.js']==self.state.get('edge_bundle_sha256') and
+            manifest.get('catalog_backend','filedb')==self.state.get('catalog_backend','filedb') and
+            manifest.get('edge_mode','preview')==self.state.get('edge_mode','preview'))
 
     def capture_current_payload(self):
+        root=self.directory/'payload-objects'
+        if root.is_symlink():raise NativeError('Unsafe immutable payload cache')
+        if self.state.get('active_payload_id'):
+            path=self.cached_payload(self.state['active_payload_id'])
+            if self.payload_matches_current(load_payload(path)):return path
+        if root.is_dir():
+            for entry in sorted(root.iterdir()):
+                if re.fullmatch(r'[0-9a-f]{64}',entry.name):
+                    path=self.cached_payload(entry.name)
+                    if self.payload_matches_current(load_payload(path)):return path
         destination = self.directory/'releases'/self.state['source_sha']
         if destination.is_dir():
             manifest = load_payload(destination)
@@ -39,7 +77,7 @@ class Operations(Deployment):
                 raise NativeError('Current cached catalog authority differs')
             if manifest.get('edge_mode','preview') != self.state.get('edge_mode','preview'):
                 raise NativeError('Current cached Edge mode differs')
-            return destination
+            return self.remember_payload(destination)
         edge = self.verify('edge')
         value = self.api('GET', '/compute/script/'+str(self.state['resources']['edge']['id'])+'/code')
         code = value.get('Code') if isinstance(value,dict) else None
@@ -63,7 +101,7 @@ class Operations(Deployment):
         manifest['edge_mode']=self.state.get('edge_mode','preview')
         atomic_private(destination/'manifest.json',manifest)
         load_payload(destination)
-        return destination
+        return self.remember_payload(destination)
 
     def assert_schema_compatible(self, payload):
         manifest=load_payload(payload)
@@ -117,8 +155,10 @@ class Operations(Deployment):
         target['container']['imageTag']='sha-'+manifest['source_sha']
         target['container']['imageDigest']=manifest['image']['digest']
         ident=str(record['id']);container_id=str(remote['containerTemplates'][0]['id'])
-        self.state['pending_update']={'from_source':self.state['source_sha'],'to_source':manifest['source_sha'],
-            'from_digest':self.state['image_digest'],'to_digest':manifest['image']['digest'],'phase':'worker_patch_intent',
+        self.state['pending_update']={**self.state.get('pending_update',{}),'from_source':self.state.get('pending_update',{}).get('from_source',self.state['source_sha']),'to_source':manifest['source_sha'],
+            'from_digest':self.state.get('pending_update',{}).get('from_digest',self.state['image_digest']),
+            'runtime_before_source':self.state['source_sha'],'runtime_before_digest':self.state['image_digest'],
+            'to_digest':manifest['image']['digest'],'phase':'worker_patch_intent',
             'started_at':datetime.now(timezone.utc).isoformat()}
         self.save()
         uncertain=None
@@ -154,30 +194,48 @@ class Operations(Deployment):
         pending=self.state.get('pending_update')
         if pending and not rollback and pending['to_source'] != manifest['source_sha']:
             raise NativeError('Resume the pending release or explicitly roll it back first')
-        if pending and not rollback:
-            previous=self.directory/'releases'/pending['from_source']
-            load_payload(previous)
-            old_sha=pending['from_source']
+        if pending:
+            previous=self.previous_payload(pending)
         else:
             previous=self.capture_current_payload()
-            old_sha=self.state['source_sha']
-        self.remember_payload(directory)
-        changed=self.switch_worker(directory)
-        changed=changed or bool(pending and old_sha != manifest['source_sha'])
-        self.wire_edge(Path(directory)/'edge.js',manifest['files']['edge.js'])
-        if changed:
-            self.worker_action('start')
+        previous_manifest=load_payload(previous)
+        old_sha=previous_manifest['source_sha']
+        from_id=self.payload_id(previous_manifest)
+        target=self.remember_payload(directory);to_id=self.payload_id(manifest)
+        if not pending and self.payload_matches_current(manifest):
+            self.verify('worker')
+            edge=self.verify('edge')
+            if self.state.get('edge_release_id')!=edge.get('CurrentReleaseId'):
+                raise NativeError('Active Edge release changed outside this deployment')
+            return {'changed':False,'from_source':old_sha,'to_source':manifest['source_sha'],
+                'from_payload_id':from_id,'to_payload_id':to_id,'previous_payload':str(previous),'rollback':rollback}
+        if pending and not rollback and pending.get('to_payload_id',to_id)!=to_id:
+            raise NativeError('Resume the exact pending payload before another configuration')
+        if not pending or rollback:
+            self.state['pending_update']={'from_source':old_sha,'to_source':manifest['source_sha'],
+                'from_digest':previous_manifest['image']['digest'],'to_digest':manifest['image']['digest'],
+                'from_payload_id':from_id,'to_payload_id':to_id,'phase':'release_prepared',
+                'started_at':datetime.now(timezone.utc).isoformat()}
+            self.save()
+        else:
+            pending.update(from_payload_id=from_id,to_payload_id=to_id);self.save()
+        worker_changed=self.switch_worker(target)
+        changed=worker_changed or from_id!=to_id
+        self.wire_edge(target/'edge.js',manifest['files']['edge.js'],force=True)
+        if changed:self.worker_action('start')
         return {'changed':changed,'from_source':old_sha,'to_source':manifest['source_sha'],
-                'previous_payload':str(previous),'rollback':rollback}
+                'from_payload_id':from_id,'to_payload_id':to_id,'previous_payload':str(previous),'rollback':rollback}
 
     @serialized
     def finish_release(self, result, health):
         if not health.get('infrastructureReady') or not health.get('worker_source_matches'):
             raise NativeError('Updated runtime health/source not confirmed')
-        if result['changed']:
+        if result['from_payload_id'] != result['to_payload_id']:
             self.state.setdefault('release_history',[]).append({
                 'from_source':result['from_source'],'to_source':result['to_source'],
+                'from_payload_id':result['from_payload_id'],'to_payload_id':result['to_payload_id'],
                 'rollback':result['rollback'],'completed_at':datetime.now(timezone.utc).isoformat()})
+        self.state['active_payload_id']=result['to_payload_id']
         self.state.pop('pending_update',None)
         self.state['last_health']=health
         self.state['phase']='infrastructure_ready_catalog_not_accepted'
@@ -361,17 +419,17 @@ class Operations(Deployment):
         self.state.setdefault('cutover_history',[]).append(pending)
         self.state['release_history']=[]  # A legacy image is not a compatible SQL rollback target.
         self.state.pop('pending_cutover',None)
+        self.state['active_payload_id']=self.payload_id(load_payload(self.capture_current_payload()))
         self.state['last_health']=health;self.state['phase']='sql_runtime_ready_catalog_not_accepted';self.save()
 
     def rollback_payload(self):
-        if self.state.get('pending_update'):
-            path=self.directory/'releases'/self.state['pending_update']['from_source']
-            load_payload(path)
-            return path
+        if self.state.get('pending_update'):return self.previous_payload(self.state['pending_update'])
         history=self.state.get('release_history',[])
-        if not history:
-            raise NativeError('No confirmed previous release to roll back to')
-        source=self.state['source_sha'] if history[-1].get('rollback') else history[-1]['from_source']
-        path=self.directory/'releases'/source
-        load_payload(path)
-        return path
+        if not history:raise NativeError('No confirmed previous release to roll back to')
+        last=history[-1]
+        identity=last.get('to_payload_id') if last.get('rollback') else last.get('from_payload_id')
+        if identity:return self.cached_payload(identity)
+        source=self.state['source_sha'] if last.get('rollback') else last['from_source']
+        if not re.fullmatch(r'[0-9a-f]{40}',source):raise NativeError('Invalid previous source identity')
+        if source==self.state['source_sha']:return self.capture_current_payload()
+        return self.remember_payload(self.directory/'releases'/source)

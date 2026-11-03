@@ -551,9 +551,9 @@ def native_health(deploy):
         raise NativeError("No verified Bunny HTTPS worker endpoint")
     credentials = read_private(deploy.secret_path)
     observations["worker_url"] = url
-    def get(path, administrative=False):
+    def get(path, administrative=False, base=url):
         headers = {"X-Dev-Key": credentials["admin_key"]} if administrative else {"X-Api-Key": credentials["api_key"]}
-        req = urllib.request.Request(url + path, headers=headers)
+        req = urllib.request.Request(base + path, headers=headers)
         try:
             with urllib.request.build_opener(NoRedirect()).open(req, timeout=8) as response:
                 data = response.read(16385)
@@ -593,6 +593,20 @@ def native_health(deploy):
     except NativeError:
         observations["sql_schema_ready"] = False
     observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"] and observations["worker_catalog_backend_matches"])
+    if deploy.state.get("edge_mode") == "original-api-gateway":
+        edge=deploy.verify("edge")
+        edge_url=safe_https(edge.get("DefaultHostname"))
+        if not edge_url or not urllib.parse.urlsplit(edge_url).hostname.endswith((".bunny.run", ".b-cdn.net")):
+            raise NativeError("No verified owned Edge gateway endpoint")
+        code,edge_version=get("/version",base=edge_url)
+        observations["edge_version_http"]=code
+        observations["edge_source_matches"]=bool(code==200 and isinstance(edge_version,dict) and
+            edge_version.get("gitFullSha")==deploy.state["source_sha"] and edge_version.get("catalogBackend")==expected_backend)
+        code,edge_search=get("/api/v1.0/torrents?search=JacRedHealthProbe"+secrets.token_hex(8),base=edge_url)
+        observations["edge_authenticated_search_http"]=code
+        observations["edge_search_key_valid"]=code==200 and isinstance(edge_search,list)
+        observations["infrastructureReady"]=bool(observations["infrastructureReady"] and
+            observations["edge_source_matches"] and observations["edge_search_key_valid"])
     observations["catalog_acceptance"] = "NOT_ESTABLISHED"
     return observations
 
@@ -730,6 +744,7 @@ def native_update(args):
         edge = deploy.verify("edge")
         if (not deploy.state.get("pending_update") and deploy.state["source_sha"] == manifest["source_sha"]
             and deploy.state["image_digest"] == manifest["image"]["digest"]
+            and deploy.state.get("edge_mode", "preview") == manifest.get("edge_mode", "preview")
             and deploy.state.get("edge_bundle_sha256") == manifest["files"]["edge.js"]
             and deploy.state.get("edge_release_id") == edge.get("CurrentReleaseId")):
             deploy.assert_schema_compatible(target)
@@ -793,7 +808,9 @@ def native_empty_sql_cutover(args):
                               'nonempty_catalog_migration':False,'existing_volumes_preserved':True},indent=2));return
         pending=deploy.state.get('pending_cutover')
         if deploy.state.get('catalog_backend')=='bunny-sql' and not pending:
-            if deploy.state['source_sha']!=manifest['source_sha'] or deploy.state['image_digest']!=manifest['image']['digest']:
+            if (deploy.state['source_sha']!=manifest['source_sha'] or deploy.state['image_digest']!=manifest['image']['digest'] or
+                deploy.state.get('edge_mode','preview')!=manifest.get('edge_mode','preview') or
+                deploy.state.get('edge_bundle_sha256')!=manifest['files']['edge.js']):
                 raise NativeError("SQL authority already active; use compatible update")
             deploy.verify('worker');deploy.assert_schema_compatible(args.payload_dir)
             print(json.dumps({'changed':False,'catalog_backend':'bunny-sql','runtime_health_checked':False},indent=2));return
