@@ -1,0 +1,1321 @@
+{
+  "schema": "jacred-live-edge-gateway/v1",
+  "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+  "edge_url": "https://jacred-6a3535da.bunny.run",
+  "source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+  "edge_release_id": 1276016,
+  "bundle_sha256": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+  "image_digest": "sha256:3fbcc95bd23cc65cdff9c147b9dc5d8f217e5b99f5d4e87f39d2e6082ff8da34",
+  "catalog_backend": "bunny-sql",
+  "row_count": 20,
+  "all_original_row_checksums_preserved": true,
+  "negative_cases": [
+    {
+      "path": "/health",
+      "auth": "none",
+      "status": 200,
+      "elapsed_seconds": 0.5827982659975532,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/version",
+      "auth": "none",
+      "status": 200,
+      "elapsed_seconds": 0.6665783210046357,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/config",
+      "auth": "none",
+      "status": 401,
+      "elapsed_seconds": 0.3650534640037222,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/config",
+      "auth": "api",
+      "status": 401,
+      "elapsed_seconds": 0.3621140859904699,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/config",
+      "auth": "wrong",
+      "status": 401,
+      "elapsed_seconds": 0.4359156510035973,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/dev/FindCorrupt?sampleSize=1",
+      "auth": "none",
+      "status": 401,
+      "elapsed_seconds": 0.6418069720093627,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/cron/maintenance/Status",
+      "auth": "none",
+      "status": 401,
+      "elapsed_seconds": 0.42053034900163766,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle",
+      "auth": "none",
+      "status": 401,
+      "elapsed_seconds": 0.1251009200059343,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle",
+      "auth": "wrong",
+      "status": 401,
+      "elapsed_seconds": 0.2226879650115734,
+      "no_store": false,
+      "body_omitted": true
+    },
+    {
+      "path": "/api/v1.0/config",
+      "spoof": [
+        "X-Forwarded-For"
+      ],
+      "status": 401,
+      "elapsed_seconds": 0.30527126499509905
+    },
+    {
+      "path": "/api/v1.0/config",
+      "spoof": [
+        "X-Real-IP"
+      ],
+      "status": 401,
+      "elapsed_seconds": 0.4701753330009524
+    },
+    {
+      "path": "/api/v1.0/config",
+      "spoof": [
+        "Forwarded"
+      ],
+      "status": 401,
+      "elapsed_seconds": 0.28659462099312805
+    }
+  ],
+  "transport_errors": [],
+  "comparisons": [
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits+Re+-+Zekkai+no+Kuu",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.3254902670014417,
+      "direct_elapsed_seconds": 0.4883127030043397,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Chii+Fuyo",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+      "edge_sha256": "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+      "edge_elapsed_seconds": 0.5578676709992578,
+      "direct_elapsed_seconds": 0.18624700298823882,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Chitose-kun+wa+Ramune+Bin+no+Naka",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+      "edge_sha256": "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+      "edge_elapsed_seconds": 0.6512267590005649,
+      "direct_elapsed_seconds": 0.6690463850100059,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Choujun%21+Choujou-senpai",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+      "edge_sha256": "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+      "edge_elapsed_seconds": 0.31209276999288704,
+      "direct_elapsed_seconds": 0.4364648470073007,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Dark+Summoner+to+Dekiteiru",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+      "edge_sha256": "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+      "edge_elapsed_seconds": 0.32369680699775927,
+      "direct_elapsed_seconds": 0.3027660670049954,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Doumo%2C+Suki+na+Hito+ni+Horegusuri+wo+Irai+sareta+Majo+desu.",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+      "edge_sha256": "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+      "edge_elapsed_seconds": 0.485926029010443,
+      "direct_elapsed_seconds": 0.289674315994489,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Dragon+Ball+Super+-+Beerus",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+      "edge_sha256": "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+      "edge_elapsed_seconds": 0.34339652699418366,
+      "direct_elapsed_seconds": 0.530274811986601,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Hotel+Inhumans+S2",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+      "edge_sha256": "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+      "edge_elapsed_seconds": 0.3066015379881719,
+      "direct_elapsed_seconds": 0.523498884998844,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Hyouken+no+Majutsushi+ga+Sekai+wo+Suberu",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+      "edge_sha256": "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+      "edge_elapsed_seconds": 0.49722737100091763,
+      "direct_elapsed_seconds": 0.3904181719990447,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Kanata+kara",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+      "edge_sha256": "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+      "edge_elapsed_seconds": 0.5092425769980764,
+      "direct_elapsed_seconds": 0.47426536699640565,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.22635323699796572,
+      "direct_elapsed_seconds": 0.2937700449983822,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=SubsPlease",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.4113514769996982,
+      "direct_elapsed_seconds": 0.25020836100156885,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.2032579949882347,
+      "direct_elapsed_seconds": 0.3794064580142731,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=nonexistent-golden-%D0%96",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.1484744750050595,
+      "direct_elapsed_seconds": 0.27444841401302256,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=%D0%91%D0%B8%D1%82%D0%B2%D0%B0",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.22524019399133977,
+      "direct_elapsed_seconds": 0.1864327079965733,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=+++",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.3317698169994401,
+      "direct_elapsed_seconds": 0.18955257399647962,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=%22",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.3932802569906926,
+      "direct_elapsed_seconds": 0.5998626079963287,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=%25",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.37690567500249017,
+      "direct_elapsed_seconds": 0.4895520730060525,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=%E6%97%A5%E6%9C%AC%E8%AA%9E",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.32248455499939155,
+      "direct_elapsed_seconds": 0.6955686620058259,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.4530000020022271,
+      "direct_elapsed_seconds": 0.3921072550001554,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=sid&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.6243628609954612,
+      "direct_elapsed_seconds": 0.4800412119948305,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=sid&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.5239881130110007,
+      "direct_elapsed_seconds": 0.28727321000769734,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=pir&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.3449260100023821,
+      "direct_elapsed_seconds": 0.5423860119917663,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=pir&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.3591774970118422,
+      "direct_elapsed_seconds": 0.30958997999550775,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=size&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.09471041700453497,
+      "direct_elapsed_seconds": 0.2058629800012568,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=size&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.17123231101140846,
+      "direct_elapsed_seconds": 0.10624483700667042,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=createTime&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.40684993799368385,
+      "direct_elapsed_seconds": 0.2751498079887824,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=createTime&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.4783831189997727,
+      "direct_elapsed_seconds": 0.6194595619890606,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=relased&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.43454181498964317,
+      "direct_elapsed_seconds": 0.6403430810023565,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=relased&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.5108720650023315,
+      "direct_elapsed_seconds": 0.33675279100134503,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=bad-sort&exact=true",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.48595045099500567,
+      "direct_elapsed_seconds": 0.4178416219947394,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=bad-sort&exact=false",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.448820852994686,
+      "direct_elapsed_seconds": 0.4025201390031725,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&tracker=subsplease",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.44630894500005525,
+      "direct_elapsed_seconds": 0.5518244679988129,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&tracker=missing",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.637066313996911,
+      "direct_elapsed_seconds": 0.6112235970067559,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.3286231880047126,
+      "direct_elapsed_seconds": 0.4834912990045268,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=720",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.30250978299591225,
+      "direct_elapsed_seconds": 0.39750611400813796,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=bad",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.363772862998303,
+      "direct_elapsed_seconds": 0.44702848700399045,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&type=anime",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.40091911199851893,
+      "direct_elapsed_seconds": 0.30409059599332977,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&type=serial",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.4597562900016783,
+      "direct_elapsed_seconds": 0.38037154999619815,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&type=movie",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.39395937000517733,
+      "direct_elapsed_seconds": 0.43544598401058465,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&season=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.2544073899916839,
+      "direct_elapsed_seconds": 0.48366481099219527,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&season=0",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.19214426800317597,
+      "direct_elapsed_seconds": 0.12239051600045059,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&season=bad",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.2590419810003368,
+      "direct_elapsed_seconds": 0.14696394599741325,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=2026",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.3176456590008456,
+      "direct_elapsed_seconds": 0.1572615629993379,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=0",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.3210817759972997,
+      "direct_elapsed_seconds": 0.255629505001707,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=bad",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.42806847400788683,
+      "direct_elapsed_seconds": 0.31826962700870354,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&voice=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.5704046609898796,
+      "direct_elapsed_seconds": 0.4467659779911628,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&voice=unknown",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.5733596760110231,
+      "direct_elapsed_seconds": 0.6954396000073757,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&videotype=1080p",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.3091125020000618,
+      "direct_elapsed_seconds": 0.18946313599008135,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits&videotype=unknown",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.2587451970030088,
+      "direct_elapsed_seconds": 0.3051829420001013,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.4356280790088931,
+      "direct_elapsed_seconds": 0.40120103300432675,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=5070",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.6078361339896219,
+      "direct_elapsed_seconds": 0.6049299180012895,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=2000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.7565523660014151,
+      "direct_elapsed_seconds": 0.6102686179947341,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.32839270601107273,
+      "direct_elapsed_seconds": 0.4381223860109458,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=5070",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.10207188900676556,
+      "direct_elapsed_seconds": 0.3960549220064422,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=2000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.35201729300024454,
+      "direct_elapsed_seconds": 0.16319819699856453,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.3148971290065674,
+      "direct_elapsed_seconds": 0.5384445290110307,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=5070",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.16477015901182313,
+      "direct_elapsed_seconds": 0.27764813500107266,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=2000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.3913103939994471,
+      "direct_elapsed_seconds": 0.47345933300675824,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.4429495430085808,
+      "direct_elapsed_seconds": 0.40162920000148006,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=5070",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.3302431920019444,
+      "direct_elapsed_seconds": 0.4582433059986215,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=2000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_sha256": "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+      "edge_elapsed_seconds": 0.29667521100782324,
+      "direct_elapsed_seconds": 0.35603844800789375,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.326643153995974,
+      "direct_elapsed_seconds": 0.4510163530067075,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=5070",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.462347751003108,
+      "direct_elapsed_seconds": 0.49445361700782087,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=2000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.5113459499989403,
+      "direct_elapsed_seconds": 0.3628502439969452,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=1&take=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.5082691020070342,
+      "direct_elapsed_seconds": 0.40328764099103864,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=1&take=1000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 1.1186299940018216,
+      "direct_elapsed_seconds": 0.4260337489977246,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=2&take=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.17334303799725603,
+      "direct_elapsed_seconds": 0.11810417599917855,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=2&take=1000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.4532805030030431,
+      "direct_elapsed_seconds": 0.3564013330033049,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=0&take=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.33009613999456633,
+      "direct_elapsed_seconds": 0.49086826799612027,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=0&take=1000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.4211349349934608,
+      "direct_elapsed_seconds": 0.4536679250013549,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=-1&take=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.4744496450002771,
+      "direct_elapsed_seconds": 0.5973269489913946,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=-1&take=1000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.5054405550035881,
+      "direct_elapsed_seconds": 0.5829130629863357,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=bad&take=1",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.4461670309974579,
+      "direct_elapsed_seconds": 0.44855612999526784,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=bad&take=1000",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_sha256": "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+      "edge_elapsed_seconds": 0.4000836129998788,
+      "direct_elapsed_seconds": 0.47996417700778693,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/trackers",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36",
+      "edge_sha256": "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36",
+      "edge_elapsed_seconds": 0.5089898580044974,
+      "direct_elapsed_seconds": 0.3995197409967659,
+      "no_store": false
+    },
+    {
+      "path": "/sync/conf",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+      "edge_sha256": "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+      "edge_elapsed_seconds": 0.2835285150067648,
+      "direct_elapsed_seconds": 0.37210937099007424,
+      "no_store": false
+    },
+    {
+      "path": "/sync/fdb?key=Battle",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_sha256": "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+      "edge_elapsed_seconds": 0.48425636399770156,
+      "direct_elapsed_seconds": 0.43090209999354556,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/conf",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "646c3ca83884d939db93dd6e269a920a1397c3c1a20425a359d5e5580d302a7d",
+      "edge_sha256": "646c3ca83884d939db93dd6e269a920a1397c3c1a20425a359d5e5580d302a7d",
+      "edge_elapsed_seconds": 0.5418545989959966,
+      "direct_elapsed_seconds": 0.45400086299923714,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.11119335399416741,
+      "direct_elapsed_seconds": 0.16386549799062777,
+      "no_store": false
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results?query=Battle",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_sha256": "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+      "edge_elapsed_seconds": 0.27686694799922407,
+      "direct_elapsed_seconds": 0.31961212698661257,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Battle+Spirits+Re+-+Zekkai+no+Kuu&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_sha256": "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+      "edge_elapsed_seconds": 0.3691840620012954,
+      "direct_elapsed_seconds": 0.47230044899333734,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Chii+Fuyo&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+      "edge_sha256": "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+      "edge_elapsed_seconds": 0.5391931070043938,
+      "direct_elapsed_seconds": 0.26547181299247313,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Chitose-kun+wa+Ramune+Bin+no+Naka&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+      "edge_sha256": "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+      "edge_elapsed_seconds": 0.704362664007931,
+      "direct_elapsed_seconds": 0.44460394300404005,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Choujun%21+Choujou-senpai&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+      "edge_sha256": "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+      "edge_elapsed_seconds": 0.30304792399692815,
+      "direct_elapsed_seconds": 0.5857293970038882,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Dark+Summoner+to+Dekiteiru&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+      "edge_sha256": "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+      "edge_elapsed_seconds": 0.4834931470104493,
+      "direct_elapsed_seconds": 0.42000623399508186,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Doumo%2C+Suki+na+Hito+ni+Horegusuri+wo+Irai+sareta+Majo+desu.&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+      "edge_sha256": "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+      "edge_elapsed_seconds": 0.3796218079951359,
+      "direct_elapsed_seconds": 0.5028706640005112,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Dragon+Ball+Super+-+Beerus&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+      "edge_sha256": "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+      "edge_elapsed_seconds": 0.44625178100250196,
+      "direct_elapsed_seconds": 0.4173776379902847,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Hotel+Inhumans+S2&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+      "edge_sha256": "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+      "edge_elapsed_seconds": 0.3340846240025712,
+      "direct_elapsed_seconds": 0.4789094929874409,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Hyouken+no+Majutsushi+ga+Sekai+wo+Suberu&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+      "edge_sha256": "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+      "edge_elapsed_seconds": 0.26056017199880444,
+      "direct_elapsed_seconds": 0.20433233799121808,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Kanata+kara&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+      "edge_sha256": "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+      "edge_elapsed_seconds": 0.48706898700038437,
+      "direct_elapsed_seconds": 0.4589663740043761,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Kikansha+no+Mahou+wa+Tokubetsu+desu&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa",
+      "edge_sha256": "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa",
+      "edge_elapsed_seconds": 0.28336604600190185,
+      "direct_elapsed_seconds": 0.19878598398645408,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Kyouran+Reijou+Nia+Liston&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb",
+      "edge_sha256": "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb",
+      "edge_elapsed_seconds": 0.3289536579977721,
+      "direct_elapsed_seconds": 0.21239767200313509,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Otome+Game+Sekai+wa+Mob+ni+Kibishii+Sekai+desu+S2&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea",
+      "edge_sha256": "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea",
+      "edge_elapsed_seconds": 0.649539461999666,
+      "direct_elapsed_seconds": 0.6492553880088963,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Sasaki+to+Pii-chan&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f",
+      "edge_sha256": "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f",
+      "edge_elapsed_seconds": 1.0551664020022145,
+      "direct_elapsed_seconds": 0.5566367949941196,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Shinja+Zero+no+Megami-sama+to+Hajimeru+Isekai+Kouryaku&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a",
+      "edge_sha256": "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a",
+      "edge_elapsed_seconds": 0.8866958069993416,
+      "direct_elapsed_seconds": 0.33103836100781336,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Shiotaiou+no+Satou-san+ga+Ore+ni+dake+Amai&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191",
+      "edge_sha256": "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191",
+      "edge_elapsed_seconds": 0.31119070600834675,
+      "direct_elapsed_seconds": 0.6379510600090725,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Tempal+-+Item+no+Chikara&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706",
+      "edge_sha256": "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706",
+      "edge_elapsed_seconds": 0.7166021960001672,
+      "direct_elapsed_seconds": 0.3470775850000791,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Tensei+Goblin+dakedo+Shitsumon+Aru&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d",
+      "edge_sha256": "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d",
+      "edge_elapsed_seconds": 0.4383427510038018,
+      "direct_elapsed_seconds": 0.47614283200528007,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Tensei+Kizoku%2C+Kantei+Skill+de+Nariagaru&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1",
+      "edge_sha256": "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1",
+      "edge_elapsed_seconds": 0.2183865569968475,
+      "direct_elapsed_seconds": 0.32687034500122536,
+      "no_store": false
+    },
+    {
+      "path": "/api/v1.0/torrents?search=Yowaki+Max&exact=true&quality=1080",
+      "direct_status": 200,
+      "edge_status": 200,
+      "match": true,
+      "direct_sha256": "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0",
+      "edge_sha256": "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0",
+      "edge_elapsed_seconds": 0.1976337600062834,
+      "direct_elapsed_seconds": 0.2625726050027879,
+      "no_store": false
+    }
+  ],
+  "matched": 101,
+  "sample_count": 101,
+  "latency_seconds": {
+    "p50": 0.3932802569906926,
+    "p95": 0.704362664007931,
+    "max": 1.1186299940018216,
+    "p99": 1.0551664020022145
+  },
+  "production_acceptance": false,
+  "limitations": [
+    "20 actual records from one public tracker; not full representativeness, client or production acceptance",
+    "15s gateway deadline and explicit size limits remain",
+    "Service-computed snapshot checksum endpoint not implemented yet"
+  ],
+  "latency_scope": "Authenticated requests after health checks; not a controlled cold-start sample",
+  "initial_probe_aborted": {
+    "reason": "Connection reset by peer",
+    "subsequent_full_run_success": true,
+    "note": "Aborted first read-only probe was not counted as a passing run"
+  },
+  "torznab": [
+    {
+      "path": "/torznab/api?t=caps",
+      "http": 200,
+      "xml_valid": true,
+      "items": 0,
+      "direct_edge_byte_identical": true,
+      "sha256": "256437b9301636211b908ce405a7eb7004bed8ef791ec1c479b60860c2185358",
+      "content_type": "application/xml; charset=utf-8"
+    },
+    {
+      "path": "/torznab/api?t=indexers",
+      "http": 200,
+      "xml_valid": true,
+      "items": 0,
+      "direct_edge_byte_identical": true,
+      "sha256": "341351695a83e80eb6ac3096c11985ec539634368f88ab9ca21ec9f207bd7ae5",
+      "content_type": "application/xml; charset=utf-8"
+    },
+    {
+      "path": "/torznab/api?t=search&q=Battle%20Spirits",
+      "http": 200,
+      "xml_valid": true,
+      "items": 1,
+      "direct_edge_byte_identical": true,
+      "sha256": "97c9e5b41a529aef149190047399df22750718c5478018517bd8988185f2736f",
+      "content_type": "application/xml; charset=utf-8"
+    },
+    {
+      "path": "/api/v2.0/indexers/all/results/torznab/api?t=search&q=Battle%20Spirits",
+      "http": 200,
+      "xml_valid": true,
+      "items": 1,
+      "direct_edge_byte_identical": true,
+      "sha256": "23329c6d85c9bf1c4e1a1d20b04a47fb8631c2ceedce8f87c4eac7ded90f884b",
+      "content_type": "application/xml; charset=utf-8"
+    },
+    {
+      "path": "/api/v1/indexer/all/newznab?t=tvsearch&q=Battle%20Spirits&cat=5070",
+      "http": 200,
+      "xml_valid": true,
+      "items": 1,
+      "direct_edge_byte_identical": true,
+      "sha256": "e839a8cb8130b4e54a5ba9c508ea642c9c9e463dfc639b6fcc2c493b86e40d80",
+      "content_type": "application/xml; charset=utf-8"
+    },
+    {
+      "path": "/torznab/api?t=search&q=nonexistent-golden-1234",
+      "http": 200,
+      "xml_valid": true,
+      "items": 0,
+      "direct_edge_byte_identical": true,
+      "sha256": "ccbe855fb0732a0cdb8f1cf45db00ec2ebebac9679057f4200d7a983536550b5",
+      "content_type": "application/xml; charset=utf-8"
+    }
+  ],
+  "post_test_worker_stop": {
+    "worker_id": "OnCopUramoFnaJG",
+    "status": "inactive",
+    "source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+    "catalog_backend": "bunny-sql",
+    "confirmed_at": 1793730328.218236
+  },
+  "browser": {
+    "edge_https_ui": true,
+    "key_save_refetch_without_reload": true,
+    "english_native_search_result_count": 1,
+    "russian_jackett_search_result_count": 1,
+    "exact_source_link_observed": true,
+    "screenshots": [
+      "/images/edge-live-search-en.png",
+      "/images/edge-live-search-ru.png",
+      "/images/edge-live-jackett-ru.png"
+    ]
+  },
+  "actual_cost": "COST_UNKNOWN: no complete account usage telemetry attributed to this test",
+  "deployment_scope": "Existing owned SQL staging, exact CI image and bundle; advanced development SQL/gateway payload, not public-release fresh installer acceptance"
+}

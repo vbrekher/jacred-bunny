@@ -6,19 +6,19 @@ Checked: 3 November 2026. **IN PROGRESS — NOT PRODUCTION READY.**
 
 | Gate | Result | Evidence / remaining work |
 | --- | --- | --- |
-| SOURCE | FAIL | CI and 946 .NET tests passed for PR #10; native foundation CI pending; reproducible release artifact and scans incomplete. |
-| FEATURE PARITY | FAIL | Existing 91 Edge tests pass; 100-case immutable original/live golden corpus has not run. |
-| REAL SQL | FAIL | Live CRUD/FTS5/transaction/least-privilege smoke passed with synthetic rows; real catalog, multi-DB fanout and recovery untested. |
-| TRACKERS 25 | FAIL | All 25 source IDs retained; 22 LIMITED / 3 UPSTREAM_UNAVAILABLE host HEAD observations; live parser samples and source-to-SQL flow not run. |
-| DURABILITY | FAIL | Storage PUT/GET checksum verified; real backup restore into a new DB and restart preservation gates not complete. |
-| WORKERS | FAIL | SQL collector, durable queue integration and 24h live soak incomplete. |
-| SECURITY | FAIL | Live missing-key 401 and no-cache responses verified; full scans/429/SSRF/RBAC matrix incomplete. |
-| CLIENTS | FAIL | Real browser UI checked; actual Lampa/Tizen/Prowlarr/Sonarr/Radarr/TorrServer integration untested. |
-| INSTALLER | FAIL | Four services created by one CLI run; repeat preserves IDs, migrations skip; expiry stop/restart verified. Default public bootstrap, real catalog fixture, all operations and owned cleanup remain incomplete. |
-| OPERATIONS | FAIL | 20 MC health samples, real expiry watchdog and CDN byte caps recorded; full usage accounting, alerts and DR incomplete. |
-| DOCUMENTATION | FAIL | English root README and real empty-catalog screenshots added; equivalent full RU/EN/NL sets incomplete. |
-| RELEASE | FAIL | PR #10 merged after CI; native foundation PR pending; no v1.0.0 release or production launch. |
+| SOURCE | FAIL | PRs #19–21 merged after successful CI; exact CI image/digest and matching Edge bundle deployed. 169 Python, 101 Edge Node, 962 .NET and 73 web checks recorded. Complete reproducibility/security/license release evidence remains open. |
+| FEATURE PARITY | FAIL | 107 immutable-snapshot local HTTP cases: 105 exact baseline matches, two build-version-only differences; all 107 local gateway/native matches. Live Edge/native: 101 JSON and six XML cases match. All required routes, richer datasets/fuzz and service-computed snapshot attestation remain incomplete. |
+| REAL SQL | FAIL | Original in-cloud collector wrote 20 real SubsPlease records to Bunny SQL; native/Edge reads and all row checksums verified after image update and restart. Complete 2+ DB live fanout/failure recovery and actual attributed usage metrics remain incomplete. |
+| TRACKERS 25 | FAIL | All 25 source IDs retained. Earlier HEAD observations are not parser readiness. Actual source-to-SQL and query proof exists for SubsPlease; complete per-adapter live samples, auth setup and objective readiness matrix remain incomplete. |
+| DURABILITY | FAIL | Real SQL catalog backup in Bunny Storage restored into a new DB after verified source loss; query checksum preserved. SQL MC restart preserved 20 real rows. General reimport, Tracks/config/jobs recovery and all-component restart gates remain incomplete. |
+| WORKERS | FAIL | Original collector runs against SQL in the owned Magic Container. Durable scheduler leases/cursors/retries/crash resume, full concurrency acceptance and 24h live soak remain incomplete. |
+| SECURITY | FAIL | Live Edge rejects anonymous/wrong-key administrative/search requests and spoofed local proxy identity; no-store and scoped SQL tokens verified. Full 429/500/SSRF/TLS/RBAC/history/secret/license/container scans remain incomplete. |
+| CLIENTS | FAIL | Actual English/Russian native and Jackett web search verified through Edge, including saved-key retry fix. Six Torznab XML protocol cases pass. Actual Lampa/Tizen/Prowlarr/Sonarr/Radarr applications and separate TorrServer integration remain incomplete. |
+| INSTALLER | FAIL | Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. |
+| OPERATIONS | FAIL | Live warmed Edge latency measured for 101 cases (p50/p95/p99 in evidence); bounded worker stop confirmed. Actual attributed cost is COST_UNKNOWN. Complete bytes/cost telemetry, alerting, controlled cold-start measurements and full rollback/restore operations remain incomplete. |
+| DOCUMENTATION | FAIL | English root README, real SQL/Edge product screenshots and dated scoped evidence updated; equivalent complete RU/EN/NL documentation and public product presentation remain incomplete. |
+| RELEASE | FAIL | PRs through #21 merged with green checks; exact source/digest gateway staging tested. No tagged v1.0.0 release, complete release acceptance or public production landing page yet. |
 
-[Machine-readable matrix](acceptance.json) · [Dated live evidence](evidence/2026-11-03-staging.md)
+[Machine-readable matrix](acceptance.json) · [Live Edge evidence](evidence/live-edge-gateway-2026-11-03.json) · [Local golden evidence](evidence/http-gateway-parity-2026-11-03.json) · [SQL disaster recovery](evidence/native-runtime-backup-v2-2026-11-03.json)
 
-No tag through v1.0.0 is claimed complete by this matrix. Test counts describe source checks; they do not prove tracker or client availability.
+No tag through v1.0.0 is claimed complete by this matrix. Every mandatory gate remains FAIL until its full scope is proven; partial live checks are recorded above without promoting them to full acceptance.
