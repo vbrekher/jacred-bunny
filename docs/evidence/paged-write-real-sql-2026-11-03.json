@@ -1,0 +1,15 @@
+{
+  "committed_rows": 1200,
+  "committed_payload_bytes": 4915200,
+  "later_page_constraint_failure_rejected": true,
+  "rows_after_failed_transaction": 0,
+  "owned_probe_cleanup_confirmed": true,
+  "source_sha": "322d1edf90432c1946833d145ea269c5313aafe7",
+  "elapsed_seconds": 8.344249,
+  "scope": "Real Bunny SQL paged writes using isolated owned probe table; no canonical catalog writes or deployed worker claim",
+  "production_acceptance": false,
+  "canonical_tables_unchanged": true,
+  "canonical_torrent_count": 22,
+  "canonical_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "reproduction_harness": "tests/LiveSqlWrites"
+}
