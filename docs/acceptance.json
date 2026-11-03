@@ -4,12 +4,12 @@
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
-  "live_worker_source_sha": "c0d5dfd00326f41ed63b23a618355e5578316df6",
+  "live_worker_source_sha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
   "gates": [
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #29 passed. Current local full suite has 1032 .NET tests, including paged bucket/index/receipt reads with actual SQLite concurrent-write isolation. Complete reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #30 passed, with 1032 .NET tests locally and in the full CI job. Exact source 742e34c3/digest-pinned native image and matching Edge bundle deployed. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -19,7 +19,7 @@
     {
       "gate": "REAL SQL",
       "status": "FAIL",
-      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete. Exact-source isolated Bunny SQL probe additionally committed 1200 rows/4915200 payload bytes, verified late-page rollback and cleanup, and preserved all seven canonical tables. Exact-source native bucket/index read-only slice additionally verified all 22 real row hashes and the unchanged independent snapshot; large live capacity remains incomplete."
+      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete. Exact-source isolated Bunny SQL probe additionally committed 1200 rows/4915200 payload bytes, verified late-page rollback and cleanup, and preserved all seven canonical tables. Exact-source native bucket/index read-only slice additionally verified all 22 real row hashes and the unchanged independent snapshot; large live capacity remains incomplete. Current image 742e34c3 MC/Edge proofs matched the independent 22-record snapshot; latest collector returned ok with zero new commits, so no new write-path PASS is asserted."
     },
     {
       "gate": "TRACKERS 25",
@@ -64,7 +64,7 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #29 merged with green checks. Exact TLS-hardened staging image tested; paged snapshot/write/read changes are not yet deployed to MC/Edge. No tagged v1.0.0 release, complete acceptance or public production landing page yet."
+      "reason": "PRs through #30 merged with green checks. Exact paged SQL image 742e34c3/d2bf298c deployed and scoped checks passed; compute stopped. No tagged v1.0.0 release, complete production acceptance or public landing page yet."
     }
   ],
   "source_checks": {
@@ -72,9 +72,10 @@
     "edge_node": 101,
     "dotnet": 1032,
     "web": 73,
-    "scope": "Local source checks; all CI through PR #29; paged read changes local full suite only until their CI completes"
+    "scope": "Local source checks and all CI through PR #30; exact native image deployed for scoped auth/snapshot/cache checks only"
   },
   "recent_evidence": [
+    "evidence/live-paged-runtime-2026-11-03.json",
     "evidence/paged-read-real-sql-2026-11-03.json",
     "evidence/paged-read-source-2026-11-03.json",
     "evidence/paged-write-real-sql-2026-11-03.json",
