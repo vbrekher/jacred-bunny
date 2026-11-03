@@ -1,4 +1,4 @@
-name: Bunny Native v0.5.1 Edge and SQL Parity
+name: Bunny Native v0.5.2 Search and SQL Sharding
 
 on:
   workflow_dispatch:
@@ -9,8 +9,11 @@ on:
       - 'tools/bunny_native_export.py'
       - 'tools/bunny_native_parity.py'
       - 'tools/bunny_native_capture.py'
+      - 'tools/bunny_native_split.py'
+      - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
       - 'tests/test_bunny_native_capture.py'
+      - 'tests/test_bunny_native_split.py'
       - 'tests/test_bunny_native_import.py'
       - '.github/workflows/bunny-native-edge.yml'
   push:
@@ -21,8 +24,11 @@ on:
       - 'tools/bunny_native_export.py'
       - 'tools/bunny_native_parity.py'
       - 'tools/bunny_native_capture.py'
+      - 'tools/bunny_native_split.py'
+      - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
       - 'tests/test_bunny_native_capture.py'
+      - 'tests/test_bunny_native_split.py'
       - '.github/workflows/bunny-native-edge.yml'
 permissions:
   contents: read
@@ -43,6 +49,8 @@ jobs:
           node --check bunny-native/edge/src/format.mjs
           node --check bunny-native/edge/src/sql.mjs
           node --check bunny-native/edge/src/parity.mjs
+          node --check bunny-native/edge/src/shards.mjs
+          python3 -m py_compile tools/bunny_native_split.py
           node --check bunny-native/edge/live-acceptance.mjs
           python3 -m py_compile bunny-native/edge/tests/fixtures/sqlite_bridge.py
           python3 -m py_compile tools/bunny_native_parity.py
@@ -64,7 +72,7 @@ jobs:
       - name: Save verified standalone Edge bundle (not deployed)
         uses: actions/upload-artifact@v4
         with:
-          name: jacred-native-v0.5.1-edge-bundle
+          name: jacred-native-v0.5.2-edge-bundle
           path: bunny-native/edge/dist/index.js
           retention-days: 14
       - name: Staged import regression after provenance transport change
@@ -73,6 +81,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_parity.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_capture.py' -v
+          python3 -m unittest discover -s tests -p 'test_bunny_native_split.py' -v
       - name: Check source tracker roster has not drifted
         run: |
           python3 - <<'PY'
