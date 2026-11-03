@@ -4,7 +4,7 @@
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
-  "live_worker_source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+  "live_worker_source_sha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
   "gates": [
     {
       "gate": "SOURCE",
@@ -14,7 +14,7 @@
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases: 105 exact baseline matches, two build-version-only differences; all 107 local gateway/native matches. Live Edge/native: 101 JSON and six XML cases match. All required routes, richer datasets/fuzz and service-computed snapshot attestation remain incomplete."
+      "reason": "107 immutable-snapshot local HTTP cases: 105 exact baseline matches, two build-version-only differences; all 107 local gateway/native matches. Live Edge/native: 101 JSON and six XML cases match. All required routes, richer datasets/fuzz and large-catalog service attestation remain incomplete. Protected service-computed SQL digest now matches the independent real snapshot through MC and Edge; bounded 20-row scope only."
     },
     {
       "gate": "REAL SQL",
@@ -39,7 +39,7 @@
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live Edge rejects anonymous/wrong-key administrative/search requests and spoofed local proxy identity; no-store and scoped SQL tokens verified. Full 429/500/SSRF/TLS/RBAC/history/secret/license/container scans remain incomplete."
+      "reason": "Live auth/spoofed-proxy denials verified. Correction: earlier 101-response no-store claim was unsupported (all captured flags false). Owned CDN header rules now preserve no-store and authenticated-then-anonymous checks passed; automatic CLI enforcement, tracker TLS/SSRF fixes and full scans/429/500/RBAC remain incomplete."
     },
     {
       "gate": "CLIENTS",
@@ -75,6 +75,7 @@
     "scope": "Local source checks and CI evidence through gateway source; not full live gates"
   },
   "recent_evidence": [
+    "evidence/service-snapshot-attestation-2026-11-03.json",
     "evidence/live-edge-gateway-2026-11-03.json",
     "evidence/http-gateway-parity-2026-11-03.json",
     "evidence/live-sql-worker-2026-11-03.json",
