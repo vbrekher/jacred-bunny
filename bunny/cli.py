@@ -47,6 +47,8 @@ def request(method, path, key, payload=None):
         raise DeploymentError("Bunny network error (" + method + " " + path.split("?")[0] + ")") from None
 
 def save_config(c):
+    if CONFIG.is_symlink():
+        raise DeploymentError("Refusing symlink config")
     CONFIG.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(CONFIG.parent, 0o700)
     temp = CONFIG.with_suffix(".tmp")
@@ -352,7 +354,7 @@ def setup(args):
     ensure_no_duplicate(key)
     ident = create_app_safely(key, body, region, args.image, registry)
     config = {"api_key": key, "app_id": ident, "region": region, "image": args.image,
-              "image_digest_at_create": digest, "data_gb": args.data_gb,
+              "image_digest_at_create": digest, "registry_id": registry, "data_gb": args.data_gb,
               "jacred_api_key": api_secret, "jacred_dev_key": dev_secret, "url": None}
     save_config(config)  # Save ID BEFORE deploy, for recovery after failure.
     print("App created:", ident, "; credentials saved locally.")
@@ -364,7 +366,7 @@ def setup(args):
             print("Deploy failed; app ID is saved. Run jacred-bunny start:", exc, file=sys.stderr)
     config["url"] = fetch_endpoint(key, ident)
     save_config(config)
-    details(config, show_keys=True)
+    details(config, show_keys=False)
     if config.get("url"):
         probe(config["url"])
 
@@ -372,8 +374,8 @@ def probe(url):
     try:
         with urllib.request.urlopen(url + "/health", timeout=8) as response:
             print("Live health HTTP:", response.status)
-    except Exception:
-        print("Live health: not ready yet; check jacred-bunny status")
+    except (urllib.error.URLError, TimeoutError, OSError):
+        raise DeploymentError("Live health unavailable; check jacred-bunny status") from None
 
 def status(show_keys=False):
     c = load_config()
@@ -402,8 +404,29 @@ def doctor():
     except DeploymentError:
         print("Account limits API not available")
 
+def verified_owned_app(c):
+    """Revalidate remote identity before every mutation, including legacy installs."""
+    ident = c.get("app_id")
+    if not isinstance(ident, str) or not re.fullmatch(r"[A-Za-z0-9-]+", ident):
+        raise DeploymentError("Invalid saved app ID")
+    app = request("GET", "/mc/apps/" + ident, c["api_key"])
+    expected = image_parts(c["image"])
+    templates = app.get("containerTemplates") if isinstance(app, dict) else None
+    if (not isinstance(app, dict) or app.get("name") != APP_NAME or
+        not isinstance(templates, list) or len(templates) != 1 or
+        not isinstance(templates[0], dict) or templates[0].get("name") != "jacred" or
+        any(templates[0].get(k) != expected[k] for k in ("imageNamespace", "imageName", "imageTag")) or
+        c.get("region") not in (app.get("regionSettings") or {}).get("requiredRegionIds", [])):
+        raise DeploymentError("Remote app identity changed; refusing mutation")
+    registry = c.get("registry_id")
+    if registry is not None and str(templates[0].get("imageRegistryId")) != str(registry):
+        raise DeploymentError("Remote app registry changed; refusing mutation")
+    return app
+
+
 def lifecycle(action):
     c = load_config()
+    verified_owned_app(c)
     verb = "deploy" if action == "start" else "undeploy"
     request("POST", "/mc/apps/" + urllib.parse.quote(c["app_id"], safe="") + "/" + verb, c["api_key"])
     print(verb.upper(), "requested:", c["app_id"])

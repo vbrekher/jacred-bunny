@@ -68,7 +68,7 @@ jobs:
       - name: Bundle deployable Edge script with official Bunny packages
         working-directory: bunny-native/edge
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build
           test -s dist/index.js
           node --check dist/index.js

@@ -111,6 +111,31 @@ class InstallerTests(unittest.TestCase):
                 with self.assertRaises(cli.DeploymentError):
                     cli.load_config()
 
+    def test_lifecycle_rejects_changed_remote_identity(self):
+        config = {"api_key": "private", "app_id": "owned-id", "region": "AMS",
+                  "image": cli.IMAGE, "registry_id": "11126"}
+        with patch.object(cli, "load_config", return_value=config), patch.object(
+                cli, "request", return_value={"name": "other-product"}) as req:
+            with self.assertRaises(cli.DeploymentError):
+                cli.lifecycle("stop")
+            self.assertTrue(all(x.args[0] == "GET" for x in req.call_args_list))
+
+    def test_health_failure_is_not_success(self):
+        with patch.object(cli.urllib.request, "urlopen", side_effect=TimeoutError):
+            with self.assertRaises(cli.DeploymentError):
+                cli.probe("https://mc-example.bunny.run")
+
+    def test_config_symlink_is_not_replaced(self):
+        with tempfile.TemporaryDirectory() as root:
+            target = Path(root) / "other-product.json"
+            target.write_text("do not change")
+            config = Path(root) / "config.json"
+            config.symlink_to(target)
+            with patch.object(cli, "CONFIG", config):
+                with self.assertRaises(cli.DeploymentError):
+                    cli.save_config({"api_key": "secret"})
+            self.assertEqual(target.read_text(), "do not change")
+
     def test_self_test(self):
         cli.self_test()
 

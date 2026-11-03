@@ -5,6 +5,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'bunny/cli.py'
+      - 'tests/test_bunny_installer.py'
       - 'Dockerfile.bunny'
       - 'bunny/boot.sh'
       - 'bunny/cron-job.sh'
