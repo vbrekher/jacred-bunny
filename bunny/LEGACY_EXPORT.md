@@ -1,6 +1,6 @@
 # Private legacy byte export — development mode
 
-This separate process mode prepares a private archive of original FileDB bytes. It does **not** import a catalog into SQL or complete an installer upgrade. Owned-worker lifecycle automation, nonempty cloud migration and restore acceptance remain incomplete.
+This separate process mode prepares a private archive of original FileDB bytes. It does **not** import a catalog into SQL or complete an installer upgrade. The CLI lifecycle controller has source/local validation; owned-worker cloud export, nonempty SQL migration and restore acceptance remain incomplete.
 
 ## Isolation and required controller sequence
 
@@ -56,3 +56,24 @@ The harness compares the running `/version` source SHA to the checkout, generate
 [Local process evidence](../docs/evidence/legacy-export-local-2026-11-04.json) records actual loopback HTTP using a synthetic FileDB and dummy keys, independent tar/hash verification, missing/wrong/search/query-key denials, absent normal routes, download exhaustion, deadline rejection/shutdown and unchanged source bytes. Unit tests cover raw Tracks/config/checkpoint bytes, timestamps, private modes, daily masters, cancellation, bounds, symlinks and a real FIFO. Shell tests execute the actual boot dispatcher with mutation commands trapped.
 
 This evidence is not a Bunny volume export, nonempty SQL import, restore, fresh public installation or production durability PASS. All mandatory production gates remain incomplete.
+
+## CLI controller and verified normal shutdown
+
+`native-staging legacy-export` defaults to a no-change plan. With `--apply`, it verifies the saved owned worker, allocation, original volumes, current source and normal-process capabilities before enabling export. The normal bridge must report both `legacyByteExportVersion: "1"` and `legacyCheckpointVersion: "1"`, with `legacyCheckpointReady: "1"`. Older images that ignore the export flag are rejected.
+
+```sh
+jacred-bunny native-staging legacy-export --state-dir /private/state
+jacred-bunny native-staging legacy-export --state-dir /private/state --apply --hours 0.15 --max-estimated-usd 2
+```
+
+A new controller window is capped at nine minutes and still uses the existing pricing estimate, owned CDN policy and independent stop watchdog. The watcher must advertise `legacy_export_stop`; an older watcher is replaced only after stopping the owned worker and confirming the previous watcher's terminal state. The controller never sends the account key to the worker. Saved environment values stay in a separate 0600 private file; the deployment journal contains their fingerprints.
+
+The ordinary `/jsondb/save` response is **not** a completed checkpoint: the original route schedules background work and its writer suppresses errors. The normal bridge instead registers a shutdown checkpoint service before the configuration watcher and other hosted workers, with sequential service shutdown enforced. After HTTP and workers stop, it waits for tracked jobs, refuses active write scopes, closes legacy write admission and flushes cached writes and the master. It verifies the exact original writer encoding with streaming hashes and fsync before writing an owned receipt. Startup invalidates the previous owned receipt; an unrecognized receipt is preserved and export readiness remains false.
+
+The receipt binds the observed normal process ID, built source SHA, actual compressed master SHA and key count. The client verifies that receipt inside the complete private archive against the process observed before stopping it. A plain byte archive without the matching shutdown receipt cannot pass this controller's checkpoint verification. This is a single owned-worker protocol; it does not coordinate an external writer that bypasses the deployment.
+
+The controller journals environment changes before PATCH, reconciles an uncertain result by reading the same resource, and never blindly replays an uncertain enable PATCH. Normal `start` refuses a pending export. After transfer or failure, the controller stops compute and restores the original environment while the app remains inactive. Re-running a pending export performs compensation and reports `RECOVERED_RETRY_REQUIRED`, without claiming an archive was verified. Verified archives and private recovery files stay under the installation's `legacy-exports/<export-id>/` directory. No SQL schema, catalog authority, Edge code or Storage object is changed by this operation.
+
+The archive verifier checks every member's bytes and timestamp, complete manifest identity, gzip CRC, tar end/trailing payload, duplicate JSON fields, portable filename collisions and expansion/metadata bounds. It refuses links, sparse/special entries and non-private archive files. It never extracts the archive.
+
+[Checkpoint/controller evidence](../docs/evidence/legacy-checkpoint-controller-2026-11-04.json) records actual local normal shutdown → exporter → Python verification, plus explicitly mocked control-plane failure tests. Cloud environment switching, nonempty SQL import, executable permissions on restore and full production migration acceptance remain incomplete.

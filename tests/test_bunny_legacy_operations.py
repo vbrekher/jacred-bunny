@@ -49,6 +49,7 @@ class LegacyOperationTests(unittest.TestCase):
     def api(self, method, path, body=None):
         self.calls.append((method, path))
         if path == '/mc/apps/worker': return deepcopy(self.remote)
+        if path == '/mc/limits': return {}
         if method == 'PATCH':
             if self.patch_applies: self.remote['containerTemplates'][0].update(deepcopy(body))
             if self.patch_lost: raise NativeError('uncertain')
@@ -180,3 +181,36 @@ class LegacyOperationTests(unittest.TestCase):
         self.deploy.api.key = self.environment[1]['value']
         with self.assertRaises(NativeError): self.deploy.prepare_legacy_export(self.proof)
         self.assertFalse(any(method=='PATCH' for method,path in self.calls))
+
+    def test_cli_rejects_sql_authority_before_rates_watchdog_or_cloud_calls(self):
+        import argparse, cli
+        self.deploy.state['catalog_backend'] = 'bunny-sql'; self.deploy.save()
+        before = list(self.calls)
+        with patch('legacy.LegacyExports', return_value=self.deploy), patch.object(cli, 'account_key', return_value='unused-local-root'), \
+             patch('native.staging_cost_plan', side_effect=AssertionError('must not estimate or renew')):
+            with self.assertRaises(NativeError):
+                cli.native_legacy_export(argparse.Namespace(apply=True, state_dir=self.deploy.directory))
+        self.assertEqual(self.calls, before)
+
+    def test_cli_apply_runs_bounded_export_using_the_existing_price_guard(self):
+        import argparse, cli
+        self.deploy.bound_staging_cdn = Mock()
+        with patch('legacy.LegacyExports', return_value=self.deploy), patch.object(cli, 'account_key', return_value='unused-local-root'), \
+             patch('native.current_pricing', return_value={}), patch('native.staging_cost_plan', return_value={'estimated_initial_usd':.1}) as cost, \
+             contextlib.redirect_stdout(io.StringIO()) as output:
+            cli.native_legacy_export(argparse.Namespace(apply=True, state_dir=self.deploy.directory, hours=1, max_estimated_usd=2))
+        self.assertEqual(cost.call_args.args[1], .15)
+        self.assertEqual(json.loads(output.getvalue())['status'], 'PRIVATE_ARCHIVE_VERIFIED')
+        self.assertEqual(self.remote['status'], 'inactive')
+
+    def test_cli_does_not_stop_an_active_pre_bridge_source_for_watcher_upgrade(self):
+        import argparse, cli
+        self.deploy.bound_staging_cdn = Mock()
+        self.deploy._normal_proof.side_effect = NativeError('pre-bridge source')
+        atomic_private(self.deploy.directory/'watchdog.json', {'capabilities':['authority_intent_stop']})
+        with patch('legacy.LegacyExports', return_value=self.deploy), patch.object(cli,'account_key',return_value='unused-local-root'), \
+             patch('native.current_pricing', return_value={}), patch('native.staging_cost_plan', return_value={'estimated_initial_usd':.1}):
+            with self.assertRaises(NativeError):
+                cli.native_legacy_export(argparse.Namespace(apply=True,state_dir=self.deploy.directory,hours=1,max_estimated_usd=2))
+        self.assertEqual(self.remote['status'], 'active')
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))

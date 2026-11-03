@@ -1,10 +1,10 @@
 name: Bunny native provisioning safety
 on:
   pull_request:
-    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_*.py', 'install-bunny.sh', '.github/workflows/bunny-native-provision.yml']
   push:
     branches: [main]
-    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_*.py', 'install-bunny.sh', '.github/workflows/bunny-native-provision.yml']
 permissions:
   contents: read
 jobs:
@@ -15,6 +15,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Control-plane regressions (offline; never live acceptance)
         run: |
-          python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_bunny*.py'
+          python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_*.py'
           python3 bunny/cli.py native-staging plan
           sh -n install-bunny.sh

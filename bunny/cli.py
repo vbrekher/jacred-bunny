@@ -884,7 +884,7 @@ def native_empty_sql_cutover(args):
 
 
 def native_legacy_export(args):
-    from native import API as NativeAPI, NativeError, installation_lock, read_private
+    from native import API as NativeAPI, NativeError, installation_lock, read_private, current_pricing, staging_cost_plan
     from legacy import LegacyExports
     if not args.apply:
         print(json.dumps({'operation': 'legacy-export', 'apply': False, 'creates_cloud_resources': False,
@@ -897,6 +897,8 @@ def native_legacy_export(args):
         deploy = LegacyExports(args.state_dir, NativeAPI(account_key()))
         if not deploy.state or 'worker' not in deploy.state.get('resources', {}):
             raise NativeError('No owned native legacy installation')
+        if deploy.state.get('catalog_backend', 'filedb') != 'filedb':
+            raise NativeError('Legacy export refuses an SQL-authoritative installation before any cloud mutation')
         if deploy.state.get('pending_legacy_export'):
             print(json.dumps(deploy.export_legacy(), indent=2))
             return
@@ -908,6 +910,11 @@ def native_legacy_export(args):
         cost = staging_cost_plan(deploy.api('GET', '/mc/limits'), hours, data_gb, rates=current_pricing())
         if cost['estimated_initial_usd'] > args.max_estimated_usd:
             raise NativeError('Legacy export window exceeds conservative estimate budget')
+        deploy.bound_staging_cdn()
+        if str(deploy.verify('worker').get('status', '')).lower() == 'active':
+            # Never stop a running pre-bridge legacy process merely to upgrade
+            # its watcher: that old process cannot attest a durable shutdown.
+            deploy._normal_proof()
         if not deploy.watchdog_available() or deploy.state['stop_at'] - time.time() < 240:
             deploy.renew_window(hours)
             deploy.start_watchdog()
@@ -926,7 +933,6 @@ def native_legacy_export(args):
             capabilities = read_private(deploy.directory / 'watchdog.json').get('capabilities') or []
             if not all(value in capabilities for value in ('authority_intent_stop', 'legacy_export_stop')):
                 raise NativeError('Legacy-export-aware watchdog unavailable; mutation refused')
-        deploy.bound_staging_cdn()
         started_here = False
         try:
             if str(deploy.verify('worker').get('status', '')).lower() != 'active':
