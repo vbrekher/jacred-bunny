@@ -79,12 +79,13 @@ def ask(label, default=None, hidden=False):
         value = input(prompt)
     else:
         try:
-            with open("/dev/tty", "r+", encoding="utf-8") as terminal:
+            with open("/dev/tty", "w", encoding="utf-8") as terminal:
                 terminal.write(prompt)
                 terminal.flush()
+            with open("/dev/tty", "r", encoding="utf-8") as terminal:
                 value = terminal.readline()
-                if not value:
-                    raise DeploymentError("Interactive input ended")
+            if not value:
+                raise DeploymentError("Interactive input ended")
         except OSError:
             raise DeploymentError("Interactive terminal required; use noninteractive flags") from None
     return value.strip() or default
