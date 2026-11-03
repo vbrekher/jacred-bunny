@@ -37,6 +37,8 @@ class Operations(Deployment):
                 raise NativeError('Current cached image identity differs')
             if manifest.get('catalog_backend','filedb') != self.state.get('catalog_backend','filedb'):
                 raise NativeError('Current cached catalog authority differs')
+            if manifest.get('edge_mode','preview') != self.state.get('edge_mode','preview'):
+                raise NativeError('Current cached Edge mode differs')
             return destination
         edge = self.verify('edge')
         value = self.api('GET', '/compute/script/'+str(self.state['resources']['edge']['id'])+'/code')
@@ -58,6 +60,7 @@ class Operations(Deployment):
         manifest={'schema':'jacred-bunny-native-payload/v2' if self.state.get('catalog_backend') == 'bunny-sql' else 'jacred-bunny-native-payload/v1',
             'source_sha':self.state['source_sha'],'image':{'reference':self.state['image'],'digest':self.state['image_digest']},'files':files}
         if self.state.get('catalog_backend') == 'bunny-sql':manifest['catalog_backend']='bunny-sql'
+        manifest['edge_mode']=self.state.get('edge_mode','preview')
         atomic_private(destination/'manifest.json',manifest)
         load_payload(destination)
         return destination

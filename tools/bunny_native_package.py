@@ -9,11 +9,13 @@ import shutil
 import subprocess
 
 
-def package(root, output, source_sha, image_digest, catalog_backend="filedb"):
+def package(root, output, source_sha, image_digest, catalog_backend="filedb", edge_mode="preview"):
     if not re.fullmatch(r'[0-9a-f]{40}',source_sha) or not re.fullmatch(r'sha256:[0-9a-f]{64}',image_digest):
         raise ValueError('Require exact source SHA and immutable OCI digest')
     if catalog_backend not in ("filedb", "bunny-sql"):
         raise ValueError('Unsupported catalog backend')
+    if edge_mode not in ("preview", "original-api-gateway") or (edge_mode == "original-api-gateway" and catalog_backend != "bunny-sql"):
+        raise ValueError('Gateway requires SQL authority payload')
     output.mkdir(parents=True,exist_ok=True)
     files={}
     inputs=[(root/'bunny-native/edge/dist/index.js','edge.js')]
@@ -26,6 +28,7 @@ def package(root, output, source_sha, image_digest, catalog_backend="filedb"):
     manifest={'schema':'jacred-bunny-native-payload/'+('v2' if catalog_backend == 'bunny-sql' else 'v1'),'source_sha':source_sha,
         'image':{'reference':'ghcr.io/vbrekher/jacred-bunny:sha-'+source_sha,'digest':image_digest},'files':files}
     if catalog_backend == 'bunny-sql':manifest['catalog_backend']='bunny-sql'
+    manifest['edge_mode']=edge_mode
     (output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     return manifest
 
@@ -37,11 +40,12 @@ def main():
     p.add_argument('--source-sha',required=True)
     p.add_argument('--image-digest',required=True)
     p.add_argument('--catalog-backend',choices=('filedb','bunny-sql'),default='filedb')
+    p.add_argument('--edge-mode',choices=('preview','original-api-gateway'),default='preview')
     a=p.parse_args()
     head=subprocess.run(['git','-C',str(a.root),'rev-parse','HEAD'],capture_output=True,text=True,check=True).stdout.strip()
     if head != a.source_sha or subprocess.run(['git','-C',str(a.root),'diff','--quiet','HEAD']).returncode:
         raise SystemExit('Public payload requires a clean tracked source tree at the requested exact SHA')
-    package(a.root,a.output,a.source_sha,a.image_digest,a.catalog_backend)
+    package(a.root,a.output,a.source_sha,a.image_digest,a.catalog_backend,a.edge_mode)
     print('Public native installer payload created (no deployment or acceptance claim)')
 
 

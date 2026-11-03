@@ -1,0 +1,2700 @@
+{
+  "scope": "local Node gateway integration plus HTTP original FileDB baseline 878c4e89 both layouts versus native runtime using actual Bunny SQL read-only; same real MC snapshot",
+  "snapshot_sha256": "f1a37cecebe3a78027f3e017a9ef46176d0d8e569140734b51616bae50c52bc7",
+  "cases": 107,
+  "matched": 105,
+  "production_acceptance": false,
+  "results": [
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits+Re+-+Zekkai+no+Kuu",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Chii+Fuyo",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Chitose-kun+wa+Ramune+Bin+no+Naka",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Choujun%21+Choujou-senpai",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Dark+Summoner+to+Dekiteiru",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Doumo%2C+Suki+na+Hito+ni+Horegusuri+wo+Irai+sareta+Majo+desu.",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Dragon+Ball+Super+-+Beerus",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Hotel+Inhumans+S2",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Hyouken+no+Majutsushi+ga+Sekai+wo+Suberu",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Kanata+kara",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=SubsPlease",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=nonexistent-golden-%D0%96",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=%D0%91%D0%B8%D1%82%D0%B2%D0%B0",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=+++",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=%22",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=%25",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=%E6%97%A5%E6%9C%AC%E8%AA%9E",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=sid&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=sid&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=pir&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=pir&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=size&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=size&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=createTime&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=createTime&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=relased&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=relased&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=bad-sort&exact=true",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&sort=bad-sort&exact=false",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&tracker=subsplease",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&tracker=missing",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=720",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&quality=bad",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&type=anime",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&type=serial",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&type=movie",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&season=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&season=0",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&season=bad",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=2026",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=0",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&relased=bad",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&voice=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&voice=unknown",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&videotype=1080p",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits&videotype=unknown",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=5070",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits&Category%5B%5D=2000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=5070",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=SubsPlease&Category%5B%5D=2000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=5070",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=nonexistent-golden&Category%5B%5D=2000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=5070",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=&Category%5B%5D=2000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4",
+        "2a1a5ada7492fe228523d191125c2be9df42c75718a054553cf76ff2fd74bed4"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=5070",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle+Spirits+Re+-+Zekkai+no+Kuu&Category%5B%5D=2000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=1&take=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=1&take=1000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=2&take=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=2&take=1000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=0&take=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=0&take=1000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=-1&take=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=-1&take=1000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=bad&take=1",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/qualitys?name=Battle+Spirits&page=bad&take=1000",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042",
+        "75d2fe2564fd0a0291e7939991a1717abfe7a43036837b099bf1913ebbd17042"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/trackers",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        25,
+        25,
+        25,
+        25
+      ],
+      "sha256": [
+        "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36",
+        "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36",
+        "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36",
+        "207eaba2c319c9c03c666cab48fbde023e7371edc60fee3a2fc9c29c24206b36"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/trackers",
+        "key": false
+      },
+      "match": true,
+      "statuses": [
+        401,
+        401,
+        401,
+        401
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9"
+      ]
+    },
+    {
+      "case": {
+        "path": "/sync/conf",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b"
+      ]
+    },
+    {
+      "case": {
+        "path": "/sync/conf",
+        "key": false
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b",
+        "6061e0390f4ad4648238f80062b0e6299afc5de89e6b505157e6bab2b706111b"
+      ]
+    },
+    {
+      "case": {
+        "path": "/sync/fdb?key=Battle",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/sync/fdb?key=Battle",
+        "key": false
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "sha256": [
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7",
+        "dda36aed23db4bf0b610044b8c8759f3a84341c2ef074651e24c2107ebdcc7f7"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/conf",
+        "key": true
+      },
+      "match": false,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "17a84f1671933270504be759f888f1594a7a7696649dac37ce183b36ccadb374",
+        "17a84f1671933270504be759f888f1594a7a7696649dac37ce183b36ccadb374",
+        "340505e77f806d85f5346f3374d2361a81f9dc1eebefd5811b6614170bfc21ec",
+        "340505e77f806d85f5346f3374d2361a81f9dc1eebefd5811b6614170bfc21ec"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/conf",
+        "key": false
+      },
+      "match": false,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "86829f5c8582971d792ba199c7aa20ae31ef7675bcde67ae123bfea372e3425e",
+        "86829f5c8582971d792ba199c7aa20ae31ef7675bcde67ae123bfea372e3425e",
+        "210da468badecdeea08086cea1258fd2468694890f088acec898e3834413c1ce",
+        "210da468badecdeea08086cea1258fd2468694890f088acec898e3834413c1ce"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle",
+        "key": false
+      },
+      "match": true,
+      "statuses": [
+        401,
+        401,
+        401,
+        401
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44",
+        "003f4ce2f2b9fd488228bf76210a59147483eaae4c563a8028771fba74640d44"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v2.0/indexers/all/results?query=Battle",
+        "key": false
+      },
+      "match": true,
+      "statuses": [
+        401,
+        401,
+        401,
+        401
+      ],
+      "item_counts": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "sha256": [
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9",
+        "f7dd70ff290b25c512c503335a891cbe0bb01dfccbc310ca61525aedcd6d22c9"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Battle+Spirits+Re+-+Zekkai+no+Kuu&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1",
+        "9b1e60018b490ac73655c6869d0f00371ba65117b33d60f7975821f7d131a5a1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Chii+Fuyo&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc",
+        "d6b11d759a9fdccedd384fad715ccf24517d07b71eb6d5a98efc00df18bfc6fc"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Chitose-kun+wa+Ramune+Bin+no+Naka&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499",
+        "252d116f4a3d5173c59c1084790c8ddd8bda24caf725a015d46a936edd098499"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Choujun%21+Choujou-senpai&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca",
+        "d4cc06ba39be8996cb30baa88c60d97044e447411a50a23e5ba5645a07b55eca"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Dark+Summoner+to+Dekiteiru&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d",
+        "88f9779153a7458c0dd161c0d8a78c3d0ef72cfc8eddb93f5d5ae11ed6b7eb3d"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Doumo%2C+Suki+na+Hito+ni+Horegusuri+wo+Irai+sareta+Majo+desu.&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823",
+        "092baa0871f3d89766b9feef0901a1b0b09a776ec06cc17443f99abfd1f4d823"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Dragon+Ball+Super+-+Beerus&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb",
+        "207c87f44fcf8462fa9a52214055edb4b106209db6d824b483965b011aa32deb"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Hotel+Inhumans+S2&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92",
+        "385b858295795873aac877e251101d5ff1cb6c548c7cebdefa7a341fa0b13c92"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Hyouken+no+Majutsushi+ga+Sekai+wo+Suberu&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739",
+        "c3b5dab3b0bd4db6cc942f7fb25f64f58ed903042d58e2dac889ce747d46f739"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Kanata+kara&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a",
+        "d2c70e990486a5c521d07433f57f5362073c36f4b55b77da4d283478b25dd67a"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Kikansha+no+Mahou+wa+Tokubetsu+desu&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa",
+        "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa",
+        "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa",
+        "96da49eb626729819ca12f64245651552a3cb20c0bd66933c95f039c695bc1aa"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Kyouran+Reijou+Nia+Liston&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb",
+        "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb",
+        "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb",
+        "fc571674ac6561d45cc177166c601d481f86d8d9338ac5a54109401faa0264fb"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Otome+Game+Sekai+wa+Mob+ni+Kibishii+Sekai+desu+S2&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea",
+        "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea",
+        "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea",
+        "4199d83600dea4aa0a2b0d95c956eafb4cc60f1410dfc23b16eaf88e5ffa7eea"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Sasaki+to+Pii-chan&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f",
+        "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f",
+        "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f",
+        "2651672600b411173940244da35fcee4a2a5e5294105772accc9232e87e84d4f"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Shinja+Zero+no+Megami-sama+to+Hajimeru+Isekai+Kouryaku&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a",
+        "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a",
+        "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a",
+        "69cbb038264b08d35c28fd4b7f1189dff1f35948929fc9202ee1e903a008a07a"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Shiotaiou+no+Satou-san+ga+Ore+ni+dake+Amai&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191",
+        "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191",
+        "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191",
+        "a893f770f441cf6704538a9a3d1b4953deb5157628a17e34e9bcd34459e13191"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Tempal+-+Item+no+Chikara&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706",
+        "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706",
+        "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706",
+        "d5e0b36ac7ff4c899f48df132d1dea3f5fdf57aff15196a057e0dcfae823f706"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Tensei+Goblin+dakedo+Shitsumon+Aru&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d",
+        "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d",
+        "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d",
+        "a904030c242b04e7acf7fb826e1178393a28e33afe32e506c738014dbda3526d"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Tensei+Kizoku%2C+Kantei+Skill+de+Nariagaru&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1",
+        "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1",
+        "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1",
+        "5febd77dfe5fa391b215f5b14f8f0b6dba44dc6aeaef0b3959514ac9d5f9d5f1"
+      ]
+    },
+    {
+      "case": {
+        "path": "/api/v1.0/torrents?search=Yowaki+Max&exact=true&quality=1080",
+        "key": true
+      },
+      "match": true,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "item_counts": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "sha256": [
+        "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0",
+        "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0",
+        "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0",
+        "b56520b6ac19c85275fe46b51e6170d3d0e2d947dc04ea9817b7b800eb2620a0"
+      ]
+    }
+  ],
+  "schema": "jacred-http-gateway-evidence/v1",
+  "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
+  "native_source_sha": "042bb0b0737bfcd777127a68e12ab45c180d4ae6",
+  "gateway_source": "development worktree; commit recorded in enclosing pull request",
+  "gateway_matches_native": 107,
+  "baseline_raw_identical": 105,
+  "expected_build_version_differences": 2,
+  "unexplained_differences": 0,
+  "synthetic": false,
+  "limitations": [
+    "107 local HTTP cases on 20 real records from one tracker",
+    "Gateway fixed-origin fetch adapted only in local integration harness to loopback HTTP; not Bunny Edge live acceptance",
+    "Both FileDB layouts exported from the same real SQL snapshot; not a customer legacy migration proof",
+    "No full 25-tracker/client/production acceptance claim",
+    "Known explicit gateway bounds: 2 MiB request and 8 MiB response, 15 second total deadline, redirects refused"
+  ]
+}
