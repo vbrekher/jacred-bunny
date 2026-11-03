@@ -268,21 +268,34 @@ class SQL:
 
     @staticmethod
     def decode(value):
-        kind = value.get("type")
-        if kind == "null":
-            return None
-        if kind == "integer":
-            return int(value["value"])
-        if kind == "float":
-            return float(value["value"])
-        if kind == "text":
-            return value["value"]
-        if kind == "blob":
-            return base64.b64decode(value["base64"], validate=True)
+        try:
+            kind = value.get("type")
+            if kind == "null":
+                return None
+            if kind == "integer":
+                raw = value["value"]
+                if not isinstance(raw, str) or not re.fullmatch(r"-?(?:0|[1-9][0-9]*)", raw):
+                    raise ValueError()
+                result = int(raw)
+                if not -(2**63) <= result < 2**63:
+                    raise ValueError()
+                return result
+            if kind == "float":
+                result = value["value"]
+                if isinstance(result, bool) or not isinstance(result, (int, float)) or not math.isfinite(result):
+                    raise ValueError()
+                return float(result)
+            if kind == "text" and isinstance(value["value"], str):
+                return value["value"]
+            if kind == "blob":
+                raw = value["base64"]
+                return base64.b64decode(raw + "=" * ((4-len(raw)%4)%4), validate=True)
+        except (ValueError, KeyError, TypeError, AttributeError, OverflowError):
+            pass
         raise NativeError("Invalid SQL response value")
 
-    def send(self, request):
-        body = json.dumps({"baton": None, "requests": [request, {"type": "close"}]}).encode()
+    def exchange(self, requests, baton=None):
+        body = json.dumps({"baton": baton, "requests": requests}).encode()
         if len(body) > 4 * 1024 * 1024:
             raise NativeError("SQL request exceeds bounded batch size")
         req = urllib.request.Request(self.url, data=body, method="POST", headers={
@@ -293,16 +306,29 @@ class SQL:
                 raw = response.read(8 * 1024 * 1024 + 1)
             if len(raw) > 8 * 1024 * 1024:
                 raise NativeError("SQL response exceeds bounded result size")
-            result = json.loads(raw)["results"][0]
-            if result.get("type") == "error" or result.get("error"):
-                raise NativeError("SQL operation rejected; values omitted")
-            return result["response"].get("result")
+            result = json.loads(raw)
+            if not isinstance(result.get("results"), list):
+                raise NativeError("Malformed SQL protocol response")
+            return result
         except urllib.error.HTTPError as exc:
             raise NativeError("SQL HTTP " + str(exc.code)) from None
         except (urllib.error.URLError, TimeoutError):
             raise NativeError("SQL network failure; do not blindly replay writes") from None
         except (KeyError, ValueError, TypeError, IndexError):
             raise NativeError("Malformed SQL protocol response") from None
+
+    @staticmethod
+    def unwrap(payload):
+        try:
+            result = payload["results"][0]
+            if result.get("type") == "error" or result.get("error"):
+                raise NativeError("SQL operation rejected; values omitted")
+            return result["response"].get("result")
+        except (KeyError, TypeError, IndexError):
+            raise NativeError("Malformed SQL protocol response") from None
+
+    def send(self, request):
+        return self.unwrap(self.exchange([request, {"type": "close"}]))
 
     def query(self, text, values=()):
         result = self.send({"type": "execute", "stmt": {"sql": text,
@@ -340,6 +366,37 @@ class SQL:
                 "','" + digest + "','" + stamp + "');\nCOMMIT;")
             changed.append(path.name)
         return changed
+
+
+class SQLSession(SQL):
+    """Read snapshot across bounded requests; a missing baton aborts the export."""
+    def __init__(self, url, token, opener=None):
+        super().__init__(url, token, opener)
+        self.baton = None
+
+    def send(self, request):
+        payload = self.exchange([request], self.baton)
+        self.baton = payload.get("baton")
+        if payload.get("base_url"):
+            self.url = SQL(payload["base_url"], self.token).url
+        result = self.unwrap(payload)
+        if not isinstance(self.baton, str) or not self.baton:
+            raise NativeError("Interactive snapshot session unavailable; backup not accepted")
+        return result
+
+    def __enter__(self):
+        self.query("BEGIN")
+        return self
+
+    def __exit__(self, kind, value, traceback):
+        try:
+            self.query("ROLLBACK" if kind else "COMMIT")
+        finally:
+            if self.baton:
+                try:
+                    self.exchange([{"type": "close"}], self.baton)
+                finally:
+                    self.baton = None
 
 
 def sql_statements(text):
@@ -530,6 +587,26 @@ class Deployment:
         self.save()
         return ident
 
+    def verify_worker_for_stop(self):
+        try:
+            return self.verify("worker")
+        except NativeError:
+            pending = self.state.get("pending_update")
+            if (not pending or not re.fullmatch(r"[0-9a-f]{40}", pending.get("to_source", "")) or
+                not re.fullmatch(r"sha256:[0-9a-f]{64}", pending.get("to_digest", ""))):
+                raise
+            # A PATCH response can be lost between a known update intent and
+            # journal confirmation. Either saved image may be stopped; every
+            # other ownership, mount and allocation check remains mandatory.
+            record = self.state["resources"]["worker"]
+            original = record["identity"]["container"]
+            candidate = dict(original, imageTag="sha-" + pending["to_source"], imageDigest=pending["to_digest"])
+            record["identity"]["container"] = candidate
+            try:
+                return self.verify("worker")
+            finally:
+                record["identity"]["container"] = original
+
     @serialized
     def worker_action(self, action):
         if action not in ("start", "stop"):
@@ -538,7 +615,10 @@ class Deployment:
             raise NativeError("Staging budget deadline expired; renew a bounded window before start")
         if action == "start" and not self.watchdog_available():
             raise NativeError("No live budget watchdog; refusing worker deploy")
-        self.verify("worker")
+        if action == "stop":
+            self.verify_worker_for_stop()
+        else:
+            self.verify("worker")
         if action == "start" and time.time() >= self.state["stop_at"]:
             raise NativeError("Staging deadline expired during verification")
         ident = self.state["resources"]["worker"]["id"]
@@ -746,7 +826,7 @@ def run_watchdog(directory, key, nonce, sleep=time.sleep, clock=time.time):
                     atomic_private(directory / "watchdog.json", heartbeat)
                     return
                 try:
-                    remote = deploy.verify("worker")
+                    remote = deploy.verify_worker_for_stop()
                     if remote.get("status") == "inactive":
                         heartbeat["status"] = "stopped_confirmed"
                         atomic_private(directory / "watchdog.json", heartbeat)

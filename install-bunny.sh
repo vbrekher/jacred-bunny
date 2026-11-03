@@ -32,7 +32,23 @@ from pathlib import Path
 import sys
 compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
 PYTHON
+curl -fsSL --retry 3 "https://raw.githubusercontent.com/$REPO/$REV/bunny/operations.py" -o "$TMP.operations"
+python3 - "$TMP.operations" <<'PYTHON'
+from pathlib import Path
+import sys
+compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
+PYTHON
+curl -fsSL --retry 3 "https://raw.githubusercontent.com/$REPO/$REV/bunny/backup.py" -o "$TMP.backup"
+python3 - "$TMP.backup" <<'PYTHON'
+from pathlib import Path
+import sys
+compile(Path(sys.argv[1]).read_text(), sys.argv[1], "exec")
+PYTHON
 python3 "$TMP" self-test
+mv "$TMP.backup" "$SHARE_DIR/backup.py"
+chmod 600 "$SHARE_DIR/backup.py"
+mv "$TMP.operations" "$SHARE_DIR/operations.py"
+chmod 600 "$SHARE_DIR/operations.py"
 mv "$TMP.native" "$SHARE_DIR/native.py"
 chmod 600 "$SHARE_DIR/native.py"
 mv "$TMP" "$SHARE_DIR/cli.py"

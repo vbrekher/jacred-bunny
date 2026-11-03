@@ -69,6 +69,14 @@ class SQLTests(unittest.TestCase):
             with self.assertRaises(native.NativeError):
                 native.SQL.encode(bad)
 
+    def test_bunny_blob_responses_without_padding(self):
+        self.assertEqual(native.SQL.decode({'type':'blob','base64':'AP8'}), b'\x00\xff')
+
+    def test_invalid_typed_archive_values_fail_before_restore(self):
+        for value in ({'type':'integer','value':str(2**63)}, {'type':'float','value':float('nan')},
+                      {'type':'text','value':{}}, {'type':'integer','value':True}, {'type':'blob','base64':'!'}):
+            with self.assertRaises(native.NativeError):native.SQL.decode(value)
+
     def test_catalog_migrations_and_fts_are_idempotent(self):
         files = [ROOT/'bunny-native/migrations/0001_catalog.sql', ROOT/'bunny-native/migrations/0002_search_fts5.sql']
         self.assertEqual(len(self.sql.migrate(files)), 2)

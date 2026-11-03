@@ -551,8 +551,9 @@ def native_health(deploy):
         raise NativeError("No verified Bunny HTTPS worker endpoint")
     credentials = read_private(deploy.secret_path)
     observations["worker_url"] = url
-    def get(path):
-        req = urllib.request.Request(url + path, headers={"X-Api-Key": credentials["api_key"]})
+    def get(path, administrative=False):
+        headers = {"X-Dev-Key": credentials["admin_key"]} if administrative else {"X-Api-Key": credentials["api_key"]}
+        req = urllib.request.Request(url + path, headers=headers)
         try:
             with urllib.request.build_opener(NoRedirect()).open(req, timeout=8) as response:
                 data = response.read(16385)
@@ -574,6 +575,12 @@ def native_health(deploy):
     sha = version.get("gitSha", "") if isinstance(version, dict) else ""
     observations["server_git_sha"] = sha if re.fullmatch(r"[0-9a-f]{8,40}", sha) else None
     observations["worker_source_matches"] = bool(observations["server_git_sha"] and deploy.state["source_sha"].startswith(sha))
+    code, search = get("/api/v1.0/torrents?search=JacRedHealthProbe" + secrets.token_hex(8))
+    observations["authenticated_search_http"] = code
+    observations["worker_search_key_valid"] = code == 200 and isinstance(search, list)
+    code, _ = get("/api/v1.0/config/schema", administrative=True)
+    observations["admin_schema_http"] = code
+    observations["worker_admin_key_valid"] = code == 200
     try:
         sql = deploy.sql_client(create=False)
         observations["sql_migration_count"] = sql.query("SELECT count(*) AS n FROM native_schema_migrations")[0]["n"]
@@ -581,7 +588,7 @@ def native_health(deploy):
         observations["sql_schema_ready"] = observations["sql_migration_count"] >= 2
     except NativeError:
         observations["sql_schema_ready"] = False
-    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"])
+    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"])
     observations["catalog_acceptance"] = "NOT_ESTABLISHED"
     return observations
 
@@ -639,6 +646,8 @@ def _native_install(args):
         if db_limits.get("current_databases", 0) >= db_limits.get("max_databases", 0):
             raise NativeError("Database quota exhausted")
     deploy.initialize(payload["source_sha"], image, digest, hours=args.hours)
+    from operations import Operations
+    Operations(args.state_dir,api).remember_payload(args.payload_dir)
     if time.time() >= deploy.state["stop_at"]:
         raise NativeError("Existing staging window expired; use an explicitly bounded start window")
     deploy.state["cost_plan"] = cost
@@ -669,6 +678,82 @@ def _native_install(args):
     print("Infrastructure installed; FileDB compatibility API is active. SQL collector cutover and catalog/client acceptance remain required.")
 
 
+def native_update(args):
+    from native import API as NativeAPI, NativeError, installation_lock, load_payload, fetch_release_payload, current_pricing, staging_cost_plan
+    from operations import Operations
+    with installation_lock(args.state_dir):
+        key=account_key() if args.apply else ""
+        deploy=Operations(args.state_dir,NativeAPI(key))
+        if not deploy.state:
+            raise NativeError("No native installation to update")
+        if args.operation == "rollback":
+            if args.release or args.payload_dir:
+                raise NativeError("Rollback uses the saved previous immutable payload")
+            target=deploy.rollback_payload()
+        elif args.release:
+            if args.payload_dir:
+                raise NativeError("Use either --release or --payload-dir")
+            target=fetch_release_payload(args.release,args.state_dir/"payloads",args.source_sha)
+        elif args.payload_dir:
+            target=args.payload_dir
+        else:
+            raise NativeError("Update requires --release or --payload-dir")
+        manifest=load_payload(target)
+        if args.source_sha and manifest["source_sha"] != args.source_sha:
+            raise NativeError("Payload source differs from requested SHA")
+        if not args.apply:
+            print(json.dumps({"apply":False,"from_source":deploy.state["source_sha"],"to_source":manifest["source_sha"],
+                              "resource_ids_preserved":True,"sql_rollback":False},indent=2))
+            return
+        deploy.recover_pending_worker()
+        deploy.verify("worker")
+        edge = deploy.verify("edge")
+        if (not deploy.state.get("pending_update") and deploy.state["source_sha"] == manifest["source_sha"]
+            and deploy.state["image_digest"] == manifest["image"]["digest"]
+            and deploy.state.get("edge_bundle_sha256") == manifest["files"]["edge.js"]
+            and deploy.state.get("edge_release_id") == edge.get("CurrentReleaseId")):
+            deploy.assert_schema_compatible(target)
+            print(json.dumps({"changed":False,"source_sha":manifest["source_sha"],
+                              "runtime_health_checked":False,"reason":"Verified release already configured; lifecycle preserved"},indent=2))
+            return
+        preferred=args.registry_id or deploy.state["resources"]["worker"]["identity"]["container"]["imageRegistryId"]
+        resolve_native_registry(key,manifest["image"]["reference"],manifest["image"]["digest"],preferred)
+        if not deploy.watchdog_available() or deploy.state["stop_at"]-time.time()<240:
+            data_gb=next(x["size"] for x in deploy.state["resources"]["worker"]["identity"]["volumes"] if x["name"]=="data")
+            cost=staging_cost_plan(deploy.api("GET","/mc/limits"),args.hours,data_gb,rates=current_pricing())
+            if not 0.1 <= args.hours <= 24 or not 0 < args.max_estimated_usd <= 5 or cost["estimated_initial_usd"]>args.max_estimated_usd:
+                raise NativeError("Update needs a bounded staging window within the estimate budget")
+            deploy.renew_window(args.hours)
+            deploy.start_watchdog()
+        previous=deploy.rollback_payload() if deploy.state.get("pending_update") else deploy.capture_current_payload()
+        try:
+            result=deploy.apply_release(target,rollback=args.operation=="rollback")
+            deadline=time.monotonic()+180
+            while True:
+                health=native_health(deploy)
+                if health["infrastructureReady"]:break
+                if time.monotonic()>=deadline:raise NativeError("Updated source/health not confirmed within deadline")
+                time.sleep(5)
+            deploy.finish_release(result,health)
+        except NativeError:
+            if not args.keep_on_error:
+                try:
+                    compensation=deploy.apply_release(previous,rollback=True)
+                    deadline=time.monotonic()+120
+                    while True:
+                        recovered=native_health(deploy)
+                        if recovered["infrastructureReady"]:break
+                        if time.monotonic()>=deadline:raise NativeError("Compensation health not confirmed")
+                        time.sleep(5)
+                    deploy.finish_release(compensation,recovered)
+                    print("Previous immutable worker/Edge code restored; SQL and volumes were preserved",file=sys.stderr)
+                except NativeError:
+                    print("Update compensation could not be confirmed; saved intent requires reconciliation",file=sys.stderr)
+            raise
+        print(json.dumps({"changed":result["changed"],"from_source":result["from_source"],"to_source":result["to_source"],
+            "rollback":result["rollback"],"sql_rollback":False,"health":health},indent=2))
+
+
 def native_staging(args):
     # One CLI, with its implementation split into a standard-library module.
     try:
@@ -676,6 +761,21 @@ def native_staging(args):
     except ImportError:
         raise DeploymentError("Native staging module missing; reinstall the CLI") from None
     try:
+        if args.operation in ("backup", "restore-test"):
+            from native import installation_lock
+            from backup import Backups
+            with installation_lock(args.state_dir):
+                deploy = Backups(args.state_dir, NativeAPI(account_key()))
+                if not deploy.state:
+                    raise NativeError("No native installation")
+                if args.operation == "restore-test" and not args.backup_id:
+                    raise NativeError("Restore test requires --backup-id")
+                result = deploy.backup() if args.operation == "backup" else deploy.restore_test(args.backup_id)
+                print(json.dumps(result, indent=2))
+            return
+        if args.operation in ("update", "rollback"):
+            native_update(args)
+            return
         if args.operation in ("install", "resume"):
             native_install(args)
             return
@@ -746,7 +846,8 @@ def main():
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
-    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop"))
+    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test"))
+    native.add_argument("--backup-id", help="Private SQL backup receipt ID for isolated restore test")
     native.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
     native.add_argument("--release", help="Public GitHub release payload; no GitHub PAT required")
     native.add_argument("--payload-dir", type=Path)
@@ -756,6 +857,7 @@ def main():
     native.add_argument("--image", default=IMAGE)
     native.add_argument("--registry-id", help="Optional existing numeric registry; public GHCR is auto-discovered")
     native.add_argument("--apply", action="store_true")
+    native.add_argument("--keep-on-error", action="store_true", help="Retain failed update configuration instead of code compensation")
     native.add_argument("--max-estimated-usd", type=float, default=2.0)
     args = parser.parse_args()
     try:
