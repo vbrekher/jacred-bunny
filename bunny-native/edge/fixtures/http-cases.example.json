@@ -1,0 +1,25 @@
+{
+  "schema": "jacred.bunny.http-compare.v1",
+  "cases": [
+    {
+      "id": "trackers",
+      "path": "/api/v1.0/trackers",
+      "type": "json"
+    },
+    {
+      "id": "indexers",
+      "path": "/api/v2.0/indexers",
+      "type": "json"
+    },
+    {
+      "id": "jackett-query",
+      "path": "/api/v2.0/indexers/all/results?query=Test",
+      "type": "json"
+    },
+    {
+      "id": "torrents-query",
+      "path": "/api/v1.0/torrents?search=Test",
+      "type": "json"
+    }
+  ]
+}
