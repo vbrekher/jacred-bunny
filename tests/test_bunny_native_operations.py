@@ -82,6 +82,24 @@ class OperationTests(unittest.TestCase):
         self.assertTrue(all('SELECT' in call.args[0] for call in self.sql.query.call_args_list))
         self.assertFalse(any(method=='DELETE' or (method=='POST' and path in ['/mc/apps','/database/v2/databases']) for method,path in self.calls))
 
+    def test_repeat_cli_rollback_preserves_stopped_lifecycle_without_rearming(self):
+        import contextlib
+        import types
+        import cli
+        self.deploy.state['edge_release_id']=self.edge_release
+        self.deploy.state['release_history']=[{'from_source':'c'*40,'to_source':'a'*40,'rollback':True}]
+        self.remote['status']='inactive'
+        self.deploy.save()
+        self.deploy.renew_window=Mock()
+        args=types.SimpleNamespace(state_dir=self.root/'state',apply=True,operation='rollback',release=None,payload_dir=None,source_sha=None)
+        with patch('native.installation_lock',return_value=contextlib.nullcontext()),patch('operations.Operations',return_value=self.deploy),\
+             patch.object(cli,'account_key',return_value='test-key'),patch.object(cli,'native_health') as health,\
+             patch.object(cli,'resolve_native_registry') as registry:
+            cli.native_update(args)
+        self.deploy.renew_window.assert_not_called()
+        health.assert_not_called();registry.assert_not_called()
+        self.assertFalse(any(method in ('PATCH','POST','DELETE') for method,path in self.calls))
+
     def test_uncertain_patch_is_inspected_and_not_replayed(self):
         self.uncertain=True
         self.finish(self.deploy.apply_release(self.new))

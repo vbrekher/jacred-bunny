@@ -66,3 +66,21 @@ SQL migrations commit their checksum receipt atomically; rerunning skips matchin
 Current limitations: the runtime flow retains staged resources after errors for diagnosis; automatic owned rollback/cleanup, production upgrade/rollback, every management command and the complete fresh public bootstrap gate remain open. The expiry watchdog and retained volume charges still apply. The earlier three-resource `provision` primitive does not arm a compute watchdog because it creates no worker.
 
 [Actual four-service installer evidence](../docs/evidence/native-installer-2026-11-03.json).
+
+## Image update, rollback and private SQL recovery (development)
+
+```sh
+jacred-bunny native-staging update --payload-dir /path/to/verified/payload
+jacred-bunny native-staging update --payload-dir /path/to/verified/payload --apply --hours 0.1 --max-estimated-usd 2
+jacred-bunny native-staging rollback --apply --hours 0.1 --max-estimated-usd 2
+jacred-bunny native-staging backup
+jacred-bunny native-staging restore-test --backup-id CATALOG_RECEIPT_ID
+```
+
+Update defaults to a dry-run. Applied updates pin the new image digest, preserve resource IDs and volumes, require an active budget watchdog, and validate both search and admin credentials plus the worker source. Rollback uses the saved immutable payload. SQL migrations must match exactly: this implementation refuses incompatible schema changes and never reverses SQL data. Failed updates attempt compensation to the previous verified image and Edge code; an uncertain result remains journalled for reconciliation. Repeating an already configured rollback preserves the worker's lifecycle, including a stopped worker, and explicitly does not claim a new runtime health check.
+
+`backup` exports only the five canonical staging SQL tables inside one read transaction. All page requests share the same server baton; missing interactive-session support aborts the export. Typed values preserve signed 64-bit integers, Unicode and binary data. The private Storage zone must have no public Pull Zones. The upload checksum and download checksum must agree before a local receipt is saved. Keep the private state directory and receipt files; they identify the owned database, private object and schema checksums. This development command does not implement automated retention.
+
+`restore-test` verifies the entire archive before creating a new, isolated database. It applies only trusted matching migrations, restores rows, compares canonical content hashes, and executes an FTS query. It deletes only that verified temporary database afterwards. The source database is never a restore target. An interrupted create must be reconciled from its saved intent before retrying; a temporary database can remain billable after interrupted cleanup.
+
+These commands **do not back up legacy FileDB, Tracks objects, runtime configuration or worker jobs**. They cannot satisfy full production backup/restore acceptance. Live tests used explicitly synthetic data and removed their probe rows. The native database fork endpoint returned HTTP 403; its absence was reconciled against the account database list, and the supported SQL transaction mechanism was tested independently. [Live operation evidence](../docs/evidence/native-operations-2026-11-03.json).
