@@ -11,7 +11,7 @@ import pathlib
 import sqlite3
 import sys
 
-ROOT=pathlib.Path(__file__).resolve().parents[3]
+ROOT=pathlib.Path(__file__).resolve().parents[4]
 sys.path.insert(0,str(ROOT/"tools"))
 from bunny_native_import import stage,check_file
 
