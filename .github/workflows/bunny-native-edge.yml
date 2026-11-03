@@ -69,6 +69,7 @@ jobs:
         working-directory: bunny-native/edge
         run: |
           npm ci --no-audit --no-fund
+          npm audit --omit=dev --audit-level=moderate
           npm run build
           test -s dist/index.js
           node --check dist/index.js
