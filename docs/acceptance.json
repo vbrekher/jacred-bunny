@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #33 passed (1049 .NET, 188 Python). Current local Python source passes 193 tests, including private artifact publication and reserved SQLite filename regressions. Exact source ef2cc77a/digest-pinned native image deployed with matching Edge bundle. Full reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #34 passed (1049 .NET, 193 Python). Current local source passes 1071 .NET and 195 Python tests, including an isolated legacy byte exporter, actual local HTTP and boot dispatch checks. Exact source ef2cc77a/digest-pinned native image remains the last cloud deployment. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -49,7 +49,7 @@
     {
       "gate": "INSTALLER",
       "status": "FAIL",
-      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete."
+      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete."
     },
     {
       "gate": "OPERATIONS",
@@ -64,17 +64,18 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #32 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet."
+      "reason": "PRs through #34 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet."
     }
   ],
   "source_checks": {
-    "python": 193,
+    "python": 195,
     "edge_node": 101,
-    "dotnet": 1049,
+    "dotnet": 1071,
     "web": 73,
-    "scope": "Current local Python 193; complete CI through PR #33 includes 1049 .NET/188 Python. Exact hardening image deployed for scoped public-path acceptance."
+    "scope": "Current local 1071 .NET/195 Python; complete CI through PR #34 includes 1049 .NET/193 Python. Legacy exporter source/local HTTP only, not deployed; current ef2 cloud acceptance retains its separate scope."
   },
   "recent_evidence": [
+    "evidence/legacy-export-local-2026-11-04.json",
     "evidence/private-publication-2026-11-04.json",
     "evidence/live-admin-key-boundary-2026-11-04.json",
     "evidence/lan-admin-key-boundary-2026-11-03.json",

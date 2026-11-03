@@ -20,7 +20,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 | Component | Verified state |
 | --- | --- |
-| Original .NET application | 1,049 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
+| Original .NET application | 1,071 local tests passed; original collector/query verified in a SQL-backed Magic Container pilot |
 | Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
 | Bunny Database | 22 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
 | Edge API | Original API gateway deployed to owned staging; 101 live HTTP comparisons and six Torznab XML cases passed |
@@ -33,6 +33,8 @@ The standard setup still installs the FileDB candidate. An explicit SQL pilot no
 TLS-hardened live collection and source announce-probe safeguards are recorded in the [changelog](CHANGELOG.md). Source SQL snapshot checks now page one consistent read session; a local dataset exceeding the former 8 MiB response limit matches an independent verifier. Catalog writes also use transport pages in one atomic transaction, retaining durable commit receipts. Bucket, index and receipt reads also page one consistent transaction. Per-row transport limits, whole-bucket memory, deadlines and complete large-catalog acceptance remain open.
 
 Private local migration and HTTP capture tools now refuse output symlinks and preserve files created during validation. [Filesystem regression evidence](docs/evidence/private-publication-2026-11-04.json) records the reproduced data-loss risk and 193 passing Python tests; general live FileDB migration remains incomplete.
+
+A separate [legacy byte export mode](bunny/LEGACY_EXPORT.md) now prepares a private, bounded archive without starting normal writers. Actual local HTTP verified archive hashes, authentication, absent collector routes and deadline shutdown. It is a development building block: owned-volume cloud migration and nonempty SQL import remain incomplete. Current local source passes 1,071 .NET and 195 Python tests.
 
 The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store checks matched the retained 22-record catalog. The subsequent collector call produced no fresh commits; it is not new write-path acceptance. [Current runtime evidence](docs/evidence/live-paged-runtime-2026-11-03.json).
 

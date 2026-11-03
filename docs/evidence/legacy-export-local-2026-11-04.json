@@ -1,0 +1,170 @@
+{
+  "scope": "Actual local loopback exporter process with synthetic FileDB, dummy keys and independent tar/hash verification; no cloud migration or customer data",
+  "checkout_source_sha": "85e569a208d6c844a70c7024b4ec058d7cf03664",
+  "service_version": {
+    "gitFullSha": "85e569a208d6c844a70c7024b4ec058d7cf03664",
+    "mode": "legacy-export-only",
+    "catalogBackend": "filedb"
+  },
+  "http_checks": [
+    {
+      "case": "missing",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "wrong",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "search-key",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "search-as-admin",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "query-only",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "foreign-origin",
+      "http": 401,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "normal-config-not-registered",
+      "http": 404,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "collector-not-registered",
+      "http": 404,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "write-not-registered",
+      "http": 404,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "public-health",
+      "http": 200,
+      "no_store": true,
+      "no_cors_reflection": true
+    },
+    {
+      "case": "private-download-1",
+      "http": 200,
+      "member_hashes_match_source": true,
+      "range_does_not_bypass_full_archive": true,
+      "no_store": true
+    },
+    {
+      "case": "private-download-2",
+      "http": 200,
+      "member_hashes_match_source": true,
+      "range_does_not_bypass_full_archive": true,
+      "no_store": true
+    },
+    {
+      "case": "private-download-3",
+      "http": 200,
+      "member_hashes_match_source": true,
+      "range_does_not_bypass_full_archive": true,
+      "no_store": true
+    },
+    {
+      "case": "download-budget-exhausted",
+      "http": 429
+    }
+  ],
+  "lifecycle_processes": [
+    {
+      "case": "expired",
+      "exit_code": 1,
+      "no_dummy_key_logged": true
+    },
+    {
+      "case": "excessive-window",
+      "exit_code": 1,
+      "no_dummy_key_logged": true
+    },
+    {
+      "case": "sql-mode-refused",
+      "exit_code": 1,
+      "no_dummy_key_logged": true
+    },
+    {
+      "case": "deadline-shutdown",
+      "exit_code": 0,
+      "no_dummy_key_logged": true
+    }
+  ],
+  "source_files": 6,
+  "source_bytes_unchanged": true,
+  "normal_startup_log_directory_absent": true,
+  "process_stopped": true,
+  "archive_sha256": "76cf61d63e0c5c4f71464edd23bdf40f17ee5d5a83117ec1d10682c5169187e3",
+  "quiescence": "Single isolated local process; cloud owned-worker lifecycle not exercised",
+  "production_ready": false,
+  "schema": "jacred-legacy-export-local-evidence/v1",
+  "checked_at": "2026-11-04",
+  "dotnet_tests": {
+    "passed": 1071,
+    "skipped": 0,
+    "new_archive_cases": 22,
+    "scope": "Local macOS full .NET suite; Linux CI acceptance pending"
+  },
+  "python_tests": {
+    "passed": 195,
+    "skipped": 0,
+    "new_boot_cases": 2
+  },
+  "limits": {
+    "source_bytes": 268435456,
+    "files": 10000,
+    "directories": 10000,
+    "member_name_characters": 1024,
+    "preparation_seconds": 90,
+    "transfer_seconds": 90,
+    "authenticated_transfers_per_process": 3,
+    "maximum_absolute_window_seconds": 600
+  },
+  "boundaries": [
+    "Cloud owned-worker checkpoint/stop/single-replica/volume lifecycle not implemented or tested by this evidence",
+    "Not a distributed write fence; source parent directories must be trusted",
+    "No nonempty SQL import, restore, fresh installation or current cloud image acceptance",
+    "Archive files use private 0600 permissions; executable permission restoration has not been accepted",
+    "No Bunny resource started or catalog row changed for this local evidence"
+  ],
+  "source_files_sha256": {
+    "Program.cs": "5ac41e9856262ac0d278508153f9587ef9d956f9611e25830dc3ddaea3575d2b",
+    "bunny/boot.sh": "0a1b2a042a5e53a2f19e08dbab498f9bcd293529eb2bce8302318fb248c50b90",
+    "Infrastructure/Persistence/Legacy/LegacyArchive.cs": "faee707430fbe4bdaa992a62764a919e1420e4dcdeb629ea66585d52f6433f21",
+    "Infrastructure/Persistence/Legacy/LegacyExportHost.cs": "993ea657b04f1b5c1a2b63d3864803718b65bb0612e50eace3f09f5f6cb38cbc",
+    "tests/JacRed.Tests/Persistence/Legacy/LegacyArchiveTests.cs": "5a9eaa7c6fca823ddf9bbb56582e097404ea32d6f6fa99ed32e5ddce320ebe11",
+    "tests/test_legacy_export_boot.py": "acfda1b4f6de8e6e70b2f975f4b6ed2ae56c76b45062aeb9fac4fbbb6e4df66a",
+    "tools/bunny_legacy_export_acceptance.py": "40d25df990e88ace63e0cac2f152d946c6d8d80e02c35d73777948f4531eaa0e"
+  },
+  "reproduction": {
+    "plan": "python3 tools/bunny_legacy_export_acceptance.py",
+    "run": "python3 tools/bunny_legacy_export_acceptance.py --run --app bin/Release/net10.0/JacRed.dll",
+    "requires": "Build the app from the current exact checkout with .NET 10 first; --dotnet can select an installed executable",
+    "linux_ci": "Added to .NET unit job after Release build; CI result pending"
+  }
+}
