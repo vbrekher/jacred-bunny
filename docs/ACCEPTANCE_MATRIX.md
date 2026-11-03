@@ -9,7 +9,7 @@ Checked: 3 November 2026. **IN PROGRESS — NOT PRODUCTION READY.**
 | SOURCE | FAIL | CI and 946 .NET tests passed for PR #10; native foundation CI pending; reproducible release artifact and scans incomplete. |
 | FEATURE PARITY | FAIL | Existing 91 Edge tests pass; 100-case immutable original/live golden corpus has not run. |
 | REAL SQL | FAIL | Live CRUD/FTS5/transaction/least-privilege smoke passed with synthetic rows; real catalog, multi-DB fanout and recovery untested. |
-| TRACKERS 25 | FAIL | All 25 source IDs retained; live parser samples and source-to-SQL flow not run. |
+| TRACKERS 25 | FAIL | All 25 source IDs retained; 22 LIMITED / 3 UPSTREAM_UNAVAILABLE host HEAD observations; live parser samples and source-to-SQL flow not run. |
 | DURABILITY | FAIL | Storage PUT/GET checksum verified; real backup restore into a new DB and restart preservation gates not complete. |
 | WORKERS | FAIL | SQL collector, durable queue integration and 24h live soak incomplete. |
 | SECURITY | FAIL | Live missing-key 401 and no-cache responses verified; full scans/429/SSRF/RBAC matrix incomplete. |

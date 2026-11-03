@@ -24,7 +24,7 @@
     {
       "gate": "TRACKERS 25",
       "status": "FAIL",
-      "reason": "All 25 source IDs retained; live parser samples and source-to-SQL flow not run."
+      "reason": "All 25 source IDs retained. HEAD-only reachability: 22 LIMITED, 3 UPSTREAM_UNAVAILABLE from operator machine. No parser readiness or source-to-SQL acceptance."
     },
     {
       "gate": "DURABILITY",
