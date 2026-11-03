@@ -16,6 +16,7 @@ cli=importlib.util.module_from_spec(spec);spec.loader.exec_module(cli)
 
 class Response(io.BytesIO):
     status=200
+    headers={"Cache-Control":"private, no-store, max-age=0"}
 
 class HealthTests(unittest.TestCase):
     def test_public_liveness_cannot_mask_lost_api_credentials_after_update(self):
@@ -50,7 +51,7 @@ class HealthTests(unittest.TestCase):
             self.assertFalse(result['infrastructureReady'])
 
     def test_gateway_release_requires_exact_edge_source_and_authenticated_search(self):
-        for failure in (None,'stale-source','wrong-key'):
+        for failure in (None,'stale-source','wrong-key','cache-rewrite','worker-cache-rewrite','false-directive'):
             with self.subTest(failure=failure),tempfile.TemporaryDirectory() as root:
                 deploy=Mock();deploy.secret_path=Path(root)/'credentials.json'
                 native.atomic_private(deploy.secret_path,{'api_key':'test-api','admin_key':'test-admin'})
@@ -65,7 +66,10 @@ class HealthTests(unittest.TestCase):
                     if is_edge and failure=='wrong-key':
                         raise urllib.error.HTTPError(req.full_url,401,'Unauthorized',None,io.BytesIO(b''))
                     if '/health' in req.full_url:return Response(b'{"status":"OK"}')
-                    return Response(b'[]')
+                    response=Response(b'[]')
+                    if (is_edge and failure=='cache-rewrite') or (not is_edge and failure=='worker-cache-rewrite'):response.headers={'Cache-Control':'no-cache'}
+                    if is_edge and failure=='false-directive':response.headers={'Cache-Control':'public, x-no-store=yes'}
+                    return response
                 with patch.object(cli.urllib.request,'build_opener',return_value=Mock(open=opened)):
                     result=cli.native_health(deploy)
                 self.assertEqual(result['infrastructureReady'],failure is None)

@@ -684,6 +684,40 @@ class Deployment:
         self.state["stop_at"] = time.time() + hours * 3600
         self.save()
 
+    def ensure_cdn_no_store(self, kind):
+        zone=self.verify(kind)
+        ident=self.state['resources'][kind]['id']
+        if zone.get('Id',ident)!=ident:raise NativeError('No-store CDN response identity differs')
+        records=self.state.setdefault('cdn_no_store_rules',{})
+        record=records.get(kind)
+        if record and record.get('zone_id')!=ident:raise NativeError('No-store CDN zone identity changed')
+        description=record['description'] if record else 'JacRed '+self.state['name']+' no-store'
+        matches=[rule for rule in zone.get('EdgeRules',[]) if rule.get('Description')==description]
+        if len(matches)>1:raise NativeError('Ambiguous owned no-store rules; no mutation allowed')
+        if matches and not record:raise NativeError('Unrecorded no-store rule; ownership not established')
+        if not matches:
+            if record:raise NativeError('Pending or saved no-store rule not confirmed; no POST replay')
+            record={'zone_id':ident,'description':description,'phase':'creating'}
+            records[kind]=record;self.save()
+            body={'Description':description,'Enabled':True,'ActionType':5,
+                  'ActionParameter1':'Cache-Control','ActionParameter2':'private, no-store, max-age=0',
+                  'TriggerMatchingType':0,'Triggers':[{'Type':0,'PatternMatchingType':0,'PatternMatches':['*']}],'OrderIndex':0}
+            try:self.api('POST','/pullzone/'+str(ident)+'/edgerules/addOrUpdate',body)
+            except NativeError:pass  # Inspect saved intent; never repeat an uncertain rule creation.
+            matches=[rule for rule in self.verify(kind).get('EdgeRules',[]) if rule.get('Description')==description]
+        if len(matches)!=1:raise NativeError('Owned no-store rule creation not confirmed; intent retained')
+        rule=matches[0]
+        triggers=rule.get('Triggers',[])
+        if (not rule.get('Guid') or record.get('guid',rule['Guid'])!=rule['Guid'] or rule.get('Enabled') is not True or
+            rule.get('ActionType') not in (5,'SetResponseHeader') or rule.get('ActionParameter1')!='Cache-Control' or
+            rule.get('ActionParameter2')!='private, no-store, max-age=0' or rule.get('ExtraActions') not in (None,[]) or
+            rule.get('TriggerMatchingType') not in (0,'MatchAny') or len(triggers)!=1 or
+            triggers[0].get('Type') not in (0,'Url') or triggers[0].get('PatternMatchingType') not in (0,'MatchAny') or
+            triggers[0].get('PatternMatches')!=['*']):
+            raise NativeError('Owned no-store rule configuration drift; no overwrite allowed')
+        record.update(guid=rule['Guid'],phase='confirmed');self.save()
+        return record
+
     @serialized
     def bound_staging_cdn(self):
         for parent, cap in (("edge", 10_000_000), ("worker", 25_000_000)):
@@ -713,6 +747,7 @@ class Deployment:
             confirmed = self.verify(kind)
             if confirmed.get("MonthlyBandwidthLimit") != cap or confirmed.get("CacheErrorResponses") is not False:
                 raise NativeError("CDN byte budget not confirmed; worker must not be deployed")
+        for kind in ('edge_cdn','worker_cdn'):self.ensure_cdn_no_store(kind)
         self.state["cdn_monthly_byte_limits"] = {"edge": 10_000_000, "worker": 25_000_000}
         self.save()
 

@@ -551,11 +551,14 @@ def native_health(deploy):
         raise NativeError("No verified Bunny HTTPS worker endpoint")
     credentials = read_private(deploy.secret_path)
     observations["worker_url"] = url
+    cache_headers={}
+    def no_store(value):return any(part.strip().lower()=="no-store" for part in value.split(","))
     def get(path, administrative=False, base=url):
         headers = {"X-Dev-Key": credentials["admin_key"]} if administrative else {"X-Api-Key": credentials["api_key"]}
         req = urllib.request.Request(base + path, headers=headers)
         try:
             with urllib.request.build_opener(NoRedirect()).open(req, timeout=8) as response:
+                cache_headers[(base,path)]=getattr(response,"headers",{}).get("Cache-Control","")
                 data = response.read(16385)
                 if len(data) > 16384:
                     return response.status, None
@@ -579,12 +582,15 @@ def native_health(deploy):
     observations["worker_catalog_backend_matches"] = actual_backend == expected_backend if expected_backend == "bunny-sql" else actual_backend in (None,"filedb")
     observations["server_git_sha"] = sha if re.fullmatch(r"[0-9a-f]{8,40}", sha) else None
     observations["worker_source_matches"] = bool(observations["server_git_sha"] and deploy.state["source_sha"].startswith(sha))
-    code, search = get("/api/v1.0/torrents?search=JacRedHealthProbe" + secrets.token_hex(8))
+    search_path="/api/v1.0/torrents?search=JacRedHealthProbe"+secrets.token_hex(8)
+    code, search = get(search_path)
     observations["authenticated_search_http"] = code
     observations["worker_search_key_valid"] = code == 200 and isinstance(search, list)
     code, _ = get("/api/v1.0/config/schema", administrative=True)
     observations["admin_schema_http"] = code
     observations["worker_admin_key_valid"] = code == 200
+    observations["worker_authenticated_no_store"]=all(no_store(cache_headers.get((url,path),''))
+        for path in (search_path,'/api/v1.0/config/schema'))
     try:
         sql = deploy.sql_client(create=False)
         observations["sql_migration_count"] = sql.query("SELECT count(*) AS n FROM native_schema_migrations")[0]["n"]
@@ -592,7 +598,7 @@ def native_health(deploy):
         observations["sql_schema_ready"] = observations["sql_migration_count"] >= (3 if expected_backend == "bunny-sql" else 2)
     except NativeError:
         observations["sql_schema_ready"] = False
-    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"] and observations["worker_catalog_backend_matches"])
+    observations["infrastructureReady"] = bool(observations["worker_healthy"] and observations["worker_source_matches"] and observations["sql_schema_ready"] and observations["worker_search_key_valid"] and observations["worker_admin_key_valid"] and observations["worker_catalog_backend_matches"] and observations["worker_authenticated_no_store"])
     if deploy.state.get("edge_mode") == "original-api-gateway":
         edge=deploy.verify("edge")
         edge_url=safe_https(edge.get("DefaultHostname"))
@@ -602,11 +608,13 @@ def native_health(deploy):
         observations["edge_version_http"]=code
         observations["edge_source_matches"]=bool(code==200 and isinstance(edge_version,dict) and
             edge_version.get("gitFullSha")==deploy.state["source_sha"] and edge_version.get("catalogBackend")==expected_backend)
-        code,edge_search=get("/api/v1.0/torrents?search=JacRedHealthProbe"+secrets.token_hex(8),base=edge_url)
+        edge_search_path="/api/v1.0/torrents?search=JacRedHealthProbe"+secrets.token_hex(8)
+        code,edge_search=get(edge_search_path,base=edge_url)
         observations["edge_authenticated_search_http"]=code
         observations["edge_search_key_valid"]=code==200 and isinstance(edge_search,list)
+        observations["edge_authenticated_no_store"]=no_store(cache_headers.get((edge_url,edge_search_path),''))
         observations["infrastructureReady"]=bool(observations["infrastructureReady"] and
-            observations["edge_source_matches"] and observations["edge_search_key_valid"])
+            observations["edge_source_matches"] and observations["edge_search_key_valid"] and observations["edge_authenticated_no_store"])
     observations["catalog_acceptance"] = "NOT_ESTABLISHED"
     return observations
 
@@ -760,6 +768,7 @@ def native_update(args):
                 raise NativeError("Update needs a bounded staging window within the estimate budget")
             deploy.renew_window(args.hours)
             deploy.start_watchdog()
+        deploy.bound_staging_cdn()
         previous=deploy.rollback_payload() if deploy.state.get("pending_update") else deploy.capture_current_payload()
         try:
             result=deploy.apply_release(target,rollback=args.operation=="rollback")

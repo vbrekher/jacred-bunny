@@ -79,7 +79,7 @@ class PayloadHistoryTests(unittest.TestCase):
             payload_dir=self.gateway,source_sha=None,registry_id=None,hours=.1,max_estimated_usd=2,keep_on_error=True)
         with patch('native.installation_lock',return_value=contextlib.nullcontext()),patch('operations.Operations',return_value=self.deploy),\
              patch.object(cli,'account_key',return_value='test-key'),patch.object(cli,'resolve_native_registry'),\
-             patch.object(cli,'native_health',return_value={'infrastructureReady':True,'worker_source_matches':True}) as health:
+             patch.object(self.deploy,'bound_staging_cdn'),patch.object(cli,'native_health',return_value={'infrastructureReady':True,'worker_source_matches':True}) as health:
             cli.native_update(args)
         health.assert_called_once()
         self.assertEqual(self.deploy.state['edge_mode'],'original-api-gateway')
