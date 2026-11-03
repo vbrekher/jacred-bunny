@@ -86,3 +86,13 @@ Update defaults to a dry-run. Applied updates pin the new image digest, preserve
 These commands **do not back up legacy FileDB, Tracks objects, runtime configuration or worker jobs**. They cannot satisfy full production backup/restore acceptance. Live tests used explicitly synthetic data and removed their probe rows. The native database fork endpoint returned HTTP 403; its absence was reconciled against the account database list, and the supported SQL transaction mechanism was tested independently. [Live operation evidence](../docs/evidence/native-operations-2026-11-03.json).
 
 The [experimental original .NET SQL runtime](SQL_RUNTIME.md) now has a real source-to-query acceptance slice. It requires an explicit backend setting and migration `0004_catalog_commits.sql`; the current infrastructure payload does not enable it. Full HTTP parity, worker rollout and complete recovery remain separate gates.
+
+## SQL runtime payload v2
+
+The packager accepts `--catalog-backend bunny-sql` to produce a v2 payload with explicit SQL authority and migrations 1, 2 and 4. Optional shard migration3 is excluded. The public packager CLI requires a clean tracked source tree at its declared SHA. The default legacy v1 payload remains supported.
+
+A fresh v2 install supplies separate reader/writer tokens through private worker environment settings, records only a configuration fingerprint, verifies its remote readback, and requires the worker's `/version` to report `catalogBackend: bunny-sql`. A live FileDB process cannot satisfy SQL runtime readiness. Install/update/rollback reject an implicit backend change; migrating an existing FileDB installation needs a separate verified data transition. This format support is not fresh-public-install or deployed-worker acceptance.
+
+SQL backup v2 additionally includes bucket versions and commit receipts. Restore rejects unresolved temporary database intents before allocating another database and confirms cleanup with HTTP404. A real three-release SQL catalog was restored from private Storage after its original database was deleted; the original query service returned the same response checksum. This covers SQL catalog recovery only. Tracks, runtime configuration, durable worker jobs, encryption policy, retention and complete production recovery remain required. Per-step elapsed values in the evidence are not an end-to-end RTO claim.
+
+[SQL runtime backup and loss-of-source recovery evidence](../docs/evidence/native-runtime-backup-v2-2026-11-03.json).

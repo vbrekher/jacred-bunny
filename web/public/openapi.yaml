@@ -1687,6 +1687,10 @@ components:
           type: string
           format: uri
           description: Corresponding public source for this fork build
+        catalogBackend:
+          type: string
+          enum: [filedb, bunny-sql]
+          description: Authoritative catalog backend used by the running process
         gitBranch:
           type: string
         buildDate:

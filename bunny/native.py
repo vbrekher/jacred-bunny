@@ -178,6 +178,40 @@ def staging_cost_plan(limits, hours=1, data_gb=1, rates=None):
                 "https://bunny.net/database/"]}
 
 
+SQL_RUNTIME_MIGRATIONS = ("0001_catalog.sql", "0002_search_fts5.sql", "0004_catalog_commits.sql")
+
+
+def environment_fingerprint(values):
+    if (not isinstance(values, list) or any(not isinstance(row, dict) or set(row) != {"name", "value"} or
+        not isinstance(row["name"], str) or not isinstance(row["value"], str) for row in values) or
+        len({row["name"] for row in values}) != len(values)):
+        raise NativeError("Invalid private worker environment shape")
+    return hashlib.sha256(json.dumps(sorted(values,key=lambda row:row["name"]),sort_keys=True,separators=(",",":")).encode()).hexdigest()
+
+
+def payload_spec(manifest):
+    try:
+        sha, image, files = manifest["source_sha"], manifest["image"], manifest["files"]
+        schema = manifest.get("schema")
+        if schema == "jacred-bunny-native-payload/v1":
+            names = ("edge.js", *SQL_RUNTIME_MIGRATIONS[:2])
+            if manifest.get("catalog_backend", "filedb") != "filedb":
+                raise NativeError("Legacy payload cannot select SQL authority")
+        elif schema == "jacred-bunny-native-payload/v2" and manifest.get("catalog_backend") == "bunny-sql":
+            names = ("edge.js", *SQL_RUNTIME_MIGRATIONS)
+        else:
+            raise NativeError("Unsupported native payload schema/backend")
+        if (not re.fullmatch(r"[0-9a-f]{40}", sha) or
+            image["reference"] != "ghcr.io/vbrekher/jacred-bunny:sha-" + sha or
+            not re.fullmatch(r"sha256:[0-9a-f]{64}", image["digest"]) or
+            not isinstance(files, dict) or set(files) != set(names) or
+            any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value) for value in files.values())):
+            raise NativeError("Invalid native payload identity")
+        return names
+    except (ValueError, TypeError, KeyError):
+        raise NativeError("Invalid native payload manifest") from None
+
+
 def load_payload(directory):
     directory = Path(directory)
     manifest_file = directory / "manifest.json"
@@ -185,19 +219,11 @@ def load_payload(directory):
         raise NativeError("Missing or unsafe native payload manifest")
     try:
         manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
-        sha = manifest["source_sha"]
-        image = manifest["image"]
-        files = manifest["files"]
-        if (manifest.get("schema") != "jacred-bunny-native-payload/v1" or
-            not re.fullmatch(r"[0-9a-f]{40}", sha) or
-            image["reference"] != "ghcr.io/vbrekher/jacred-bunny:sha-" + sha or
-            not re.fullmatch(r"sha256:[0-9a-f]{64}", image["digest"]) or
-            not isinstance(files, dict) or set(files) != {"edge.js", "0001_catalog.sql", "0002_search_fts5.sql"}):
-            raise NativeError("Invalid native payload identity")
-        for name, digest in files.items():
+        names = payload_spec(manifest)
+        for name in names:
             path = directory / name
-            if (not re.fullmatch(r"[0-9a-f]{64}", digest) or path.is_symlink() or not path.is_file() or
-                not 0 < path.stat().st_size <= 2 * 1024 * 1024 or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+            if (path.is_symlink() or not path.is_file() or not 0 < path.stat().st_size <= 2 * 1024 * 1024 or
+                hashlib.sha256(path.read_bytes()).hexdigest() != manifest["files"][name]):
                 raise NativeError("Native payload file checksum mismatch")
         return manifest
     except (ValueError, TypeError, KeyError):
@@ -223,7 +249,12 @@ def fetch_release_payload(tag, cache, expected_source=None):
     base = "https://github.com/vbrekher/jacred-bunny/releases/download/" + tag + "/"
     with tempfile.TemporaryDirectory(prefix=".payload-", dir=cache) as temp:
         staging = Path(temp)
-        for name in ("manifest.json", "edge.js", "0001_catalog.sql", "0002_search_fts5.sql"):
+        (staging / "manifest.json").write_bytes(fetch_public(base + "manifest.json"))
+        try:
+            names = payload_spec(json.loads((staging / "manifest.json").read_text()))
+        except (ValueError, OSError):
+            raise NativeError("Invalid release manifest") from None
+        for name in names:
             (staging / name).write_bytes(fetch_public(base + name))
         manifest = load_payload(staging)
         if expected_source is not None and manifest["source_sha"] != expected_source:
@@ -532,6 +563,8 @@ class Deployment:
                 templates[0].get("volumeMounts") != identity["volumeMounts"] or
                 remote.get("volumes") != identity["volumes"]):
                 raise NativeError("Remote worker specification changed; refusing mutation")
+            if identity.get("environment_sha256") is not None and environment_fingerprint(templates[0].get("environmentVariables")) != identity["environment_sha256"]:
+                raise NativeError("Remote private worker configuration changed; refusing mutation")
         return remote
 
     def sql_client(self, write=False, create=True):
@@ -582,6 +615,8 @@ class Deployment:
                     ("name", "imageNamespace", "imageName", "imageTag", "imageRegistryId", "imageDigest")},
                     "region": self.state["region"], "volumeMounts": container.get("volumeMounts"),
                     "volumes": payload.get("volumes")}
+        if self.state.get("catalog_backend") == "bunny-sql":
+            identity["environment_sha256"] = environment_fingerprint(container.get("environmentVariables"))
         ident = self.create("worker", "/mc/apps", payload, "id", "/mc/apps/{id}", "name", identity=identity)
         self.state["phase"] = "worker_created_not_deployed"
         self.save()

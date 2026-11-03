@@ -1,0 +1,145 @@
+{
+  "kind": "LIVE_SQL_RUNTIME_BACKUP_RESTORE_V2",
+  "scope": "local original runtime and real Bunny Database/Storage, no Magic Containers rollout",
+  "synthetic": false,
+  "source_capture_sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4",
+  "seed": {
+    "kind": "LIVE_BUNNY_ORIGINAL_PARSER_TO_SQL_QUERY",
+    "synthetic": false,
+    "source_snapshot_sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4",
+    "original_parser_records": 20,
+    "selected_records": 3,
+    "search_result_count": 1,
+    "query_body_sha256": "f47cc1e95810136e98f7529a30af1e864e7f5cc3cd88470a26b0ffd47f76102d",
+    "process_mode": "write",
+    "local_filedb_fallback": false,
+    "production_acceptance": false
+  },
+  "archive": {
+    "counts": {
+      "buckets": 3,
+      "bucket_aliases": 3,
+      "torrents": 3,
+      "track_file_inventory": 0,
+      "native_imports": 0,
+      "catalog_bucket_versions": 3,
+      "catalog_commits": 3
+    },
+    "gzip_sha256": "5091bb4f17f11de48756fbe8f6e50f77147c305bd2a5619d57ca82e382a31710",
+    "content_sha256": "ebe52e030c4fd3e0bccda3d9bd6f1c355c170863add5e540e531a0d31dd12f22",
+    "bytes": 2586,
+    "elapsed_seconds": 5.11303112799942,
+    "coverage": {
+      "sql_catalog": true,
+      "legacy_filedb": false,
+      "legacy_tracks_objects": false,
+      "runtime_config": false,
+      "worker_jobs": false,
+      "catalog_versions_and_commits": true
+    }
+  },
+  "restore": {
+    "backup_id": "catalog-20261103T164446Z-e339d220",
+    "restored_database_id": "db_01M6H4S7E8ZD92M7456D714630",
+    "restored_counts": {
+      "buckets": 3,
+      "bucket_aliases": 3,
+      "torrents": 3,
+      "track_file_inventory": 0,
+      "native_imports": 0,
+      "catalog_bucket_versions": 3,
+      "catalog_commits": 3
+    },
+    "content_sha256_verified": true,
+    "fts_query_completed": true,
+    "fts_probe_matches": 0,
+    "elapsed_seconds": 9.686083613996743,
+    "coverage": {
+      "sql_catalog": true,
+      "legacy_filedb": false,
+      "legacy_tracks_objects": false,
+      "runtime_config": false,
+      "worker_jobs": false,
+      "catalog_versions_and_commits": true
+    },
+    "production_restore_acceptance": false
+  },
+  "restore_cleanup_status": "deleted_after_restore_test",
+  "source_cleanup": "deleted_confirmed_404",
+  "public_release_payload_acceptance": false,
+  "production_acceptance": false,
+  "loss_of_source_recovery": {
+    "original_database_absent_404": true,
+    "restore": {
+      "backup_id": "catalog-20261103T164446Z-e339d220",
+      "restored_database_id": "db_01M6H4VSSXJRPHKJVP0PVP48B4",
+      "restored_counts": {
+        "buckets": 3,
+        "bucket_aliases": 3,
+        "torrents": 3,
+        "track_file_inventory": 0,
+        "native_imports": 0,
+        "catalog_bucket_versions": 3,
+        "catalog_commits": 3
+      },
+      "content_sha256_verified": true,
+      "fts_query_completed": true,
+      "fts_probe_matches": 0,
+      "elapsed_seconds": 9.28522887500003,
+      "coverage": {
+        "sql_catalog": true,
+        "legacy_filedb": false,
+        "legacy_tracks_objects": false,
+        "runtime_config": false,
+        "worker_jobs": false,
+        "catalog_versions_and_commits": true
+      },
+      "production_restore_acceptance": false
+    },
+    "restored_query": {
+      "kind": "LIVE_BUNNY_ORIGINAL_PARSER_TO_SQL_QUERY",
+      "synthetic": false,
+      "source_snapshot_sha256": "ca97b106fa8654e4bedd2d06aff846228f5acb4f78a5f6aae8ad88186d2d31d4",
+      "original_parser_records": 20,
+      "selected_records": 3,
+      "search_result_count": 1,
+      "query_body_sha256": "f47cc1e95810136e98f7529a30af1e864e7f5cc3cd88470a26b0ffd47f76102d",
+      "process_mode": "read",
+      "local_filedb_fallback": false,
+      "production_acceptance": false
+    },
+    "original_query_body_sha256_matches": true,
+    "cleanup": "deleted_confirmed_404"
+  },
+  "cleanup_readback": [
+    {
+      "id": "db_01M6H4S7E8ZD92M7456D714630",
+      "deleted_confirmed_404": true
+    },
+    {
+      "id": "db_01M6H4VSSXJRPHKJVP0PVP48B4",
+      "deleted_confirmed_404": true
+    }
+  ],
+  "implementation": "development worktree; not a tagged or deployed MC acceptance run",
+  "limitations": [
+    "No v2 fresh installer or worker rollout was exercised yet.",
+    "The payload descriptor was reconstructed locally from exact-source CI image/bundle and source-matching migration4; not a public release acceptance.",
+    "Tracks/config/jobs, encryption policy and retention are not covered.",
+    "Elapsed values measure individual operations, not full production RTO."
+  ],
+  "file_sha256": {
+    "bunny/backup.py": "8cfa4aae1000aa601df5f4cff52a3515095496934bb19516366f60b3f0a25fda",
+    "bunny/native.py": "aa7c1635142f4abcf0bf8389905388299a1e50c575834755c4462b9dcf154c3f",
+    "bunny/operations.py": "fc88174834f1cd4138b23a7b83406ea40bfb95aee9b1fe8294c48f78380f7365",
+    "bunny/cli.py": "a060da0e5ccccb1551e37ac15c06a1d5656b5d97793584cc9ab13af613f74351"
+  },
+  "worker_environment_readback": {
+    "owned_existing_worker_shape_verified": true,
+    "field_names": [
+      "name",
+      "value"
+    ],
+    "values_published": false
+  }
+}

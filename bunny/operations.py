@@ -30,6 +30,8 @@ class Operations(Deployment):
             manifest = load_payload(destination)
             if manifest['image']['digest'] != self.state['image_digest']:
                 raise NativeError('Current cached image identity differs')
+            if manifest.get('catalog_backend','filedb') != self.state.get('catalog_backend','filedb'):
+                raise NativeError('Current cached catalog authority differs')
             return destination
         edge = self.verify('edge')
         value = self.api('GET', '/compute/script/'+str(self.state['resources']['edge']['id'])+'/code')
@@ -42,19 +44,23 @@ class Operations(Deployment):
         (destination/'edge.js').write_text(code,encoding='utf-8')
         expected = {x['name']:x['sha256'] for x in self.state.get('migration_receipts',[])}
         files={'edge.js':hashlib.sha256(code.encode()).hexdigest()}
-        for name in ['0001_catalog.sql','0002_search_fts5.sql']:
+        for name in (['0001_catalog.sql','0002_search_fts5.sql','0004_catalog_commits.sql'] if self.state.get('catalog_backend') == 'bunny-sql' else ['0001_catalog.sql','0002_search_fts5.sql']):
             body=fetch_public('https://raw.githubusercontent.com/vbrekher/jacred-bunny/'+self.state['source_sha']+'/bunny-native/migrations/'+name)
             digest=hashlib.sha256(body).hexdigest()
             if digest != expected.get(name):
                 raise NativeError('Cannot reconstruct verified current migration payload')
             (destination/name).write_bytes(body);files[name]=digest
-        atomic_private(destination/'manifest.json',{'schema':'jacred-bunny-native-payload/v1',
-            'source_sha':self.state['source_sha'],'image':{'reference':self.state['image'],'digest':self.state['image_digest']},'files':files})
+        manifest={'schema':'jacred-bunny-native-payload/v2' if self.state.get('catalog_backend') == 'bunny-sql' else 'jacred-bunny-native-payload/v1',
+            'source_sha':self.state['source_sha'],'image':{'reference':self.state['image'],'digest':self.state['image_digest']},'files':files}
+        if self.state.get('catalog_backend') == 'bunny-sql':manifest['catalog_backend']='bunny-sql'
+        atomic_private(destination/'manifest.json',manifest)
         load_payload(destination)
         return destination
 
     def assert_schema_compatible(self, payload):
         manifest=load_payload(payload)
+        if manifest.get('catalog_backend','filedb') != self.state.get('catalog_backend','filedb'):
+            raise NativeError('Update/rollback cannot change catalog authority; explicit data migration required')
         expected={name:digest for name,digest in manifest['files'].items() if name.endswith('.sql')}
         rows=self.sql_client(create=False).query('SELECT name,sha256 FROM native_schema_migrations ORDER BY name')
         actual={x['name']:x['sha256'] for x in rows}

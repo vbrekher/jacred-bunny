@@ -84,6 +84,50 @@ class PayloadTests(unittest.TestCase):
         manifest=pkg.package(root,out,'a'*40,'sha256:'+'b'*64)
         self.assertEqual(n.load_payload(out),manifest)
 
+    def test_sql_payload_requires_exact_runtime_migrations_and_backend(self):
+        name='0004_catalog_commits.sql'
+        (self.root/name).write_text('SELECT 1;')
+        self.manifest['files'][name]=hashlib.sha256((self.root/name).read_bytes()).hexdigest()
+        self.manifest.update(schema='jacred-bunny-native-payload/v2',catalog_backend='bunny-sql')
+        self.save();self.assertEqual(n.load_payload(self.root),self.manifest)
+        self.manifest['catalog_backend']='filedb';self.save()
+        with self.assertRaises(n.NativeError):n.load_payload(self.root)
+
+    def test_sql_packager_roundtrip_excludes_optional_shard_migration(self):
+        package_spec=importlib.util.spec_from_file_location('sql_package_tool',P.parents[1]/'tools/bunny_native_package.py')
+        pkg=importlib.util.module_from_spec(package_spec);package_spec.loader.exec_module(pkg)
+        source=P.parents[1]
+        # Use a private dummy bundle; all three actual SQL migration files are copied.
+        from unittest.mock import patch
+        import shutil
+        root=self.root/'source';(root/'bunny-native/edge/dist').mkdir(parents=True)
+        (root/'bunny-native/migrations').mkdir(parents=True)
+        (root/'bunny-native/edge/dist/index.js').write_text('test-only bundle')
+        for name in n.SQL_RUNTIME_MIGRATIONS:shutil.copyfile(source/'bunny-native/migrations'/name,root/'bunny-native/migrations'/name)
+        out=self.root/'sql-payload';manifest=pkg.package(root,out,'a'*40,'sha256:'+'b'*64,'bunny-sql')
+        self.assertEqual(n.load_payload(out),manifest)
+        self.assertNotIn('0003_shard_identity.sql',manifest['files'])
+
+    def test_existing_legacy_install_cannot_silently_adopt_sql_authority(self):
+        from unittest.mock import patch,Mock
+        import argparse
+        name='0004_catalog_commits.sql';(self.root/name).write_text('SELECT 1;')
+        self.manifest['files'][name]=hashlib.sha256((self.root/name).read_bytes()).hexdigest()
+        self.manifest.update(schema='jacred-bunny-native-payload/v2',catalog_backend='bunny-sql');self.save()
+        state=self.root/'state';deploy=n.Deployment(state,Mock())
+        deploy.initialize('a'*40,self.manifest['image']['reference'],self.manifest['image']['digest'])
+        cli_spec=importlib.util.spec_from_file_location('backend_cli',P.parent/'cli.py')
+        cli=importlib.util.module_from_spec(cli_spec);cli_spec.loader.exec_module(cli)
+        args=argparse.Namespace(apply=True,payload_dir=self.root,release=None,state_dir=state)
+        with patch.dict('sys.modules',{'native':n}),patch.object(cli,'account_key',return_value='test-only'),patch.object(n,'API') as api:
+            with self.assertRaisesRegex(n.NativeError,'authority change'):cli.native_install(args)
+        api.return_value.assert_not_called()
+
+    def test_environment_hash_is_order_independent_and_rejects_duplicate_names(self):
+        values=[{'name':'A','value':'private-test-value'},{'name':'B','value':'test'}]
+        self.assertEqual(n.environment_fingerprint(values),n.environment_fingerprint(list(reversed(values))))
+        with self.assertRaises(n.NativeError):n.environment_fingerprint(values+values)
+
     def test_release_name_cannot_escape_cache_or_repository(self):
         for tag in ['../other','latest','v1.0.0/../../other','https://attacker.invalid']:
             with self.assertRaises(n.NativeError):

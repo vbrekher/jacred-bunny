@@ -100,6 +100,23 @@ class OperationTests(unittest.TestCase):
         health.assert_not_called();registry.assert_not_called()
         self.assertFalse(any(method in ('PATCH','POST','DELETE') for method,path in self.calls))
 
+    def test_private_environment_readback_is_hashed_and_drift_is_rejected(self):
+        env=[{'name':'JACRED_CATALOG_BACKEND','value':'bunny-sql'},{'name':'PRIVATE_TEST','value':'dummy-secret-only'}]
+        self.remote['containerTemplates'][0]['environmentVariables']=env
+        identity=self.deploy.state['resources']['worker']['identity']
+        identity['environment_sha256']=native.environment_fingerprint(env)
+        self.deploy.verify('worker')
+        env[1]['value']='different-test-value'
+        with self.assertRaisesRegex(native.NativeError,'private worker configuration') as failure:self.deploy.verify('worker')
+        self.assertNotIn('dummy-secret-only',str(failure.exception))
+        self.assertNotIn('different-test-value',str(failure.exception))
+
+    def test_sql_authority_cannot_roll_back_to_legacy_payload(self):
+        self.deploy.state['catalog_backend']='bunny-sql'
+        with self.assertRaisesRegex(native.NativeError,'catalog authority'):
+            self.deploy.assert_schema_compatible(self.old)
+        self.sql.query.assert_not_called()
+
     def test_uncertain_patch_is_inspected_and_not_replayed(self):
         self.uncertain=True
         self.finish(self.deploy.apply_release(self.new))
