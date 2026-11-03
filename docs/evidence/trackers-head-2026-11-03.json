@@ -87,17 +87,17 @@
     {
       "id": "animelayer",
       "parsers": [
-        "Infrastructure/Trackers/Animelayer/AnimeLayerParser.cs"
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerParser.cs"
       ],
       "sync_services": [
-        "Infrastructure/Trackers/Animelayer/AnimeLayerSyncService.cs"
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerSyncService.cs"
       ],
       "active_in_host_crontab": true,
       "host": "https://animelayer.ru",
       "parser_ready": false,
       "source_sha256": {
-        "Infrastructure/Trackers/Animelayer/AnimeLayerParser.cs": "343064e8107020d415f915e8d9f9a0f739d467c2a4a8cdb31abdbb492a3214e5",
-        "Infrastructure/Trackers/Animelayer/AnimeLayerSyncService.cs": "9309833e4992df645928104afc00da160db019de1cc0481100871a4edda92be6"
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerParser.cs": "343064e8107020d415f915e8d9f9a0f739d467c2a4a8cdb31abdbb492a3214e5",
+        "Infrastructure/Trackers/AnimeLayer/AnimeLayerSyncService.cs": "9309833e4992df645928104afc00da160db019de1cc0481100871a4edda92be6"
       },
       "status": "LIMITED",
       "http_status": 200,
@@ -415,17 +415,17 @@
     {
       "id": "subsplease",
       "parsers": [
-        "Infrastructure/Trackers/Subsplease/SubsPleaseParser.cs"
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseParser.cs"
       ],
       "sync_services": [
-        "Infrastructure/Trackers/Subsplease/SubsPleaseSyncService.cs"
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseSyncService.cs"
       ],
       "active_in_host_crontab": true,
       "host": "https://subsplease.org",
       "parser_ready": false,
       "source_sha256": {
-        "Infrastructure/Trackers/Subsplease/SubsPleaseParser.cs": "90a82301f005e9fe45292c5c32edc8134f981e9bd9a84a3334d2d396612b92b7",
-        "Infrastructure/Trackers/Subsplease/SubsPleaseSyncService.cs": "34c4402767e101e5055fbade1c4423b8feb2a62c2ae32cb4f6683769a45a3500"
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseParser.cs": "90a82301f005e9fe45292c5c32edc8134f981e9bd9a84a3334d2d396612b92b7",
+        "Infrastructure/Trackers/SubsPlease/SubsPleaseSyncService.cs": "34c4402767e101e5055fbade1c4423b8feb2a62c2ae32cb4f6683769a45a3500"
       },
       "status": "LIMITED",
       "http_status": 200,
@@ -455,17 +455,17 @@
     {
       "id": "torrentby",
       "parsers": [
-        "Infrastructure/Trackers/Torrentby/TorrentByParser.cs"
+        "Infrastructure/Trackers/TorrentBy/TorrentByParser.cs"
       ],
       "sync_services": [
-        "Infrastructure/Trackers/Torrentby/TorrentBySyncService.cs"
+        "Infrastructure/Trackers/TorrentBy/TorrentBySyncService.cs"
       ],
       "active_in_host_crontab": true,
       "host": "https://torrent.by",
       "parser_ready": false,
       "source_sha256": {
-        "Infrastructure/Trackers/Torrentby/TorrentByParser.cs": "8baa0638ffc8be9543e38ebdd40fc2de70a4db30b8d9ee822f7218dcfe4f1db4",
-        "Infrastructure/Trackers/Torrentby/TorrentBySyncService.cs": "12a0c890bacef60da6460b3c56f6a340d98474901e1640f08b568fb616554097"
+        "Infrastructure/Trackers/TorrentBy/TorrentByParser.cs": "8baa0638ffc8be9543e38ebdd40fc2de70a4db30b8d9ee822f7218dcfe4f1db4",
+        "Infrastructure/Trackers/TorrentBy/TorrentBySyncService.cs": "12a0c890bacef60da6460b3c56f6a340d98474901e1640f08b568fb616554097"
       },
       "status": "UPSTREAM_UNAVAILABLE",
       "http_status": null,
