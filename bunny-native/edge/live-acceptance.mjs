@@ -6,6 +6,8 @@
  */
 import {createHash} from "node:crypto";
 import {isReady} from "./src/sql.mjs";
+import {makeShardProvider} from "./src/shards.mjs";
+import {verifyShardFleet} from "./src/acceptance.mjs";
 
 function safeNumber(v){
   const n=Number(v);
@@ -23,7 +25,7 @@ export async function verifyRemote(db,{hashAll=false,maxRows=1000000}={}){
   const b=safeNumber(meta.bucket_count),t=safeNumber(meta.track_file_count);
   const aliasRow=await db.prepare("SELECT COUNT(*) AS n FROM bucket_aliases").first();
   const aliases=safeNumber(aliasRow?.n);
-  if(aliases===0)throw Error("Missing original search aliases");
+  if(aliases===0 && expected>0)throw Error("Missing original search aliases");
   const ftsRow=await db.prepare("SELECT COUNT(*) AS n FROM torrent_fts").first();
   if(safeNumber(ftsRow?.n)!==expected)throw Error("Search index count mismatch");
   // A real FTS MATCH query catches unsupported/missing FTS5 early. No content is
@@ -71,26 +73,33 @@ function parseArgs(argv){
   if(argv.includes("--help")||argv.length===0)return {help:true};
   if(!argv.includes("--run"))throw Error("Explicit --run required");
   for(const flag of argv)
-    if(!["--run","--hash-all","--ack-full-scan"].includes(flag))
+    if(!["--run","--hash-all","--audit-routing","--ack-full-scan"].includes(flag))
       throw Error("Unknown argument");
   const hashAll=argv.includes("--hash-all");
-  if(hashAll&&!argv.includes("--ack-full-scan"))
-    throw Error("--hash-all requires --ack-full-scan");
-  return {help:false,hashAll};
+  const auditRoute=argv.includes("--audit-routing");
+  if((hashAll||auditRoute)&&!argv.includes("--ack-full-scan"))
+    throw Error("Full scans require --ack-full-scan");
+  return {help:false,hashAll,auditRoute};
 }
 async function main(){
   try{
     const args=parseArgs(process.argv.slice(2));
     if(args.help){
-      console.log("Usage: node live-acceptance.mjs --run [--hash-all --ack-full-scan]");
+      console.log("Usage: node live-acceptance.mjs --run [--hash-all] [--audit-routing] [--ack-full-scan]");
       console.log("Read-only staging checks. Requires BUNNY_DATABASE_URL and BUNNY_DATABASE_AUTH_TOKEN in environment.");
       return;
     }
-    if(!process.env.BUNNY_DATABASE_URL||!process.env.BUNNY_DATABASE_AUTH_TOKEN)
+    const sharded=Boolean(process.env.JACRED_SQL_SHARD_IDS);
+    if(!sharded&&(!process.env.BUNNY_DATABASE_URL||!process.env.BUNNY_DATABASE_AUTH_TOKEN))
       throw Error("Missing Bunny Database connection environment");
+    if(!sharded&&args.auditRoute)
+      throw Error("--audit-routing requires multiple configured shards");
     const {connect}=await import("@bunny.net/database-client");
-    const db=connect({timeout:3000});
-    const result=await verifyRemote(db,{hashAll:args.hashAll});
+    const provider=makeShardProvider(process.env,connect);
+    const result=provider
+      ? await verifyShardFleet(provider,{verifySingle:verifyRemote,
+          hashAll:args.hashAll,auditRoute:args.auditRoute})
+      : await verifyRemote(connect({timeout:3000}),{hashAll:args.hashAll});
     console.log(JSON.stringify(result));
   }catch(error){
     // SDK exception messages can echo SQL, raw magnets or connection strings.
