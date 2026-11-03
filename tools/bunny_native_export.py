@@ -33,7 +33,11 @@ def export_stage(database, output):
         conn=sqlite3.connect("file:"+database.as_posix()+"?mode=ro",uri=True)
         try:
             with os.fdopen(fd,"wb") as stream:
+                manifest=conn.execute("SELECT master_sha256 FROM native_imports WHERE id=1").fetchone()
+                if not manifest or not isinstance(manifest[0],str):
+                    raise Refused("Stage import provenance unavailable")
                 stream.write(encode({"kind":"header","schema":"jacred-bunny-v0.4",
+                    "master_sha256":manifest[0],
                     "bucket_count":stats["buckets"],"torrent_count":stats["torrents"],
                     "track_file_count":stats["track_files_inventory_only"]}))
                 specs=[

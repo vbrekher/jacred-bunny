@@ -55,6 +55,8 @@ async function validateFile(file,expected) {
       if(sum!==record.raw_sha256)throw Error("Payload hash mismatch");
     }
   }
+  if(!/^[0-9a-f]{64}$/.test(header.master_sha256??""))
+    throw Error("Missing stage master checksum");
   if(!ended||totals.bucket!==header.bucket_count||totals.torrent!==header.torrent_count
     ||totals.track!==header.track_file_count)throw Error("Export incomplete");
   return {totals,header};
@@ -74,14 +76,14 @@ const FIELDS={
 };
 async function apply(db,file,stats){
   const tablesAlready=await db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all();
-  if(tablesAlready.rows.length)throw Error("Target database already has JacRed tables; refusing overwrite/resume");
+  if(tablesAlready.length)throw Error("Target database already has JacRed tables; refusing overwrite/resume");
   await db.exec(readFileSync(join(migration,"0001_catalog.sql"),"utf8"));
   await db.exec(readFileSync(join(migration,"0002_search_fts5.sql"),"utf8"));
   let pending=[],kind=null,total=0;
   const flush=async()=>{
     if(!pending.length)return;
     // Bunny client transactions are all-or-nothing for each bounded batch.
-    await db.batch(pending,{mode:"immediate"});
+    await db.batch(pending);
     pending=[];
   };
   for await (const line of createInterface({input:createReadStream(file),crlfDelay:Infinity})){
@@ -94,9 +96,14 @@ async function apply(db,file,stats){
   }
   await flush();
   const result=await db.prepare("SELECT (SELECT count(*) FROM buckets) AS buckets,(SELECT count(*) FROM torrents) AS torrents,(SELECT count(*) FROM track_file_inventory) AS tracks").all();
-  const row=result.rows[0];
+  const row=result[0];
   if(Number(row.buckets)!==stats.totals.bucket||Number(row.torrents)!==stats.totals.torrent||Number(row.tracks)!==stats.totals.track)
     throw Error("Bunny remote count mismatch; database is staging-only");
+  // Publish the import manifest only after all batches and counts succeeded.
+  // Edge preview refuses a partial upload with no import manifest.
+  await db.prepare("INSERT INTO native_imports(id,master_sha256,bucket_count,torrent_count,track_file_count,imported_at) VALUES(1,?,?,?,?,?)")
+    .bind(stats.header.master_sha256,stats.totals.bucket,stats.totals.torrent,
+      stats.totals.track,new Date().toISOString()).run();
   // No complete remote record-by-record hash or cross-region parity certification.
   // Deliberately do not record any 'production ready' or cutover flag.
   return {status:"BUNNY_REMOTE_STAGING_ONLY_NOT_CUTOVER",statements:total,

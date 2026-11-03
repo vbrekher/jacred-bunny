@@ -1,0 +1,74 @@
+name: Bunny Native v0.5 Edge API Preview
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'bunny-native/edge/**'
+      - 'bunny-native/remote-import.mjs'
+      - 'tools/bunny_native_export.py'
+      - 'tests/test_bunny_native_import.py'
+      - '.github/workflows/bunny-native-edge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'bunny-native/edge/**'
+      - 'bunny-native/remote-import.mjs'
+      - 'tools/bunny_native_export.py'
+      - '.github/workflows/bunny-native-edge.yml'
+permissions:
+  contents: read
+jobs:
+  edge-api-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check entrypoint and modules
+        run: |
+          node --check bunny-native/edge/entry.mjs
+          node --check bunny-native/edge/src/app.mjs
+          node --check bunny-native/edge/src/format.mjs
+          node --check bunny-native/edge/src/sql.mjs
+          node --check bunny-native/remote-import.mjs
+      - name: Edge API compatibility and security tests (no network)
+        run: node --test bunny-native/edge/tests/api.test.mjs
+      - name: Bundle deployable Edge script with official Bunny packages
+        working-directory: bunny-native/edge
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          test -s dist/index.js
+          node --check dist/index.js
+          sha256sum dist/index.js
+          echo "EDGE_SCRIPT_BUNDLE_CREATED_PASS"
+      - name: Save verified standalone Edge bundle (not deployed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacred-native-v0.5-edge-bundle
+          path: bunny-native/edge/dist/index.js
+          retention-days: 14
+      - name: Staged import regression after provenance transport change
+        run: |
+          python3 -m unittest discover -s tests -p 'test_bunny_native_import.py' -v
+          python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
+      - name: Check source tracker roster has not drifted
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          config = Path('Data/init.yaml').read_text()
+          roster = config.split('synctrackers:',1)[1].split('\ndisable_trackers:',1)[0]
+          expected = re.findall(r'(?m)^\s+-\s+([a-z0-9_-]+)\s*$',roster)
+          code = Path('bunny-native/edge/src/catalog.mjs').read_text()
+          match = re.search(r'Object\.freeze\("([^"]+)"\.split',code)
+          assert match, "Cannot extract frozen Edge tracker contract"
+          actual = match.group(1).split()
+          assert len(actual) == len(set(actual)) == 25
+          assert actual == expected, (actual,expected)
+          print('EDGE_TRACKER_CONTRACT_25_OF_25_PASS')
+          PY

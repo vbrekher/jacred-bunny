@@ -37,6 +37,28 @@ no production cutover, live Bunny data acceptance or claim of search parity.
 
 **[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
 
+## v0.5.0 — Edge Scripting API Preview
+
+The Bunny-native path now includes a separate, **opt-in / read-only** Edge Scripting
+API preview for Jackett, Torznab, Prowlarr, tracker discovery and SQL search.
+It uses the official Bunny Edge SDK + Bunny Database client and requires a
+verified completed SQL import manifest before returning search results.
+
+[Русский · v0.5.0 Edge API setup, compatibility matrix and safe staging](docs/BUNNY_NATIVE_v0.5.0_IMPLEMENTATION.ru.md)
+
+**Status:** offline API tests and Edge bundle build PASS. Real Bunny Database access,
+original .NET exact search/result parity, real live deployment and production cutover
+are **not yet certified**. The existing .NET JacRed remains authoritative.
+
+### Run the isolated source tests
+
+```bash
+cd bunny-native/edge
+npm install --no-audit --no-fund
+npm test
+npm run build
+```
+
 ## Full Bunny-native rewrite roadmap
 
 A documented upgrade path covers complete SQL-backed replacement of FileDB, a TypeScript Edge Scripting API, automatic collection from all 25 supported tracker adapters, shared logical data for multiple replicas, Bunny Storage backup/restore, and optional TorrServer-bunny playback integration.
