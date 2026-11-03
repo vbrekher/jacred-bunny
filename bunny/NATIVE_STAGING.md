@@ -203,6 +203,8 @@ The exact CI image for source `742e34c3e3354e05062f7caaa801c5698ac9650c`, digest
 
 ## Private local migration artifacts
 
+The separate [legacy byte export mode](LEGACY_EXPORT.md) branches before normal configuration/FileDB initialization and workers. Its Bunny boot branch also skips config copies and cron. [Actual local exporter evidence](../docs/evidence/legacy-export-local-2026-11-04.json) verifies authenticated archive bytes, absent normal routes, download limits and expiry with dummy keys and a synthetic FileDB. This mode requires a controller-verified stopped-writer, single-worker window; its source checks do not create a distributed fence. Cloud owned-volume export, nonempty import, restored executable permissions and general migration acceptance remain open. The active Bunny image is still the separately verified ef2cc77a runtime.
+
 Private local FileDB staging, JSONL exports and HTTP captures publish their completed 0600 files with a same-filesystem hard link. Publication fails if a file or symlink appeared at the destination during validation. Dangling output symlinks are rejected before resolving the parent directory. SQLite import replacement remains an explicit `--replace` action; use it only with exclusive control of the target. Unsupported hard-link filesystems fail closed, without an overwrite fallback. Parent directories must be trusted; this is not a sandbox against a malicious local directory owner. [Local filesystem evidence](../docs/evidence/private-publication-2026-11-04.json) covers the reproduced failures and full Python regression suite, not cloud cutover or FileDB quiescence.
 
 ## Administrative key boundary

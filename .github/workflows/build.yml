@@ -44,6 +44,8 @@ jobs:
           dotnet-version: "10.0.x"
       - name: Test original contracts, SQL transport and TLS validation
         run: dotnet test tests/JacRed.Tests/JacRed.Tests.csproj --configuration Release --logger trx --results-directory artifacts/unit-tests
+      - name: Verify isolated legacy exporter through actual local HTTP
+        run: python3 tools/bunny_legacy_export_acceptance.py --run --app bin/Release/net10.0/JacRed.dll
       - name: Retain non-secret test results
         if: always()
         uses: actions/upload-artifact@v4

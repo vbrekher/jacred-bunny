@@ -8,6 +8,13 @@ valid_key() {
   [ "$count" -ge 32 ] && [ "$count" -le 128 ] || return 1
   case "$1" in *[!A-Za-z0-9_-]*) return 1 ;; esac
 }
+# A migration controller must first stop and verify the owned single worker.
+# This branch deliberately precedes config copies, chown, cron and entrypoint.
+case "${JACRED_LEGACY_EXPORT:-0}" in
+  0) ;;
+  1) exec su-exec jacred:jacred /app/JacRed legacy-export ;;
+  *) fail "JACRED_LEGACY_EXPORT must be 0 or 1" ;;
+esac
 # Persistent volumes can arrive owned by root. Correct just the mount roots at startup.
 # Do not recursively chown a potentially multi-GB FileDB on every restart.
 mkdir -p /app/config /app/Data
