@@ -240,3 +240,10 @@ test("HTML special characters must escape in Torznab XML",()=>{
   assert.match(xml,/&amp; Movie/);
   assert.doesNotMatch(xml,/<title>Фильм & Movie/);
 });
+
+test("HEAD requests carry no body with correct status and security headers",async()=>{
+  const r=await harness().req("/api/v2.0/indexers",{method:"HEAD"});
+  assert.equal(r.status,200);
+  assert.equal(await r.text(),"");
+  assert.equal(r.headers.get("cache-control"),"private, no-store, max-age=0");
+});
