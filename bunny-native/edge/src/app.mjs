@@ -4,8 +4,9 @@ import {TRACKERS,TRACKER_SET} from "./catalog.mjs";
 import {resultFromTorrent,rssXml,capsXml,indexersXml,prowlarrRelease} from "./format.mjs";
 import {searchLegacy,isReady} from "./sql.mjs";
 import {filterRows} from "./parity.mjs";
+import {mergeReleases} from "./merge.mjs";
 
-const VERSION="0.5.1-edge-parity-preview";
+const VERSION="0.5.2-sharded-search-preview";
 const API_ORIGIN="https://github.com/vbrekher/jacred-bunny";
 const BAD={error:"Edge preview unavailable",productionReady:false};
 function json(body,status=200,headers={}){
@@ -200,7 +201,7 @@ export function createHandler({getDb,env={}}){
         const offset=pageNum(q.get("offset"),0,0,2000);
         const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
           titleOriginal:getParam(q,"title_original"),tracker}),q,{phrase}).slice(offset,offset+limit);
-        const payload=rssXml(rows.map(resultFromTorrent),originUrl,apiUrl,getParam(q,"cat"));
+        const payload=rssXml(mergeReleases(rows.map(resultFromTorrent)),originUrl,apiUrl,getParam(q,"cat"));
         return attach(xml(payload),responseHeaders);
       }
       const jackett=pathname.match(/^\/api\/v2\.0\/indexers\/([a-z0-9_-]+)\/results$/i);
@@ -212,7 +213,7 @@ export function createHandler({getDb,env={}}){
         const offset=pageNum(q.get("offset"),0,0,2000);
         const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
           titleOriginal:getParam(q,"title_original"),tracker}),q,{phrase}).slice(offset,offset+limit);
-        return attach(json({Results:rows.map(resultFromTorrent),jacred:true}),responseHeaders);
+        return attach(json({Results:mergeReleases(rows.map(resultFromTorrent)),jacred:true}),responseHeaders);
       }
       if(pathname==="/api/v1/search"){
         const ids=q.getAll("indexerIds").flatMap(x=>x.split(","));
@@ -224,7 +225,7 @@ export function createHandler({getDb,env={}}){
         const offset=pageNum(q.get("offset"),0,0,2000);
         const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
           titleOriginal:getParam(q,"title_original")}),q,{phrase}).slice(offset,offset+limit);
-        return attach(json(rows.map(resultFromTorrent).map(prowlarrRelease)),responseHeaders);
+        return attach(json(mergeReleases(rows.map(resultFromTorrent)).map(prowlarrRelease)),responseHeaders);
       }
       if(pathname==="/api/v1.0/torrents"){
         const phrase=getParam(q,"search","altname");

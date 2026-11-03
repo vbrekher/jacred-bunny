@@ -57,6 +57,12 @@ async function validateFile(file,expected) {
   }
   if(!/^[0-9a-f]{64}$/.test(header.master_sha256??""))
     throw Error("Missing stage master checksum");
+  const sharded=header.shard_index!==undefined||header.shard_count!==undefined;
+  if(sharded&&!(Number.isInteger(header.shard_index)&&
+       Number.isInteger(header.shard_count)&&header.shard_count>=2&&
+       header.shard_count<=4&&header.shard_index>=0&&
+       header.shard_index<header.shard_count))
+    throw Error("Invalid shard manifest in export");
   if(!ended||totals.bucket!==header.bucket_count||totals.torrent!==header.torrent_count
     ||totals.track!==header.track_file_count)throw Error("Export incomplete");
   return {totals,header};
@@ -79,6 +85,8 @@ async function apply(db,file,stats){
   if(tablesAlready.length)throw Error("Target database already has JacRed tables; refusing overwrite/resume");
   await db.exec(readFileSync(join(migration,"0001_catalog.sql"),"utf8"));
   await db.exec(readFileSync(join(migration,"0002_search_fts5.sql"),"utf8"));
+  if(stats.header.shard_count!==undefined)
+    await db.exec(readFileSync(join(migration,"0003_shard_identity.sql"),"utf8"));
   let pending=[],kind=null,total=0;
   const flush=async()=>{
     if(!pending.length)return;
@@ -99,6 +107,13 @@ async function apply(db,file,stats){
   const row=result[0];
   if(Number(row.buckets)!==stats.totals.bucket||Number(row.torrents)!==stats.totals.torrent||Number(row.tracks)!==stats.totals.track)
     throw Error("Bunny remote count mismatch; database is staging-only");
+  // Shard identity is published before native_imports. A partial upload
+  // still cannot satisfy the Edge readiness gate.
+  if(stats.header.shard_count!==undefined){
+    await db.prepare("INSERT INTO native_shard_manifest(id,shard_index,shard_count,master_sha256,created_at) VALUES(1,?,?,?,?)")
+      .bind(stats.header.shard_index,stats.header.shard_count,
+        stats.header.master_sha256,new Date().toISOString()).run();
+  }
   // Publish the import manifest only after all batches and counts succeeded.
   // Edge preview refuses a partial upload with no import manifest.
   await db.prepare("INSERT INTO native_imports(id,master_sha256,bucket_count,torrent_count,track_file_count,imported_at) VALUES(1,?,?,?,?,?)")

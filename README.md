@@ -37,6 +37,22 @@ no production cutover, live Bunny data acceptance or claim of search parity.
 
 **[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
 
+## v0.5.2 — SQL shard query fanout and source-derived result merge
+
+The Bunny-native Edge preview now supports 2–4 separate **server-only** SQL
+shards with exact-first search across every shard, strict common-snapshot
+readiness, bounded candidate budgets and all-or-nothing error handling.
+
+The offline splitter creates private 0700/0600 local SQLite shard sets from an
+already verified FileDB staging database, without changing source data.
+Jackett/Torznab/Prowlarr merge torrent releases by 40-hex magnet infohash and
+prefer reliable seeder counts over unreliable tracker sources.
+
+[Русский — v0.5.2 setup, command examples and acceptance gates](docs/BUNNY_NATIVE_v0.5.2_IMPLEMENTATION.ru.md)
+
+**Source + synthetic SQLite only.** Live Bunny multi-database, actual .NET
+golden-response parity and production cutover have **not** been validated.
+
 ## v0.5.1 — Original key matching, SQLite parity and Bunny acceptance
 
 The preview now searches masterDb aliases with original JacRed name normalization
