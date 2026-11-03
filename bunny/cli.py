@@ -11,6 +11,7 @@ import re
 import secrets
 import sys
 import time
+import warnings
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -44,8 +45,6 @@ def account_key():
                     return value
             except (OSError, ValueError, AttributeError):
                 raise DeploymentError("Cannot read Bunny CLI profile") from None
-    if not sys.stdin.isatty():
-        raise DeploymentError("No Bunny CLI profile or BUNNYNET_API_KEY in noninteractive mode")
     return ask("Bunny account API key", hidden=True)
 
 
@@ -68,8 +67,27 @@ def deployment_plan(data_gb=1, hours=1):
 
 def ask(label, default=None, hidden=False):
     suffix = " [" + str(default) + "]" if default is not None else ""
-    value = (getpass.getpass(label + suffix + ": ") if hidden else input(label + suffix + ": ")).strip()
-    return value or default
+    prompt = label + suffix + ": "
+    if hidden:
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", getpass.GetPassWarning)
+                value = getpass.getpass(prompt)
+        except (getpass.GetPassWarning, EOFError, OSError):
+            raise DeploymentError("A secure terminal is required; authorize Bunny CLI or set BUNNYNET_API_KEY for noninteractive use") from None
+    elif sys.stdin.isatty():
+        value = input(prompt)
+    else:
+        try:
+            with open("/dev/tty", "r+", encoding="utf-8") as terminal:
+                terminal.write(prompt)
+                terminal.flush()
+                value = terminal.readline()
+                if not value:
+                    raise DeploymentError("Interactive input ended")
+        except OSError:
+            raise DeploymentError("Interactive terminal required; use noninteractive flags") from None
+    return value.strip() or default
 
 def request(method, path, key, payload=None):
     if not path.startswith("/mc/") or "://" in path or ".." in path:
