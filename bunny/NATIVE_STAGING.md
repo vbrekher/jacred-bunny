@@ -157,4 +157,14 @@ The tracker transports and login handlers now use the platform's certificate val
 
 [Source validation evidence](../docs/evidence/tls-validation-source-2026-11-03.json) records a real local self-signed TLS server rejected by the shared .NET transport. The same test fails with the previous permissive callback. The complete 965-test .NET suite and 184 Python tests passed. A pre-existing test race was fixed by isolating the tracker-list configuration override from concurrent search tests. The Build workflow now runs the .NET regression suite in CI.
 
-These changes still need acceptance on the next exact deployed image. They do not fix announce-address SSRF or the legacy UDP reachability probe, and do not establish all 25 tracker or full security readiness.
+The subsequent exact-image SubsPlease run below verifies one real collector with normal TLS validation. All 25 tracker and full security readiness remain open; the separately described announce-probe changes have source/local transport evidence only.
+
+## Verified TLS collector slice and public announce probes
+
+The exact TLS-hardened CI image `c0d5dfd00326f41ed63b23a618355e5578316df6` was deployed to the existing SQL staging worker. The original SubsPlease collector returned `ok`, increased torrents and commit receipts from 20 to 22, and preserved the previous source URLs. The service-computed digest matched a new independent snapshot. The original 20-record golden snapshot was retained unchanged. [Live collector evidence](../docs/evidence/tls-live-collector-2026-11-03.json) covers this one public tracker; it does not establish private tracker authentication or all 25 adapters. Compute was stopped after verification.
+
+The source announce-list probe now decodes a candidate before checking it and excludes user information, queries, fragments, nested encodings and arbitrary paths. Only `/`, `/announce` and `/announce.php` enter the public list. Private passkey endpoints are excluded, rather than publishing their credentials. UDP without an explicit port retains port 6969.
+
+Every DNS answer must be public unicast. Local, reserved, mapped-local, transition, documentation and known metadata addresses are rejected. HTTP connects directly to a vetted numeric IP, keeps normal TLS hostname/certificate validation, disables system proxy/cookies and refuses redirects. It accepts only successful or HTTP 400 responses as reachability observations, without reading the body. This does not validate a torrent announce result. UDP uses the [BEP 15 connection exchange](https://www.bittorrent.org/beps/bep_0015.html), validates action and transaction ID, and never treats a sent datagram as proof of a reply. It does not announce a fabricated swarm.
+
+The background cycle allows at most 128 distinct endpoints, seven seconds per endpoint and two minutes in total, and responds to service cancellation. These limits can produce a partial list. Source tests exercise private/mixed DNS rejection, actual pinned HTTP redirect refusal and a real local UDP request/reply plus silent-endpoint timeout. Full deployed announce acceptance and the complete security audit remain open.

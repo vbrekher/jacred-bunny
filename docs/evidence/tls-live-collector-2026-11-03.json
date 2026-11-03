@@ -1,0 +1,33 @@
+{
+  "source_sha": "c0d5dfd00326f41ed63b23a618355e5578316df6",
+  "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+  "scope": "Actual original SubsPlease HTTPS collector with platform TLS validation and Bunny SQL writes; one tracker only",
+  "http": 200,
+  "collector_response": "ok",
+  "before": {
+    "torrents": 20,
+    "commits": 20
+  },
+  "after": {
+    "torrents": 22,
+    "commits": 22
+  },
+  "elapsed_seconds": 1.2918958640075289,
+  "old_source_urls_preserved": true,
+  "changed_raw_rows": 2,
+  "real_commit_evidence": true,
+  "production_acceptance": false,
+  "snapshot_json_sha256": "f11d910efbf4224a49504cf39cb8fd734fabf7064e22c566dca7fbf7881e154e",
+  "snapshot_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "service_snapshot_matches": true,
+  "counts": {
+    "buckets": 22,
+    "bucket_aliases": 22,
+    "torrents": 22,
+    "track_file_inventory": 0,
+    "native_imports": 0,
+    "catalog_bucket_versions": 22,
+    "catalog_commits": 22
+  },
+  "worker_stop_confirmed": true
+}

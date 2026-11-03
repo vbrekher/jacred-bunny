@@ -20,5 +20,6 @@
     "Deployed staging image remains 764b8de8 until a new exact CI image is deployed",
     "Announce SSRF, UDP validation, private URL handling and full security scans remain open"
   ],
-  "production_acceptance": false
+  "production_acceptance": false,
+  "followup_live_evidence": "tls-live-collector-2026-11-03.json"
 }
