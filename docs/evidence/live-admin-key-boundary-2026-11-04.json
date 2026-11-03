@@ -1,0 +1,311 @@
+{
+  "scope": "Exact deployed admin-key hardening image: snapshot/auth/cache and nonempty search slice through MC and Edge; not full production acceptance",
+  "source_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+  "image_digest": "sha256:31e83f4a8c703e5397860bb9ed9de70b68521ab7b37ba12c8a533ab81b025a77",
+  "bundle_sha256": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+  "edge_release_id": 1276805,
+  "expected_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "original_json_snapshot_sha256": "f11d910efbf4224a49504cf39cb8fd734fabf7064e22c566dca7fbf7881e154e",
+  "all_service_proofs_match_independent_snapshot": true,
+  "operator_fake_query_checksum_ignored": true,
+  "results": [
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.08764490000612568
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.08620987500762567
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.07944684900576249
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.4562184910028009
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.5517233610007679
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.08025215499219485
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.10228477198688779
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.07902068400289863
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.4774089830025332
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.6458361819968559
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    }
+  ],
+  "production_acceptance": false,
+  "product_checks": {
+    "scope": "Actual current-image nonempty native API search and config-schema key boundary over MC/Edge; not full API/clients/security acceptance",
+    "source_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
+    "image_digest": "sha256:31e83f4a8c703e5397860bb9ed9de70b68521ab7b37ba12c8a533ab81b025a77",
+    "selected_url_sha256": "d0a2e226de7d2634b09f29ab265276ec9d4409ae74ca8bff0e91547eb346fa76",
+    "gateway_body_matches_direct_native": true,
+    "results": [
+      {
+        "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+        "check": "nonempty_native_search",
+        "http": 200,
+        "count": 1,
+        "selected_real_url_present": true,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+        "check": "config_schema",
+        "auth": "none",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+        "check": "config_schema",
+        "auth": "api",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+        "check": "config_schema",
+        "auth": "wrong",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+        "check": "config_schema",
+        "auth": "admin",
+        "http": 200,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://jacred-6a3535da.bunny.run",
+        "check": "nonempty_native_search",
+        "http": 200,
+        "count": 1,
+        "selected_real_url_present": true,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://jacred-6a3535da.bunny.run",
+        "check": "config_schema",
+        "auth": "none",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://jacred-6a3535da.bunny.run",
+        "check": "config_schema",
+        "auth": "api",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://jacred-6a3535da.bunny.run",
+        "check": "config_schema",
+        "auth": "wrong",
+        "http": 401,
+        "no_store": true
+      },
+      {
+        "endpoint": "https://jacred-6a3535da.bunny.run",
+        "check": "config_schema",
+        "auth": "admin",
+        "http": 200,
+        "no_store": true
+      }
+    ],
+    "production_acceptance": false
+  },
+  "update_health": {
+    "productionReady": false,
+    "infrastructureReady": true,
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "worker_health_http": 200,
+    "worker_healthy": true,
+    "worker_catalog_backend": "bunny-sql",
+    "worker_catalog_backend_matches": true,
+    "server_git_sha": "ef2cc77a",
+    "worker_source_matches": true,
+    "authenticated_search_http": 200,
+    "worker_search_key_valid": true,
+    "admin_schema_http": 200,
+    "worker_admin_key_valid": true,
+    "worker_authenticated_no_store": true,
+    "sql_migration_count": 3,
+    "catalog_torrent_count": 22,
+    "sql_schema_ready": true,
+    "edge_version_http": 200,
+    "edge_source_matches": true,
+    "edge_authenticated_search_http": 200,
+    "edge_search_key_valid": true,
+    "edge_authenticated_no_store": true,
+    "catalog_acceptance": "NOT_ESTABLISHED"
+  },
+  "compute_stop": {
+    "worker_status": "inactive",
+    "source_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75"
+  },
+  "source_ci": "https://github.com/vbrekher/jacred-bunny/actions/runs/41726383334",
+  "native_image_ci": "https://github.com/vbrekher/jacred-bunny/actions/runs/41726994422",
+  "limitations": [
+    "Local LAN-origin behavior was separately proved on dummy-config loopback HTTP; these cloud checks use public MC/Edge paths",
+    "Only one real nonempty query is compared here, not all original API golden cases",
+    "22-record one-tracker catalog is not a large/all-tracker/clients acceptance dataset",
+    "No new collector writes were attempted in this security rollout; full security and production gates remain open"
+  ]
+}

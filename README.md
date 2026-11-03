@@ -34,6 +34,8 @@ TLS-hardened live collection and source announce-probe safeguards are recorded i
 
 The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store checks matched the retained 22-record catalog. The subsequent collector call produced no fresh commits; it is not new write-path acceptance. [Current runtime evidence](docs/evidence/live-paged-runtime-2026-11-03.json).
 
+The subsequent administrative-key hardening image also passed a real nonempty MC/Edge search and config-schema permission checks. [Latest runtime evidence](docs/evidence/live-admin-key-boundary-2026-11-04.json). Compute remains bounded staging, not an always-on demo.
+
 ## Install the FileDB deployment candidate
 
 You need a bunny.net account, `curl`, and Python 3.9+ on macOS or Linux. Docker, local .NET builds and a GitHub PAT are not required when the public GHCR registry is available.

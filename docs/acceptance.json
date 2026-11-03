@@ -1,20 +1,20 @@
 {
   "schema": "jacred-bunny-acceptance/v1",
-  "checked_at": "2026-11-03",
+  "checked_at": "2026-11-04",
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
-  "live_worker_source_sha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+  "live_worker_source_sha": "ef2cc77a2174b7c142253ce33d09f54238214d75",
   "gates": [
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #31 passed. Current local source checks include 1049 .NET and 188 Python tests. The deployed image remains 742e34c3; new LAN/CORS hardening still needs its own CI/deployment acceptance. Full reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #32 passed, with 1049 .NET and 188 Python tests. Exact source ef2cc77a/digest-pinned native image deployed with matching Edge bundle. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete. Local atomic writes now pass 1200-record and >4 MiB payload cases plus later-page rollback and immutable receipt retry; full large-catalog and migration acceptance remain incomplete. Local reads additionally cover a 12 MB bucket, a 5000-entry wide index and 4500 long-URL receipt metadata; whole-bucket memory and full deployed capacity remain incomplete."
+      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete. Local atomic writes now pass 1200-record and >4 MiB payload cases plus later-page rollback and immutable receipt retry; full large-catalog and migration acceptance remain incomplete. Local reads additionally cover a 12 MB bucket, a 5000-entry wide index and 4500 long-URL receipt metadata; whole-bucket memory and full deployed capacity remain incomplete. Deployed ef2cc77a additionally returned one real nonempty native query identically through MC and Edge; this is not full current-image API parity."
     },
     {
       "gate": "REAL SQL",
@@ -39,7 +39,7 @@
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live auth/spoofed-proxy denials and CDN no-store checks verified; earlier unsupported no-store claim remains explicitly corrected. TLS bypasses removed and exact-image SubsPlease collection verified. Announce SSRF/UDP/passkey protections have source and local transport tests only; full deployed audit, scans, 429/500/RBAC and all adapters remain incomplete. A real dummy-config loopback HTTP probe confirmed cross-origin administrative secret disclosure through LAN trust; source hardening now requires configured devkey on every network. Exact-source 8cab97bc after-fix HTTP denies missing/wrong/search keys and permits explicit dev keys; keyless foreign/opaque contexts are denied. New code is not yet deployed; full audits remain open."
+      "reason": "Configured-key LAN bypass reproduced and fixed with exact-source local dummy HTTP evidence. Deployed ef2cc77a MC/Edge schema routes reject missing/wrong/search keys, allow admin, and retain actual no-store; service snapshots match independently. Keyless legacy mode is not a hardened network boundary. Full scans, RBAC/CORS/429/500 audit remain incomplete."
     },
     {
       "gate": "CLIENTS",
@@ -64,7 +64,7 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #30 merged with green checks. Exact paged SQL image 742e34c3/d2bf298c deployed and scoped checks passed; compute stopped. No tagged v1.0.0 release, complete production acceptance or public landing page yet."
+      "reason": "PRs through #32 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet."
     }
   ],
   "source_checks": {
@@ -72,9 +72,10 @@
     "edge_node": 101,
     "dotnet": 1049,
     "web": 73,
-    "scope": "Local source checks; CI through PR #31; configured-key LAN/CORS hardening not yet deployed or CI-accepted"
+    "scope": "Local and complete CI through PR #32; exact hardening image deployed for scoped public-path acceptance"
   },
   "recent_evidence": [
+    "evidence/live-admin-key-boundary-2026-11-04.json",
     "evidence/lan-admin-key-boundary-2026-11-03.json",
     "evidence/live-paged-runtime-2026-11-03.json",
     "evidence/paged-read-real-sql-2026-11-03.json",
