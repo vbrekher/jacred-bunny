@@ -9,6 +9,17 @@ namespace JacRed.Tests.Controllers;
 public class HealthControllerConfTests
 {
     [Fact]
+    public void Version_exposes_corresponding_fork_commit_source()
+    {
+        var result = Assert.IsType<JsonResult>(new HealthController().Version());
+        var json = JsonSerializer.SerializeToElement(result.Value);
+        Assert.Equal(VersionInfo.GitFullSha, json.GetProperty("gitFullSha").GetString());
+        Assert.Equal(VersionInfo.SourceUrl, json.GetProperty("sourceUrl").GetString());
+        Assert.Matches("^[a-f0-9]{40}$", VersionInfo.GitFullSha);
+        Assert.Equal("https://github.com/vbrekher/jacred-bunny/tree/" + VersionInfo.GitFullSha, VersionInfo.SourceUrl);
+    }
+
+    [Fact]
     public void Conf_without_server_apikey_returns_open_access()
     {
         WithApiKey(null, () =>

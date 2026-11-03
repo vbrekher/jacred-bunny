@@ -1680,6 +1680,13 @@ components:
           type: string
         gitSha:
           type: string
+        gitFullSha:
+          type: string
+          description: Full build commit SHA, or unknown when Git metadata is unavailable
+        sourceUrl:
+          type: string
+          format: uri
+          description: Corresponding public source for this fork build
         gitBranch:
           type: string
         buildDate:

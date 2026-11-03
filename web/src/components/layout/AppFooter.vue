@@ -1,14 +1,26 @@
 <script setup lang="ts">
 import { BookOpen, Braces } from '@lucide/vue'
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { cn } from '@/lib/utils'
+import { apiClient } from '@/lib/api/client'
 
 const { t } = useI18n()
 const route = useRoute()
 
 const GITHUB = 'https://github.com/jacred-fdb/jacred'
+const sourceUrl = ref('https://github.com/vbrekher/jacred-bunny')
+const sourceRequest = new AbortController()
+onMounted(async () => {
+  try {
+    const version = await apiClient.getVersion({ signal: sourceRequest.signal })
+    if (version.gitFullSha && /^[a-f0-9]{40}$/.test(version.gitFullSha)) {
+      sourceUrl.value = `https://github.com/vbrekher/jacred-bunny/tree/${version.gitFullSha}`
+    }
+  } catch { /* Keep the public fork source available when the server is offline. */ }
+})
+onUnmounted(() => sourceRequest.abort())
 const TELEGRAM = 'https://t.me/pavelpikta'
 const DOCS = 'https://docs.jacred.stream'
 
@@ -32,11 +44,11 @@ const contentMax = computed(() =>
     >
       <div class="flex items-center gap-1">
         <a
-          :href="GITHUB"
+          :href="sourceUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="jr-footer-hit relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-[transform,background-color,color] duration-100 hover:bg-muted hover:text-foreground active:scale-[0.97] motion-reduce:active:scale-100"
-          :aria-label="t('app.footer.github')"
+          :aria-label="t('app.footer.source')"
         >
           <svg
             class="size-5"
@@ -77,6 +89,15 @@ const contentMax = computed(() =>
           <BookOpen class="size-5" aria-hidden="true" />
         </a>
       </div>
+
+      <a
+        :href="sourceUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      >
+        {{ t('app.footer.source') }}
+      </a>
 
       <a
         href="/swagger"

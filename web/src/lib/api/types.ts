@@ -859,6 +859,13 @@ export interface components {
         VersionResponse: {
             version?: string;
             gitSha?: string;
+            /** @description Full build commit SHA, or unknown when Git metadata is unavailable */
+            gitFullSha?: string;
+            /**
+             * Format: uri
+             * @description Corresponding public source for this fork build
+             */
+            sourceUrl?: string;
             gitBranch?: string;
             buildDate?: string;
         };
