@@ -20,7 +20,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 | Component | Verified state |
 | --- | --- |
-| Original .NET application | 1,020 local tests passed; original collector/query running in a SQL-backed Magic Container pilot |
+| Original .NET application | 1,027 local tests passed; original collector/query running in a SQL-backed Magic Container pilot |
 | Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
 | Bunny Database | 22 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
 | Edge API | Original API gateway deployed to owned staging; 101 live HTTP comparisons and six Torznab XML cases passed |
@@ -30,7 +30,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 The standard setup still installs the FileDB candidate. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 22 real releases and verified restart persistence of the original 20-record snapshot. The original API also ran behind the real Bunny Edge gateway. This is not production acceptance or a general nonempty legacy migration. [Live gateway evidence and limits](docs/evidence/live-edge-gateway-2026-11-03.json) identify the exact scope. Staging compute is stopped after each bounded test window; these endpoints are not an always-on public demo.
 
-TLS-hardened live collection and source announce-probe safeguards are recorded in the [changelog](CHANGELOG.md). Source SQL snapshot checks now page one consistent read session; a local dataset exceeding the former 8 MiB response limit matches an independent verifier. Per-row/bucket limits, the endpoint deadline and complete large-catalog acceptance remain open.
+TLS-hardened live collection and source announce-probe safeguards are recorded in the [changelog](CHANGELOG.md). Source SQL snapshot checks now page one consistent read session; a local dataset exceeding the former 8 MiB response limit matches an independent verifier. Catalog writes also use transport pages in one atomic transaction, retaining durable commit receipts. Per-row/bucket read limits, the proof deadline and complete large-catalog acceptance remain open.
 
 ## Install the FileDB deployment candidate
 

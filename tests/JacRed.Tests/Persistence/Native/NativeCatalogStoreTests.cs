@@ -166,6 +166,89 @@ public sealed class NativeCatalogStoreTests : IDisposable
         Assert.Equal(before+1,handler.RequestCount);
     }
 
+    [Fact]
+    public async Task More_than_900_records_and_1000_statements_commit_once_and_retry_returns_original_receipt()
+    {
+        var empty=await store.ReadBucket("large-write:snow");
+        var records=Enumerable.Range(0,1200).Select(i=>Torrent("https://example.invalid/large/"+i)).ToDictionary(x=>x.url);
+        var id=Guid.NewGuid().ToString("N");
+        Assert.Equal(1,await store.WriteBucket(empty,records,id));
+        var loaded=await store.ReadBucket(empty.Key);
+        Assert.Equal(1200,loaded.Torrents.Count);
+        Assert.Equal(1,await store.WriteBucket(loaded,loaded.Torrents,id));
+        Assert.Equal(1,(await store.ReadBucket(empty.Key)).Revision);
+        Assert.Equal(1L,(await client.Query(new("SELECT count(*) AS n FROM catalog_commits"))).Rows[0]["n"]);
+        Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM catalog_write_guards"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Bucket_payload_larger_than_four_MiB_is_transport_paged_without_truncation()
+    {
+        var empty=await store.ReadBucket("large-payload:snow");
+        var records=Enumerable.Range(0,30).Select(i=>{var x=Torrent("https://example.invalid/payload/"+i);x.videotype=new string('x',200000);return x;}).ToDictionary(x=>x.url);
+        Assert.Equal(1,await store.WriteBucket(empty,records,Guid.NewGuid().ToString("N")));
+        var loaded=await store.ReadBucket(empty.Key);
+        Assert.Equal(30,loaded.Torrents.Count);
+        Assert.All(loaded.Torrents.Values,x=>Assert.Equal(200000,x.videotype.Length));
+    }
+
+    [Fact]
+    public async Task Failure_on_later_page_rolls_back_preceding_pages_and_prevents_commit()
+    {
+        await client.Query(new("CREATE TABLE write_probe(id INTEGER PRIMARY KEY,value TEXT)"));
+        var statements=Enumerable.Range(0,1200).Select(i=>new SqlStatement("INSERT INTO write_probe VALUES(?,?)",i==1000?0:i,"safe")).ToArray();
+        await Assert.ThrowsAsync<NativeSqlException>(()=>client.PagedWrite(statements));
+        Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM write_probe"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Lost_page_response_never_commits_or_replays_partial_transaction()
+    {
+        await client.Query(new("CREATE TABLE write_probe(id INTEGER PRIMARY KEY)"));
+        handler.DropNextBatchResponse=true;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>client.PagedWrite(Enumerable.Range(0,1200).Select(i=>new SqlStatement("INSERT INTO write_probe VALUES(?)",i)).ToArray()));
+        // A missing updated baton prevents immediate explicit rollback; closing
+        // the real fixture process expires all its streams, as the server does.
+        handler.ExpireStreams();
+        Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM write_probe"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Lost_commit_response_can_be_reconciled_by_same_immutable_receipt_without_rewrite()
+    {
+        var empty=await store.ReadBucket("commit-loss:snow");
+        var records=Enumerable.Range(0,1200).Select(i=>Torrent("https://example.invalid/commit/"+i)).ToDictionary(x=>x.url);
+        var id=Guid.NewGuid().ToString("N");handler.DropCommitResponse=true;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.WriteBucket(empty,records,id));
+        Assert.Equal(1,await store.WriteBucket(await store.ReadBucket(empty.Key),records,id));
+        Assert.Equal(1200,(await store.ReadBucket(empty.Key)).Torrents.Count);
+        Assert.Equal(1L,(await client.Query(new("SELECT count(*) AS n FROM catalog_commits"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Late_stale_destination_guard_restores_source_deleted_on_earlier_pages()
+    {
+        var source=await store.ReadBucket("move-source:snow");
+        var rows=Enumerable.Range(0,1200).Select(i=>Torrent("https://example.invalid/move/"+i)).ToDictionary(x=>x.url);
+        await store.WriteBucket(source,rows,Guid.NewGuid().ToString("N"));source=await store.ReadBucket(source.Key);
+        var staleTarget=await store.ReadBucket("move-target:snow");
+        var competing=Torrent("https://example.invalid/competing");
+        await store.WriteBucket(staleTarget,new Dictionary<string,TorrentDetails>{{competing.url,competing}},Guid.NewGuid().ToString("N"));
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.WriteBuckets(new[]{new CatalogWrite(source,new Dictionary<string,TorrentDetails>()),new CatalogWrite(staleTarget,rows)},Guid.NewGuid().ToString("N")));
+        Assert.Equal(1200,(await store.ReadBucket(source.Key)).Torrents.Count);
+        Assert.Single((await store.ReadBucket(staleTarget.Key)).Torrents);
+        Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM catalog_write_guards"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Oversized_later_statement_rolls_back_prior_pages_instead_of_partial_success()
+    {
+        await client.Query(new("CREATE TABLE write_probe(id INTEGER PRIMARY KEY,value TEXT)"));
+        var statements=Enumerable.Range(0,1200).Select(i=>new SqlStatement("INSERT INTO write_probe VALUES(?,?)",i,"safe")).Append(new SqlStatement("INSERT INTO write_probe VALUES(?,?)",1200,new string('x',5*1024*1024))).ToArray();
+        await Assert.ThrowsAsync<NativeSqlException>(()=>client.PagedWrite(statements));
+        Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM write_probe"))).Rows[0]["n"]);
+    }
+
     static string FindRoot()
     {
         for (var current = new DirectoryInfo(AppContext.BaseDirectory); current != null; current = current.Parent)
@@ -354,6 +437,14 @@ public sealed class NativeCatalogStoreTests : IDisposable
         public string OverrideBaseUrl;
         public bool DropNextBaton;
         public bool DropNextCloseResponse;
+        public bool DropCommitResponse;
+        public void ExpireStreams()
+        {
+            if(process==null)return;
+            process.StandardInput.Close();
+            if(!process.WaitForExit(3000)){process.Kill(entireProcessTree:true);process.WaitForExit();}
+            process.Dispose();process=null;
+        }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken)
         {
             await gate.WaitAsync(cancellationToken);
@@ -380,6 +471,8 @@ public sealed class NativeCatalogStoreTests : IDisposable
                 {DropNextBatchResponse=false;throw new HttpRequestException("Simulated response loss after database commit");}
                 if(DropNextCloseResponse && node["requests"].AsArray().Count==1 && node["requests"][0]["type"].GetValue<string>()=="close")
                 {DropNextCloseResponse=false;throw new HttpRequestException("Simulated close response loss");}
+                if(DropCommitResponse && input.Contains("COMMIT",StringComparison.Ordinal))
+                {DropCommitResponse=false;throw new HttpRequestException("Simulated response loss after COMMIT");}
                 var result=System.Text.Json.Nodes.JsonNode.Parse(output);
                 if(OverrideBaseUrl!=null)result["base_url"]=OverrideBaseUrl;
                 if(DropNextBaton){result["baton"]=null;DropNextBaton=false;}
