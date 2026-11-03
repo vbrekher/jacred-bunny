@@ -1,0 +1,257 @@
+{
+  "scope": "Actual deployed digest-pinned SQL runtime and original-API Edge gateway: service-computed snapshot, auth and cache policy slice; not large live catalog or production acceptance",
+  "source_sha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+  "image_digest": "sha256:d2bf298cd0b9bfc3e313b6551c6f08e7bfc5f920f47a7f69591fcc2d82643482",
+  "bundle_sha256": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+  "edge_release_id": 1276596,
+  "expected_relational_sha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+  "original_json_snapshot_sha256": "f11d910efbf4224a49504cf39cb8fd734fabf7064e22c566dca7fbf7881e154e",
+  "all_service_proofs_match_independent_snapshot": true,
+  "operator_fake_query_checksum_ignored": true,
+  "results": [
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.15338760400481988
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.09295259400096256
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.11475784401409328
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.7598662850068649
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.6846849270077655
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://mc-gy6p4c5g8c.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "http": 401,
+      "elapsed_seconds": 0.14706568099791184
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "http": 401,
+      "elapsed_seconds": 0.09414857000228949
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "http": 401,
+      "elapsed_seconds": 0.11255642400647048
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.9495080560009228
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "path": "/internal/version?snapshotSha256=operator-fake&sourceSha=operator-fake",
+      "auth": "admin",
+      "http": 200,
+      "proof": {
+        "sourceSha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+        "catalogBackend": "bunny-sql",
+        "algorithm": "jacred-sql-relational-snapshot/v1",
+        "snapshotSha256": "88bfc2362704c645b4cbc99bcb51375b97da14fa7c718b5a104e71d4545b524c",
+        "counts": {
+          "buckets": 22,
+          "bucket_aliases": 22,
+          "torrents": 22,
+          "track_file_inventory": 0,
+          "native_imports": 0,
+          "catalog_bucket_versions": 22,
+          "catalog_commits": 22
+        },
+        "atomicRead": true,
+        "productionReady": false
+      },
+      "no_store": true,
+      "elapsed_seconds": 0.8959628349984996
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "none",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "api",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    },
+    {
+      "endpoint": "https://jacred-6a3535da.bunny.run",
+      "auth": "wrong",
+      "after_admin_response": true,
+      "http": 401,
+      "no_store": true
+    }
+  ],
+  "production_acceptance": false,
+  "native_image_ci": "https://github.com/vbrekher/jacred-bunny/actions/runs/41717521044",
+  "source_ci": "https://github.com/vbrekher/jacred-bunny/actions/runs/41717431520",
+  "update_health": {
+    "productionReady": false,
+    "infrastructureReady": true,
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "worker_health_http": 200,
+    "worker_healthy": true,
+    "worker_catalog_backend": "bunny-sql",
+    "worker_catalog_backend_matches": true,
+    "server_git_sha": "742e34c3",
+    "worker_source_matches": true,
+    "authenticated_search_http": 200,
+    "worker_search_key_valid": true,
+    "admin_schema_http": 200,
+    "worker_admin_key_valid": true,
+    "worker_authenticated_no_store": true,
+    "sql_migration_count": 3,
+    "catalog_torrent_count": 22,
+    "sql_schema_ready": true,
+    "edge_version_http": 200,
+    "edge_source_matches": true,
+    "edge_authenticated_search_http": 200,
+    "edge_search_key_valid": true,
+    "edge_authenticated_no_store": true,
+    "catalog_acceptance": "NOT_ESTABLISHED"
+  },
+  "collector_observation": {
+    "source_sha": "742e34c3e3354e05062f7caaa801c5698ac9650c",
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "scope": "Actual SubsPlease endpoint invocation on the SQL-backed runtime; no new SQL commit observed in this run",
+    "http": 200,
+    "collector_response": "ok",
+    "before": {
+      "torrents": 22,
+      "commits": 22
+    },
+    "after": {
+      "torrents": 22,
+      "commits": 22
+    },
+    "elapsed_seconds": 1.7181735439953627,
+    "old_source_urls_preserved": true,
+    "changed_raw_rows": 0,
+    "real_commit_evidence": false,
+    "production_acceptance": false,
+    "write_path_acceptance": "NOT_EXERCISED_NO_NEW_COMMIT"
+  },
+  "compute_stop": {
+    "worker_status": "inactive",
+    "source_sha": "742e34c3e3354e05062f7caaa801c5698ac9650c"
+  },
+  "limitations": [
+    "Catalog contains 22 real SubsPlease records, not representative all-tracker/media data",
+    "Current collector returned ok with no new commits; this run does not establish a fresh write-path acceptance",
+    "New paging paths deployed, but large live capacity and full current-image response parity remain incomplete",
+    "Full production gates and actual attributed cost remain unproven"
+  ],
+  "watchdog_stop_confirmed": true,
+  "source_ci_tests": {
+    "passed": 1032,
+    "failed": 0,
+    "skipped": 0,
+    "job_url": "https://github.com/vbrekher/jacred-bunny/actions/runs/41717431520/job/126201025866"
+  }
+}
