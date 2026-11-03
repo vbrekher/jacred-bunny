@@ -249,6 +249,82 @@ public sealed class NativeCatalogStoreTests : IDisposable
         Assert.Equal(0L,(await client.Query(new("SELECT count(*) AS n FROM write_probe"))).Rows[0]["n"]);
     }
 
+    [Fact]
+    public async Task Bucket_larger_than_eight_MiB_round_trips_and_filter_does_not_leak_other_buckets()
+    {
+        string key="quote' OR 1=1 --:snow";
+        var records=Enumerable.Range(0,60).Select(i=>{var x=Torrent("https://example.invalid/read/"+i.ToString("D3"));x.videotype=new string('x',200000);return x;}).ToDictionary(x=>x.url);
+        await store.WriteBucket(await store.ReadBucket(key),records,Guid.NewGuid().ToString("N"));
+        var foreign=Torrent(records.Keys.First());foreign.title="Different bucket";
+        await store.WriteBucket(await store.ReadBucket("other:snow"),new Dictionary<string,TorrentDetails>{{foreign.url,foreign}},Guid.NewGuid().ToString("N"));
+        var oversized=await Assert.ThrowsAsync<NativeSqlException>(()=>client.Transaction(new[]{new SqlStatement("SELECT source_url,raw_json,raw_sha256 FROM torrents WHERE bucket_key=? ORDER BY source_url",key)},write:false));
+        Assert.Contains("response exceeds bounded size",oversized.Message);
+        var read=await store.ReadBucket(key);
+        Assert.Equal(60,read.Torrents.Count);Assert.Equal(1,read.Revision);
+        Assert.All(read.Torrents.Values,x=>{Assert.Equal(200000,x.videotype.Length);Assert.Equal("JacRed Ёж 雪",x.title);});
+        Assert.Equal(records.Keys.OrderBy(x=>x,StringComparer.Ordinal),read.Torrents.Keys.OrderBy(x=>x,StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task Index_larger_than_eight_MiB_is_paged_without_losing_metadata_or_order()
+    {
+        var keys=Enumerable.Range(0,5000).Select(i=>i.ToString("D5")+new string('x',1990)).ToArray();
+        var stamp=DateTime.UtcNow.ToString("O");
+        await client.PagedWrite(keys.Select(key=>new SqlStatement("INSERT INTO buckets VALUES(?,?,?,?,?,?)",key,Convert.ToHexStringLower(System.Security.Cryptography.MD5.HashData(Encoding.UTF8.GetBytes(key))),stamp,42L,new string('a',64),0)).ToArray());
+        var oversized=await Assert.ThrowsAsync<NativeSqlException>(()=>client.Query(new("SELECT bucket_key,update_time,file_time FROM buckets ORDER BY bucket_key")));
+        Assert.Contains("response exceeds bounded size",oversized.Message);
+        var index=await store.ReadIndex();
+        Assert.Equal(5000,index.Count);Assert.Equal(keys,index.Select(x=>(string)x["bucket_key"]));
+        Assert.All(index,x=>{Assert.Equal(stamp,x["update_time"]);Assert.Equal(42L,x["file_time"]);Assert.Equal(3,x.Count);});
+    }
+
+    [Fact]
+    public async Task Paged_bucket_read_does_not_mix_revision_and_rows_when_writer_commits_between_pages()
+    {
+        var key="consistent:read";
+        var rows=Enumerable.Range(0,130).Select(i=>Torrent("https://example.invalid/consistent/"+i.ToString("D3"))).ToDictionary(x=>x.url);
+        await store.WriteBucket(await store.ReadBucket(key),rows,Guid.NewGuid().ToString("N"));
+        handler.AfterNextReadPage=async()=>
+        {
+            using var writer=new Process {StartInfo=new ProcessStartInfo("python3") {RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false}};
+            writer.StartInfo.ArgumentList.Add("-c");
+            writer.StartInfo.ArgumentList.Add("import sqlite3,json,hashlib,sys;db=sqlite3.connect(sys.argv[1],isolation_level=None);db.execute('BEGIN IMMEDIATE');k=sys.argv[2];u=sys.argv[3];raw=json.loads(db.execute('SELECT raw_json FROM torrents WHERE bucket_key=? AND source_url=?',(k,u)).fetchone()[0]);raw['title']='changed after page one';encoded=json.dumps(raw,ensure_ascii=False,separators=(',',':'));db.execute('UPDATE torrents SET title=?,raw_json=?,raw_sha256=? WHERE bucket_key=? AND source_url=?',(raw['title'],encoded,hashlib.sha256(encoded.encode()).hexdigest(),k,u));pairs=db.execute('SELECT source_url,raw_sha256 FROM torrents WHERE bucket_key=? ORDER BY source_url',(k,)).fetchall();digest=hashlib.sha256(json.dumps(pairs,ensure_ascii=False,separators=(',',':')).encode()).hexdigest();db.execute('UPDATE buckets SET shard_sha256=? WHERE bucket_key=?',(digest,k));db.execute('UPDATE catalog_bucket_versions SET revision=2 WHERE bucket_key=?',(k,));db.execute('COMMIT');db.close()");
+            writer.StartInfo.ArgumentList.Add(Path.Combine(directory,"fixture.sqlite"));writer.StartInfo.ArgumentList.Add(key);writer.StartInfo.ArgumentList.Add(rows.Keys.Last());
+            writer.Start();await writer.WaitForExitAsync();Assert.Equal(0,writer.ExitCode);
+        };
+        var original=await store.ReadBucket(key);
+        Assert.Equal(1,original.Revision);Assert.Equal(130,original.Torrents.Count);
+        Assert.All(original.Torrents.Values,x=>Assert.Equal("JacRed Ёж 雪",x.title));
+        var next=await store.ReadBucket(key);
+        Assert.Equal(2,next.Revision);Assert.Equal("changed after page one",next.Torrents[rows.Keys.Last()].title);
+    }
+
+    [Fact]
+    public async Task Missing_later_bucket_page_baton_and_inconsistent_count_never_return_partial_bucket()
+    {
+        var key="incomplete:read";
+        var rows=Enumerable.Range(0,130).Select(i=>Torrent("https://example.invalid/incomplete/"+i)).ToDictionary(x=>x.url);
+        await store.WriteBucket(await store.ReadBucket(key),rows,Guid.NewGuid().ToString("N"));
+        handler.AfterNextReadPage=()=>{handler.AfterNextReadPage=()=>{handler.DropNextBaton=true;return Task.CompletedTask;};return Task.CompletedTask;};
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.ReadBucket(key));
+        handler.ExpireStreams();
+        await client.Query(new("UPDATE buckets SET torrent_count=131 WHERE bucket_key=?",key));
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.ReadBucket(key));
+    }
+
+    [Fact]
+    public async Task Receipt_metadata_over_eight_MiB_is_paged_without_changing_bucket_digest()
+    {
+        var key="large-receipt:snow";
+        var rows=Enumerable.Range(0,4500).Select(i=>Torrent("https://example.invalid/metadata/"+i.ToString("D5")+new string('x',2000))).ToDictionary(x=>x.url);
+        await store.WriteBucket(await store.ReadBucket(key),rows,Guid.NewGuid().ToString("N"));
+        var oversized=await Assert.ThrowsAsync<NativeSqlException>(()=>client.Query(new("SELECT source_url,raw_sha256 FROM torrents WHERE bucket_key=?",key)));
+        Assert.Contains("response exceeds bounded size",oversized.Message);
+        var proof=await store.SnapshotProof();
+        Assert.Equal(4500,proof.Counts["torrents"]);Assert.Equal(1,proof.Counts["buckets"]);
+        Assert.Equal(4500,(await store.ReadBucket(key)).Torrents.Count);
+    }
+
     static string FindRoot()
     {
         for (var current = new DirectoryInfo(AppContext.BaseDirectory); current != null; current = current.Parent)
@@ -438,6 +514,7 @@ public sealed class NativeCatalogStoreTests : IDisposable
         public bool DropNextBaton;
         public bool DropNextCloseResponse;
         public bool DropCommitResponse;
+        public Func<Task> AfterNextReadPage;
         public void ExpireStreams()
         {
             if(process==null)return;
@@ -473,6 +550,8 @@ public sealed class NativeCatalogStoreTests : IDisposable
                 {DropNextCloseResponse=false;throw new HttpRequestException("Simulated close response loss");}
                 if(DropCommitResponse && input.Contains("COMMIT",StringComparison.Ordinal))
                 {DropCommitResponse=false;throw new HttpRequestException("Simulated response loss after COMMIT");}
+                if(AfterNextReadPage!=null && input.Contains("WITH selected AS",StringComparison.Ordinal) && input.Contains("FROM torrents",StringComparison.Ordinal))
+                {var callback=AfterNextReadPage;AfterNextReadPage=null;await callback();}
                 var result=System.Text.Json.Nodes.JsonNode.Parse(output);
                 if(OverrideBaseUrl!=null)result["base_url"]=OverrideBaseUrl;
                 if(DropNextBaton){result["baton"]=null;DropNextBaton=false;}

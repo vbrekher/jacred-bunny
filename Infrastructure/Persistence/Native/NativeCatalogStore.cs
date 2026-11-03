@@ -46,13 +46,13 @@ internal sealed partial class NativeCatalogStore
     public async Task<CatalogBucket> ReadBucket(string key, CancellationToken cancellation = default)
     {
         ValidateKey(key);
-        var result = await sql.Transaction(new[] {
-            new SqlStatement("SELECT revision FROM catalog_bucket_versions WHERE bucket_key=?", key),
-            new SqlStatement("SELECT source_url,raw_json,raw_sha256 FROM torrents WHERE bucket_key=? ORDER BY source_url", key)
-        }, write: false, cancellation).ConfigureAwait(false);
+        using var deadline=CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+        deadline.CancelAfter(TimeSpan.FromMinutes(2));cancellation=deadline.Token;
+        await using var session=await sql.OpenReadSession(cancellation).ConfigureAwait(false);
+        var version=(await session.Query(new SqlStatement("SELECT COALESCE((SELECT revision FROM catalog_bucket_versions WHERE bucket_key=?),0) AS revision,(SELECT torrent_count FROM buckets WHERE bucket_key=?) AS expected_count",key,key),cancellation).ConfigureAwait(false)).Rows[0];
         var rows = new Dictionary<string, TorrentDetails>(StringComparer.Ordinal);
         var hashes = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var row in result[1].Rows)
+        await foreach (var row in SnapshotRows(session,"torrents","bucket_key,source_url",cancellation,bucketKey:key,projection:new[]{"source_url","raw_json","raw_sha256"}).ConfigureAwait(false))
         {
             var source = (string)row["source_url"];
             var json = (string)row["raw_json"];
@@ -65,7 +65,9 @@ internal sealed partial class NativeCatalogStore
                 throw new NativeSqlException("Canonical source URL mismatch");
             rows.Add(source, torrent);hashes.Add(source, Hash(json));
         }
-        return new CatalogBucket(key, result[0].Rows.Count == 0 ? 0 : (long)result[0].Rows[0]["revision"], rows, hashes);
+        if(version["expected_count"] is long expected ? expected!=rows.Count : rows.Count!=0)
+            throw new NativeSqlException("Catalog bucket read count mismatch; partial result refused");
+        return new CatalogBucket(key, (long)version["revision"], rows, hashes);
     }
 
     sealed record WritePlan(string Id, string Key, string Digest, long Revision, IReadOnlyList<SqlStatement> Statements);
@@ -147,8 +149,18 @@ internal sealed partial class NativeCatalogStore
         return new WritePlan(commitId,snapshot.Key,digest,revision,statements);
     }
 
-    internal Task<SqlResult> IndexQuery(CancellationToken cancellation = default)
-        => sql.Query(new SqlStatement("SELECT bucket_key,update_time,file_time FROM buckets ORDER BY bucket_key"), cancellation);
+    internal async Task<SqlResult> IndexQuery(CancellationToken cancellation = default)
+    {
+        using var deadline=CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+        deadline.CancelAfter(TimeSpan.FromMinutes(2));cancellation=deadline.Token;
+        await using var session=await sql.OpenReadSession(cancellation).ConfigureAwait(false);
+        long expected=(long)(await session.Query(new SqlStatement("SELECT count(*) AS n FROM buckets"),cancellation).ConfigureAwait(false)).Rows[0]["n"];
+        var rows=new List<IReadOnlyDictionary<string,object>>();
+        await foreach(var row in SnapshotRows(session,"buckets","bucket_key",cancellation,projection:new[]{"bucket_key","update_time","file_time"},pageRows:512).ConfigureAwait(false))
+            rows.Add(row);
+        if(rows.Count!=expected)throw new NativeSqlException("Catalog index read count mismatch; partial result refused");
+        return new SqlResult(rows,0);
+    }
 
     public async Task<IReadOnlyList<IReadOnlyDictionary<string, object>>> ReadIndex(CancellationToken cancellation = default)
         => (await IndexQuery(cancellation).ConfigureAwait(false)).Rows;

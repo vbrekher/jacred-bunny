@@ -1,0 +1,54 @@
+{
+  "scope": "Local persistent SQLite native read capacity and isolation validation; not deployed large Bunny catalog acceptance",
+  "dotnet_tests": {
+    "passed": 1032,
+    "failed": 0,
+    "skipped": 0,
+    "new_cases": 5,
+    "log": "paged-read-verified-full-tests.log"
+  },
+  "capacity_cases": [
+    {
+      "kind": "single bucket",
+      "records": 60,
+      "payload_bytes": 12000000,
+      "old_single_response_guard_fails": true,
+      "new_native_read_full_count_and_fields_match": true
+    },
+    {
+      "kind": "metadata index",
+      "entries": 5000,
+      "key_chars": 1995,
+      "old_single_response_guard_fails": true,
+      "new_index_count_fields_and_order_match": true
+    },
+    {
+      "kind": "bucket receipt URL/hash metadata",
+      "records": 4500,
+      "url_suffix_chars": 2000,
+      "old_single_response_guard_fails": true,
+      "new_proof_and_native_read_match_counts": true
+    }
+  ],
+  "consistency_cases": [
+    "Actual independent SQLite writer commits a changed unread row after page one; active native reader retains original revision/data and next reader sees the update",
+    "Lost second-page baton refuses partial bucket",
+    "Incorrect bucket record count refuses read",
+    "Quoted SQL-like bucket key remains parameterized and does not include another bucket"
+  ],
+  "policy": {
+    "read_transaction_scope": "revision/count/pages",
+    "bucket_row_candidates": 64,
+    "metadata_candidates": 512,
+    "estimated_page_bytes": 1048576,
+    "bucket_and_index_timeout_seconds": 120,
+    "snapshot_algorithm_unchanged": "jacred-sql-relational-snapshot/v1"
+  },
+  "limitations": [
+    "Individual rows must fit bounded transport",
+    "Complete bucket and metadata-index collections remain in memory for original interfaces",
+    "Receipt metadata still sorts in memory with original .NET ordinal semantics",
+    "Large live Bunny capacity, deployed MC/Edge image, migration and production gates remain open"
+  ],
+  "production_acceptance": false
+}
