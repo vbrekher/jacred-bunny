@@ -9,6 +9,13 @@ namespace JacRed.Tests.Controllers;
 public class HealthControllerConfTests
 {
     [Fact]
+    public void Internal_snapshot_route_requires_administrative_policy()
+    {
+        Assert.Equal(JacRed.Infrastructure.Security.JacRedAccessPolicy.DevAdmin,
+            JacRed.Infrastructure.Security.JacRedEndpointRegistry.ResolvePolicy("/internal/version"));
+    }
+
+    [Fact]
     public void Version_exposes_corresponding_fork_commit_source()
     {
         var result = Assert.IsType<JsonResult>(new HealthController().Version());

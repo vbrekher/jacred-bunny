@@ -16,7 +16,7 @@ internal sealed record CatalogBucket(string Key, long Revision, IReadOnlyDiction
     IReadOnlyDictionary<string, string> RowHashes);
 
 /// <summary>Canonical SQL rows, atomic optimistic writes, durable commit receipts. No filesystem fallback.</summary>
-internal sealed class NativeCatalogStore
+internal sealed partial class NativeCatalogStore
 {
     readonly BunnySqlClient sql;
     static readonly JsonSerializerSettings JsonSettings = new()

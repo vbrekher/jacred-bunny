@@ -60,6 +60,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/internal/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compute an atomic SQL catalog snapshot checksum
+         * @description Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Bounded transport fails closed for oversized snapshots; this is not full production acceptance.
+         */
+        get: operations["internalSnapshotVersion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lastupdatedb": {
         parameters: {
             query?: never;
@@ -1411,6 +1431,61 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["VersionResponse"];
                 };
+            };
+        };
+    };
+    internalSnapshotVersion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service-computed snapshot proof */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        sourceSha: string;
+                        /** @enum {string} */
+                        catalogBackend: "bunny-sql";
+                        /** @enum {string} */
+                        algorithm: "jacred-sql-relational-snapshot/v1";
+                        snapshotSha256: string;
+                        counts: {
+                            [key: string]: number;
+                        };
+                        /** @enum {boolean} */
+                        atomicRead: true;
+                        /** @enum {boolean} */
+                        productionReady: false;
+                    };
+                };
+            };
+            /** @description Administrative access denied */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FileDB authority does not provide this SQL proof */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Snapshot unavailable, oversized, timed out or integrity verification failed */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
