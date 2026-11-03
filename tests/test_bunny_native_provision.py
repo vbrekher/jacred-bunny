@@ -121,5 +121,63 @@ class ProvisionTests(unittest.TestCase):
             native.read_private(self.deploy.path)
 
 
+class WorkerTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.calls = []
+        self.remote = None
+        def api(method, path, body=None):
+            self.calls.append((method, path))
+            if method == 'POST' and path == '/mc/apps':
+                import copy
+                self.remote = copy.deepcopy(body)
+                self.remote['autoScaling'] = self.remote.pop('autoScaling')
+                self.remote['status'] = 'inactive'
+                return {'id': 'worker-test'}
+            if method == 'GET':
+                return self.remote
+            return None
+        self.api = api
+        self.deploy = native.Deployment(self.tmp.name, api)
+        self.deploy.initialize('a'*40, 'ghcr.io/vbrekher/jacred-bunny:main', 'sha256:'+'b'*64)
+        self.payload = {'name': 'legacy-name', 'autoScaling': {'min': 1, 'max': 1},
+            'regionSettings': {'requiredRegionIds': ['AMS'], 'allowedRegionIds': ['AMS']},
+            'containerTemplates': [{'name':'jacred','imageNamespace':'vbrekher','imageName':'jacred-bunny',
+                'imageTag':'main','imageRegistryId':'1156','imageDigest':'sha256:'+'b'*64,
+                'volumeMounts':[{'name':'data','mountPath':'/app/Data'},{'name':'config','mountPath':'/app/config'}]}],
+            'volumes':[{'name':'data','size':1},{'name':'config','size':1}]}
+
+    def test_worker_install_is_idempotent_and_uses_deployment_name(self):
+        first = self.deploy.provision_worker(self.payload)
+        self.assertEqual(self.deploy.provision_worker(self.payload), first)
+        self.assertEqual(self.remote['name'], self.deploy.state['name'])
+        self.assertEqual(len([x for x in self.calls if x == ('POST','/mc/apps')]), 1)
+        self.deploy.worker_action('stop')
+        self.assertIn(('POST','/mc/apps/worker-test/undeploy'), self.calls)
+
+    def test_expired_window_blocks_start_without_deploy_post(self):
+        self.deploy.provision_worker(self.payload)
+        self.deploy.state['stop_at'] = 0
+        self.deploy.save()
+        self.calls.clear()
+        with self.assertRaisesRegex(native.NativeError, 'expired'):
+            self.deploy.worker_action('start')
+        self.assertEqual(self.calls, [])
+
+    def test_mutated_remote_mount_or_digest_blocks_lifecycle(self):
+        self.deploy.provision_worker(self.payload)
+        self.remote['containerTemplates'][0]['volumeMounts'] = []
+        self.calls.clear()
+        with self.assertRaisesRegex(native.NativeError, 'specification changed'):
+            self.deploy.worker_action('stop')
+        self.assertEqual([x[0] for x in self.calls], ['GET'])
+
+    def test_multiple_regions_or_replicas_are_rejected_before_api(self):
+        self.payload['regionSettings']['allowedRegionIds'].append('DE')
+        with self.assertRaises(native.NativeError):
+            self.deploy.provision_worker(self.payload)
+        self.assertEqual(self.calls, [])
+
 if __name__ == '__main__':
     unittest.main()

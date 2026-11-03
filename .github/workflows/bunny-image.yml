@@ -6,6 +6,10 @@ on:
     branches: [main]
     paths:
       - 'bunny/cli.py'
+      - 'bunny/native.py'
+      - 'tools/bunny_native_package.py'
+      - 'bunny-native/edge/**'
+      - 'bunny-native/migrations/**'
       - 'tests/test_bunny_installer.py'
       - 'Dockerfile.bunny'
       - 'bunny/boot.sh'
@@ -34,7 +38,7 @@ jobs:
       - name: Offline CLI source smoke
         run: |
           python3 bunny/cli.py self-test
-          python3 -m unittest discover -s tests -p 'test_bunny_installer.py' -v
+          python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_bunny*.py' -v
           python3 -m py_compile bunny/cli.py
           bash -n bunny/build-push.sh
           sh -n install-bunny.sh bunny/boot.sh bunny/cron-job.sh
@@ -85,4 +89,19 @@ jobs:
           path: |
             image-digest.txt
             sbom.sha256
+          retention-days: 14
+      - name: Set up Node for the public installer payload
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build checksum-verified native installer payload
+        run: |
+          npm ci --prefix bunny-native/edge --no-audit --no-fund
+          npm run build --prefix bunny-native/edge
+          python3 tools/bunny_native_package.py --output native-installer-payload --source-sha '${{ github.sha }}' --image-digest '${{ steps.publish.outputs.digest }}'
+      - name: Save public native installer payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacred-native-${{ github.sha }}-installer-payload
+          path: native-installer-payload/
           retention-days: 14

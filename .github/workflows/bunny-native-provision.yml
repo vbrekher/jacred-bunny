@@ -1,10 +1,10 @@
 name: Bunny native provisioning safety
 on:
   pull_request:
-    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
   push:
     branches: [main]
-    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
+    paths: ['bunny/**', 'tools/bunny_tracker_probe.py', 'tools/bunny_native_package.py', 'tests/test_bunny_tracker_probe.py', 'install-bunny.sh', 'tests/test_bunny_native_provision.py', 'tests/test_bunny_installer.py', '.github/workflows/bunny-native-provision.yml']
 permissions:
   contents: read
 jobs:

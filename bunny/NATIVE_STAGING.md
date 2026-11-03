@@ -38,3 +38,31 @@ This command provisions the three data-plane resources only. It does not yet ins
 The manifest's expiry records intent; **this data-plane primitive does not enforce automatic teardown**. The separate operator staging run documented in the evidence used a compute watchdog. Empty data-plane resources remain in the account until deliberately cleaned up. Storage allocation and Edge request increments can remain billable. No destructive cleanup or production cutover is implemented here.
 
 See the [acceptance matrix](../docs/ACCEPTANCE_MATRIX.md) for remaining gates.
+
+## Unified infrastructure installer (development)
+
+The CLI now also supports `install`, `resume`, `health`, `doctor`, `start` and `stop` for a four-service staging stack. This remains infrastructure acceptance; it does not make SQL authoritative or satisfy the complete v0.5.4 gate.
+
+An exact-source public payload contains `manifest.json`, `edge.js` and migrations `0001_catalog.sql` / `0002_search_fts5.sql`. The manifest pins the source-SHA OCI tag, digest and every file checksum. The image workflow builds and saves this payload alongside its exact-digest SBOM. No public native release payload is claimed available until its release assets are published and tested.
+
+For a locally verified payload:
+
+```sh
+jacred-bunny native-staging install --payload-dir /path/to/payload --apply --max-estimated-usd 2
+jacred-bunny native-staging install --payload-dir /path/to/payload --apply --max-estimated-usd 2
+jacred-bunny native-staging health
+jacred-bunny native-staging stop
+jacred-bunny native-staging start --hours 0.1 --max-estimated-usd 2
+```
+
+Without `--apply`, install is a dry-run. `resume` runs the same idempotent pipeline. Once a verified public release carries these assets, `--release VERSION_TAG` downloads them from this repository without a GitHub PAT; `--source-sha` can additionally pin the expected release source. It refuses other repositories, unsafe redirects, altered files and unreviewed image digests.
+
+Before creating paid resources the installer fetches the current official pricing pages, validates the published billing model, checks credit/quota and verifies the image. It discovers an accessible public GHCR registry from the account; no GitHub PAT is requested. Unknown pricing or a plan above the configured estimate budget stops installation. Egress remains separate, so this is **not a hard spending guarantee**.
+
+The default compute window is one hour. A detached watchdog receives the account key through an anonymous pipe and keeps it only in memory. Deploy is refused until its heartbeat is confirmed. At expiry it verifies the saved worker identity, requests undeploy and confirms `inactive`. It does not delete volumes. It also applies and reads back monthly byte limits on only the newly owned linked CDN zones: 10 MB Edge, 25 MB worker. Direct worker egress is not bounded by those CDN limits.
+
+SQL migrations commit their checksum receipt atomically; rerunning skips matching receipts and rejects altered applied migrations. The worker keeps the original persistent FileDB path. Search and admin keys are distinct, Edge has read-only SQL access, and writer credentials stay private. Infrastructure health verifies the worker's own source SHA and read-only SQL schema access; it explicitly reports catalog acceptance as unestablished.
+
+Current limitations: the runtime flow retains staged resources after errors for diagnosis; automatic owned rollback/cleanup, production upgrade/rollback, every management command and the complete fresh public bootstrap gate remain open. The expiry watchdog and retained volume charges still apply. The earlier three-resource `provision` primitive does not arm a compute watchdog because it creates no worker.
+
+[Actual four-service installer evidence](../docs/evidence/native-installer-2026-11-03.json).

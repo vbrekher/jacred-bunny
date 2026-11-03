@@ -1,0 +1,88 @@
+{
+  "kind": "LIVE_NATIVE_INSTALLER_INFRASTRUCTURE",
+  "checked_at": "2026-11-03T14:52:27.305624+00:00",
+  "production_ready": false,
+  "catalog": "empty",
+  "application_source_sha": "9f0373d0e9d09448edb2d78218240b412c90a3d1",
+  "image_digest": "sha256:c2384859cff10dfe09269fa29ee4b3b8f246d71995018ab79360ddd50e2fb0f4",
+  "resources": {
+    "database": {
+      "id": "db_01M6GX4WFVENZXB9M4F0AVFE1C",
+      "name": "jacred-6a3535da"
+    },
+    "storage": {
+      "id": 2034483,
+      "name": "jacred-6a3535da"
+    },
+    "edge": {
+      "id": 100730,
+      "name": "jacred-6a3535da"
+    },
+    "worker": {
+      "id": "OnCopUramoFnaJG",
+      "name": "jacred-6a3535da"
+    },
+    "edge_cdn": {
+      "id": 6920852,
+      "name": "jacred-6a3535da"
+    },
+    "worker_cdn": {
+      "id": 6920854,
+      "name": "mc-gy6p4c5g8c"
+    }
+  },
+  "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+  "edge_url": "https://jacred-6a3535da.bunny.run",
+  "first_install": {
+    "exit_code": 0,
+    "migrations_applied": 2,
+    "worker_health_http": 200,
+    "worker_source_matches": true,
+    "sql_read_only_schema_read": true
+  },
+  "repeat_install": {
+    "exit_code": 0,
+    "migrations_applied": 0,
+    "resource_ids_unchanged": true
+  },
+  "budget_watchdog": {
+    "shortened_expiry_test": "stopped_confirmed",
+    "remote_after_expiry": "inactive",
+    "subsequent_bounded_start_requested": true,
+    "account_key_transport": "private anonymous pipe, no argv/config copy"
+  },
+  "cdn_monthly_byte_limits": {
+    "edge": 10000000,
+    "worker": 25000000
+  },
+  "cost_plan": {
+    "compute_envelope_usd_per_hour": 0.32,
+    "hours": 1,
+    "compute_envelope_usd": 0.32,
+    "volumes_usd_per_month": 0.2,
+    "storage_minimum_usd": 1.0,
+    "edge_first_increment_usd": 0.22,
+    "estimated_initial_usd": 1.74,
+    "hard_cost_limit": false,
+    "egress": "separately metered; not guaranteed by this estimate",
+    "rates_verified_on": "2026-11-03T14:34:21.446065+00:00",
+    "pricing_sources": [
+      "https://bunny.net/docs/magic-containers/pricing.md",
+      "https://bunny.net/docs/storage/pricing.md",
+      "https://bunny.net/docs/scripting/pricing.md",
+      "https://bunny.net/database/"
+    ]
+  },
+  "remaining": [
+    "No original catalog imported",
+    "SQL collector not integrated",
+    "Default bootstrap and public release payload not yet accepted",
+    "Update/rollback, owned cleanup and all operations remain incomplete",
+    "Not a v0.5.4 or production gate PASS",
+    "First live install used an operator development worktree before final review edits; committed/tagged fresh bootstrap must still be rerun."
+  ],
+  "current_installer_worktree_sha256": {
+    "bunny/cli.py": "31b1643d14f735267c68f6bd04f7b5ba4c75c44afc45df2c730da679a1594bfb",
+    "bunny/native.py": "64dcad1c8565d1677688e6298c7ccb4c0042b90eb2061ef9cf40016da8648f8a"
+  }
+}
