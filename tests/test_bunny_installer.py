@@ -189,6 +189,17 @@ class InstallerTests(unittest.TestCase):
             server.server_close()
             thread.join()
 
+    def test_hidden_prompt_never_falls_back_to_echoed_stdin(self):
+        import warnings
+        with patch.object(cli.getpass, 'getpass', side_effect=cli.getpass.GetPassWarning('cannot hide')):
+            with self.assertRaises(cli.DeploymentError):
+                cli.ask('test key', hidden=True)
+
+    def test_account_key_can_use_controlling_terminal_with_piped_stdin(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(cli.Path, 'is_file', return_value=False), \
+             patch.object(cli.sys.stdin, 'isatty', return_value=False), patch.object(cli, 'ask', return_value='dummy-private-key'):
+            self.assertEqual(cli.account_key(), 'dummy-private-key')
+
     def test_self_test(self):
         cli.self_test()
 
