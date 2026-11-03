@@ -1,3 +1,4 @@
+import {isShardProvider,allShardsReady,searchAllShards} from "./shards.mjs";
 // SQL-backed bounded preview. Server-side only, no secrets exposed to clients.
 // Official @bunny.net/database-client: prepare(...).bind(...).all()/first().
 export function makeMatch(query){
@@ -10,6 +11,7 @@ export function makeMatch(query){
   return terms.map(term=>'"'+term+'"').join(" AND ");
 }
 export async function isReady(db){
+  if(isShardProvider(db))return allShardsReady(db,isReady);
   // v0.4 stage manifest is published ONLY after full import. A partial remote
   // upload must not be mistaken for a complete catalog.
   const row=await db.prepare(
@@ -54,7 +56,16 @@ import {normalizeJacRed} from "./parity.mjs";
 // then bounded substring fallback. FTS5 alone cannot find compact aliases
 // like "щелкунчик" vs "шелкунчик" produced by StringConvert.SearchName.
 export async function searchLegacy(db,{query,title=null,titleOriginal=null,
-  tracker=null,maxCandidates=200}){
+  tracker=null,maxCandidates=200,searchMode="auto"}={}){
+  if(isShardProvider(db)){
+    if(!await isReady(db))throw new Error("Sharded catalog is incomplete");
+    const params={query,title,titleOriginal,tracker,maxCandidates};
+    const exact=await searchAllShards(db,{...params,searchMode:"exact"},searchLegacy);
+    if(exact.length)return exact;
+    return searchAllShards(db,{...params,searchMode:"partial"},searchLegacy);
+  }
+  if(!["auto","exact","partial"].includes(searchMode))
+    throw new RangeError("Invalid search mode");
   if(!Number.isInteger(maxCandidates)||maxCandidates<1||maxCandidates>200)
     throw new RangeError("Candidate budget must be 1..200");
   const input=[title,titleOriginal].filter(Boolean);
@@ -94,9 +105,9 @@ export async function searchLegacy(db,{query,title=null,titleOriginal=null,
       return body;
     });
   }
+  if(searchMode==="exact")return gather(true);
+  if(searchMode==="partial")return gather(false);
   const exact=await gather(true);
-  // Card searches are keyed to exact master aliases. Only use partial
-  // fallback when none matched, to avoid polluting exact card results.
   if(exact.length)return exact;
   return gather(false);
 }
