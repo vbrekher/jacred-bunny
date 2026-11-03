@@ -1,0 +1,20 @@
+{
+  "name": "jacred-bunny-edge-preview",
+  "private": true,
+  "version": "0.5.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "esbuild entry.mjs --bundle --platform=neutral --format=esm --target=es2022 --outfile=dist/index.js"
+  },
+  "dependencies": {
+    "@bunny.net/database-client": "0.0.3",
+    "@bunny.net/edgescript-sdk": "0.12.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}
