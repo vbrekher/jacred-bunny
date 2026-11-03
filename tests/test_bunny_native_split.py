@@ -173,4 +173,14 @@ class SplitTests(unittest.TestCase):
             self.assertIn("BUNNY_REMOTE_IMPORT_REFUSED",result.stderr)
             self.assertNotIn("magnet:?",result.stderr)
 
+
+    def test_symlink_input_stage_is_refused_before_resolve(self):
+        with tempfile.TemporaryDirectory() as d:
+            base=Path(d);source=sample(base)
+            alias=base/"linked-stage.sqlite"
+            alias.symlink_to(source)
+            with self.assertRaises(SplitRefused):
+                split(alias,base/"parts",2)
+            self.assertFalse((base/"parts").exists())
+
 if __name__=="__main__":unittest.main()
