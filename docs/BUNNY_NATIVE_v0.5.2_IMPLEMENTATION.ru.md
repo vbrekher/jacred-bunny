@@ -59,7 +59,7 @@
 
     node bunny-native/remote-import.mjs \
       --file "$HOME/Downloads/jacred-shard-0-private.jsonl" \
-      --sha256 <SHA256_ОТ_ЭКСПОРТЕРА>
+      --sha256 YOUR_EXPORTED_SHA256
 
 Список переменных Edge Scripting при реальном отдельном staging (значения ниже лишь шаблон):
 
