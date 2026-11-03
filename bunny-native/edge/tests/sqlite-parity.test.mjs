@@ -9,6 +9,7 @@ import {fileURLToPath} from "node:url";
 import {createHandler} from "../src/app.mjs";
 import {normalizeJacRed,matchesMedia,matchesYear,matchesSeason,filterRows} from "../src/parity.mjs";
 import {isReady,searchLegacy} from "../src/sql.mjs";
+import {verifyRemote} from "../live-acceptance.mjs";
 
 const BRIDGE=fileURLToPath(new URL("./fixtures/sqlite_bridge.py",import.meta.url));
 const SECRET="integration-secret-abcdefghijklmnopqrstuvwxyz";
@@ -138,4 +139,60 @@ test("all missing canonical source aliases do not create false matches",async()=
 test("query candidate limit is enforced using real SQLite rows",async()=>{
   await assert.rejects(()=>searchLegacy(db,{query:"Сериал",maxCandidates:1}),
     /candidate safety budget/);
+});
+
+test("operator read-only acceptance checks actual SQLite FTS + import manifest",async()=>{
+  const summary=await verifyRemote(db);
+  assert.equal(summary.result,"READ_ONLY_REMOTE_STAGING_CHECK_PASS_NOT_PRODUCTION_CUTOVER");
+  assert.equal(summary.rows,5);
+  assert.equal(summary.buckets,4);
+  assert.equal(summary.sqlite_fts5_query,"PASS");
+  assert.equal(summary.full_payload_sha256_audit,"NOT_RUN");
+  assert.equal(summary.production_cutover_authorized,false);
+});
+test("full opt-in acceptance verifies ALL actual imported payload SHA256 digests",async()=>{
+  const summary=await verifyRemote(db,{hashAll:true,maxRows:50});
+  assert.equal(summary.rows_hashed,5);
+  assert.equal(summary.full_payload_sha256_audit,"PASS");
+  assert.equal(summary.production_cutover_authorized,false);
+});
+test("full scan refuses caps lower than manifest row count",async()=>{
+  await assert.rejects(()=>verifyRemote(db,{hashAll:true,maxRows:4}),
+    /exceeds maxRows cap/);
+});
+test("live acceptance rejects staged database with no import manifest",async()=>{
+  const bad={prepare(sql){
+    if(sql.includes("expected_buckets"))return {async first(){return null;}};
+    return db.prepare(sql);
+  }};
+  await assert.rejects(()=>verifyRemote(bad),/Missing or incomplete import manifest/);
+});
+test("remote hash mismatch blocks acceptance even when row counts match",async()=>{
+  const tampered={prepare(sql){
+    if(sql.includes("SELECT id,raw_json,raw_sha256")){
+      return {bind(...args){return {async all(){
+        const rows=await db.prepare(sql).bind(...args).all();
+        if(rows.length)return [{...rows[0],raw_sha256:"0".repeat(64)},...rows.slice(1)];
+        return rows;
+      }};}};
+    }
+    return db.prepare(sql);
+  }};
+  await assert.rejects(()=>verifyRemote(tampered,{hashAll:true,maxRows:50}),
+    /checksum mismatch/);
+});
+test("live acceptance CLI is safe no-network help by default",()=>{
+  const cli=fileURLToPath(new URL("../live-acceptance.mjs",import.meta.url));
+  const run=spawnSync(process.execPath,[cli,"--help"],{encoding:"utf8",timeout:10000,
+    env:{PATH:process.env.PATH}});
+  assert.equal(run.status,0,run.stderr);
+  assert.match(run.stdout,/Read-only staging checks/);
+});
+test("live acceptance CLI refuses run with no Bunny credentials",()=>{
+  const cli=fileURLToPath(new URL("../live-acceptance.mjs",import.meta.url));
+  const run=spawnSync(process.execPath,[cli,"--run"],{encoding:"utf8",timeout:10000,
+    env:{PATH:process.env.PATH}});
+  assert.equal(run.status,2);
+  assert.match(run.stderr,/JACRED_BUNNY_REMOTE_ACCEPTANCE_REFUSED/);
+  assert.doesNotMatch(run.stderr,/libsql:|BUNNY_DATABASE_AUTH_TOKEN=/);
 });
