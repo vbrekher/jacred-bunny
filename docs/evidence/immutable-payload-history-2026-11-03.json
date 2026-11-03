@@ -1,0 +1,109 @@
+{
+  "source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+  "image_digest": "sha256:3fbcc95bd23cc65cdff9c147b9dc5d8f217e5b99f5d4e87f39d2e6082ff8da34",
+  "bundle_sha256": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+  "cli_source_sha": "72a0696b4ee598d6ee06c859c51e2dc3a5650262",
+  "same_source_mode_update": true,
+  "mode_roundtrip": [
+    "original-api-gateway",
+    "preview",
+    "original-api-gateway"
+  ],
+  "history": [
+    {
+      "from_source": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+      "to_source": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+      "from_payload_id": "04ce55c61fe3cf62283c995da201fe70e8e45a7bfea0fd5629531eab12789ae2",
+      "to_payload_id": "6b9e5d3afcae6d0782a08bef449b15e7013c951c92c039bf494f38b7d06c0cbc",
+      "rollback": false,
+      "completed_at": "2026-11-03T18:39:02.227959+00:00"
+    },
+    {
+      "from_source": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+      "to_source": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+      "from_payload_id": "6b9e5d3afcae6d0782a08bef449b15e7013c951c92c039bf494f38b7d06c0cbc",
+      "to_payload_id": "04ce55c61fe3cf62283c995da201fe70e8e45a7bfea0fd5629531eab12789ae2",
+      "rollback": true,
+      "completed_at": "2026-11-03T18:40:06.973538+00:00"
+    }
+  ],
+  "row_count": 20,
+  "all_original_row_checksums_preserved": true,
+  "gateway_health": {
+    "productionReady": false,
+    "infrastructureReady": true,
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "worker_health_http": 200,
+    "worker_healthy": true,
+    "worker_catalog_backend": "bunny-sql",
+    "worker_catalog_backend_matches": true,
+    "server_git_sha": "98bd42e1",
+    "worker_source_matches": true,
+    "authenticated_search_http": 200,
+    "worker_search_key_valid": true,
+    "admin_schema_http": 200,
+    "worker_admin_key_valid": true,
+    "sql_migration_count": 3,
+    "catalog_torrent_count": 20,
+    "sql_schema_ready": true,
+    "edge_version_http": 200,
+    "edge_source_matches": true,
+    "edge_authenticated_search_http": 200,
+    "edge_search_key_valid": true,
+    "catalog_acceptance": "NOT_ESTABLISHED"
+  },
+  "production_acceptance": false,
+  "uncertain_secret_write_recovery": {
+    "scope": "Owned live Edge secret PUT response-loss injection at Operations layer, not a public installer or network outage claim",
+    "cli_source_sha": "13cc752b9858f2e88ae78c424a77066ff27c746e",
+    "worker_source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+    "injected_after_successful_secret_put": true,
+    "secret_mode_writes": [
+      "false",
+      "true"
+    ],
+    "republished_after_partial_configuration": true,
+    "old_release_id": 1276105,
+    "restored_release_id": 1276118,
+    "exact_previous_payload_restored": true,
+    "health": {
+      "productionReady": false,
+      "infrastructureReady": true,
+      "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+      "worker_health_http": 200,
+      "worker_healthy": true,
+      "worker_catalog_backend": "bunny-sql",
+      "worker_catalog_backend_matches": true,
+      "server_git_sha": "98bd42e1",
+      "worker_source_matches": true,
+      "authenticated_search_http": 200,
+      "worker_search_key_valid": true,
+      "admin_schema_http": 200,
+      "worker_admin_key_valid": true,
+      "sql_migration_count": 3,
+      "catalog_torrent_count": 20,
+      "sql_schema_ready": true,
+      "edge_version_http": 200,
+      "edge_source_matches": true,
+      "edge_authenticated_search_http": 200,
+      "edge_search_key_valid": true,
+      "catalog_acceptance": "NOT_ESTABLISHED"
+    },
+    "production_acceptance": false
+  },
+  "repeat_cli_rollback": {
+    "changed": false,
+    "source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+    "runtime_health_checked": false,
+    "reason": "Verified release already configured; lifecycle preserved"
+  },
+  "post_all_tests": {
+    "worker_status": "inactive",
+    "all_original_row_checksums_preserved": true,
+    "row_count": 20,
+    "source_sha": "98bd42e19c244d3a783a9123b54a5a94d5b0f7b7",
+    "edge_mode": "original-api-gateway",
+    "edge_release_id": 1276118
+  },
+  "scope": "Existing owned SQL staging; development CLI payload-history acceptance; not public fresh installer or production acceptance"
+}
