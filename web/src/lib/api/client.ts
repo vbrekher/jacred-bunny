@@ -196,7 +196,7 @@ export const apiClient = {
   getConf(options?: ApiClientOptions) {
     return apiRequest<GetJson<'/api/v1.0/conf'>>(
       '/api/v1.0/conf',
-      { method: 'GET', query: { apikey: getApiKey() || undefined } },
+      { method: 'GET' },
       options,
     )
   },
@@ -221,7 +221,7 @@ export const apiClient = {
       `/api/v2.0/indexers/${encodeURIComponent(status || 'all')}/results` as const
     return apiRequest<GetJson<'/api/v2.0/indexers/{status}/results'>>(
       path,
-      { method: 'GET', query: { ...query, apikey: getApiKey() || undefined } },
+      { method: 'GET', query },
       options,
     )
   },
