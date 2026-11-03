@@ -475,6 +475,9 @@ export function useTorrents() {
       return
     }
     activateSearch(q)
+    // A semantic query key does not change when the user retries or saves a key.
+    // Invalidate that exact search so cached failures and fresh data can refetch.
+    await queryClient.invalidateQueries({ queryKey: ['torrents', buildKey(q)], exact: true })
   }
 
   function prefetchRecent(q: string) {
