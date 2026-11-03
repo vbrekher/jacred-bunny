@@ -1,0 +1,61 @@
+{
+  "scope": "Real CLI rule creation/repeat on existing owned linked staging zones; no new stack or production acceptance",
+  "cli_source_sha": "66ac66870118ba0cde243f1b83a21d15f5fe07a4",
+  "created_rule_count": 2,
+  "repeat_preserved_rule_ids": true,
+  "new_rules": {
+    "edge_cdn": {
+      "zone_id": 6920852,
+      "description": "JacRed jacred-6a3535da no-store",
+      "phase": "confirmed",
+      "guid": "da50ecd2-a370-4d78-8eed-d45fc5e0058a"
+    },
+    "worker_cdn": {
+      "zone_id": 6920854,
+      "description": "JacRed jacred-6a3535da no-store",
+      "phase": "confirmed",
+      "guid": "1da9c5e5-7f59-4f4b-b220-3114d26344c1"
+    }
+  },
+  "old_manual_rule_cleanup": [
+    {
+      "zone_id": 6920854,
+      "old_guid": "292bfcc4-9ad8-4f1b-a039-a2a7e42507e6",
+      "deleted_confirmed": true
+    },
+    {
+      "zone_id": 6920852,
+      "old_guid": "b42ed35e-b414-4904-b1cc-0080ddee193c",
+      "deleted_confirmed": true
+    }
+  ],
+  "worker_remained_inactive": true,
+  "production_acceptance": false,
+  "actual_health": {
+    "productionReady": false,
+    "infrastructureReady": true,
+    "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+    "worker_health_http": 200,
+    "worker_healthy": true,
+    "worker_catalog_backend": "bunny-sql",
+    "worker_catalog_backend_matches": true,
+    "server_git_sha": "764b8de8",
+    "worker_source_matches": true,
+    "authenticated_search_http": 200,
+    "worker_search_key_valid": true,
+    "admin_schema_http": 200,
+    "worker_admin_key_valid": true,
+    "worker_authenticated_no_store": true,
+    "sql_migration_count": 3,
+    "catalog_torrent_count": 20,
+    "sql_schema_ready": true,
+    "edge_version_http": 200,
+    "edge_source_matches": true,
+    "edge_authenticated_search_http": 200,
+    "edge_search_key_valid": true,
+    "edge_authenticated_no_store": true,
+    "catalog_acceptance": "NOT_ESTABLISHED"
+  },
+  "post_health_worker_status": "inactive",
+  "install_order_validation": "Mocked installer regression only; no fresh Mac/Linux cloud bootstrap acceptance claim"
+}

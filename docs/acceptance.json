@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "PRs #19–21 merged after successful CI; exact CI image/digest and matching Edge bundle deployed. 169 Python, 101 Edge Node, 962 .NET and 73 web checks recorded. Complete reproducibility/security/license release evidence remains open."
+      "reason": "CI through PR #24 passed; current local checks include 184 Python, 101 Edge Node, 964 .NET and 73 web tests. Exact CI image/digest and matching Edge bundle deployed. Complete reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -39,7 +39,7 @@
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live auth/spoofed-proxy denials verified. Correction: earlier 101-response no-store claim was unsupported (all captured flags false). Owned CDN header rules now preserve no-store and authenticated-then-anonymous checks passed; automatic CLI enforcement, tracker TLS/SSRF fixes and full scans/429/500/RBAC remain incomplete."
+      "reason": "Live auth/spoofed-proxy denials verified. Correction: earlier 101-response no-store claim was unsupported (all captured flags false). CLI-created owned CDN header rules now preserve no-store and authenticated-then-anonymous checks passed; tracker TLS/SSRF fixes and full scans/429/500/RBAC remain incomplete."
     },
     {
       "gate": "CLIENTS",
@@ -68,13 +68,14 @@
     }
   ],
   "source_checks": {
-    "python": 169,
+    "python": 184,
     "edge_node": 101,
-    "dotnet": 962,
+    "dotnet": 964,
     "web": 73,
     "scope": "Local source checks and CI evidence through gateway source; not full live gates"
   },
   "recent_evidence": [
+    "evidence/cli-no-store-policy-2026-11-03.json",
     "evidence/service-snapshot-attestation-2026-11-03.json",
     "evidence/live-edge-gateway-2026-11-03.json",
     "evidence/http-gateway-parity-2026-11-03.json",
