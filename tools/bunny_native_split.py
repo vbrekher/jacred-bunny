@@ -45,7 +45,10 @@ def db_open(path):
 def split(source,out,shard_count):
     if not isinstance(shard_count,int) or not 2<=shard_count<=4:
         raise SplitRefused("Only 2..4 shards supported by Edge preview")
-    source=Path(source).resolve()
+    supplied_source=Path(source)
+    if supplied_source.is_symlink():
+        raise SplitRefused("Source symlink refused")
+    source=supplied_source.resolve()
     out=Path(out).absolute()
     if out.exists() or out.is_symlink():
         raise SplitRefused("Output must be a new directory")
