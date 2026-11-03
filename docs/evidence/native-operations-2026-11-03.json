@@ -1,0 +1,132 @@
+{
+  "schema": "jacred-native-operations-evidence/v1",
+  "date": "2026-11-03",
+  "scope": "isolated owned staging; synthetic SQL records only",
+  "limitations": [
+    "Uncommitted development CLI exercised these operations; committed release/bootstrap still needs acceptance.",
+    "Legacy FileDB, Tracks, runtime config and worker jobs are not covered by SQL backups.",
+    "No real catalog or client acceptance, no 24-hour soak, no production PASS."
+  ],
+  "update": {
+    "changed": true,
+    "from_source": "9f0373d0e9d09448edb2d78218240b412c90a3d1",
+    "to_source": "1608e68017da08ba6afa40ef73ca85c5868606cb",
+    "rollback": false,
+    "sql_rollback": false,
+    "health": {
+      "productionReady": false,
+      "infrastructureReady": true,
+      "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+      "worker_health_http": 200,
+      "worker_healthy": true,
+      "server_git_sha": "1608e680",
+      "worker_source_matches": true,
+      "authenticated_search_http": 200,
+      "worker_search_key_valid": true,
+      "admin_schema_http": 200,
+      "worker_admin_key_valid": true,
+      "sql_migration_count": 2,
+      "catalog_torrent_count": 0,
+      "sql_schema_ready": true,
+      "catalog_acceptance": "NOT_ESTABLISHED"
+    }
+  },
+  "rollback": {
+    "changed": true,
+    "from_source": "1608e68017da08ba6afa40ef73ca85c5868606cb",
+    "to_source": "9f0373d0e9d09448edb2d78218240b412c90a3d1",
+    "rollback": true,
+    "sql_rollback": false,
+    "health": {
+      "productionReady": false,
+      "infrastructureReady": true,
+      "worker_url": "https://mc-gy6p4c5g8c.bunny.run",
+      "worker_health_http": 200,
+      "worker_healthy": true,
+      "server_git_sha": "9f0373d0",
+      "worker_source_matches": true,
+      "authenticated_search_http": 200,
+      "worker_search_key_valid": true,
+      "admin_schema_http": 200,
+      "worker_admin_key_valid": true,
+      "sql_migration_count": 2,
+      "catalog_torrent_count": 0,
+      "sql_schema_ready": true,
+      "catalog_acceptance": "NOT_ESTABLISHED"
+    }
+  },
+  "repeat_rollback": {
+    "changed": false,
+    "source_sha": "9f0373d0e9d09448edb2d78218240b412c90a3d1",
+    "runtime_health_checked": false,
+    "reason": "Verified release already configured; lifecycle preserved"
+  },
+  "backup": {
+    "counts": {
+      "buckets": 1,
+      "bucket_aliases": 1,
+      "torrents": 1,
+      "track_file_inventory": 0,
+      "native_imports": 0
+    },
+    "content_sha256": "ae249fad97caeafe85500ca98a8749ee8c0cb175ce80cbbd6700c43041f5e310",
+    "gzip_sha256": "f835ee1589ad888db8e0fcced599cf175db7ed4a31348dad895514bd8d5d51bf",
+    "bytes": 1011,
+    "elapsed_seconds": 3.7138718649948714,
+    "coverage": {
+      "sql_catalog": true,
+      "legacy_filedb": false,
+      "legacy_tracks_objects": false,
+      "runtime_config": false,
+      "worker_jobs": false
+    },
+    "production_backup_acceptance": false
+  },
+  "restore": {
+    "backup_id": "catalog-20261103T155000Z-b9d9fbb6",
+    "restored_database_id": "db_01M6H1MWSP07VSCWMH5A5AQTVZ",
+    "restored_counts": {
+      "buckets": 1,
+      "bucket_aliases": 1,
+      "torrents": 1,
+      "track_file_inventory": 0,
+      "native_imports": 0
+    },
+    "content_sha256_verified": true,
+    "fts_query_completed": true,
+    "fts_probe_matches": 1,
+    "elapsed_seconds": 6.242879330995493,
+    "coverage": {
+      "sql_catalog": true,
+      "legacy_filedb": false,
+      "legacy_tracks_objects": false,
+      "runtime_config": false,
+      "worker_jobs": false
+    },
+    "production_restore_acceptance": false
+  },
+  "cleanup_readback": {
+    "fork_403_reconciled_no_matching_name": true,
+    "source_catalog_after_probe": 0,
+    "restores": [
+      {
+        "id": "db_01M6H1KMGJM6FTC71V2Q61MTXP",
+        "deleted_confirmed_by_404": true
+      },
+      {
+        "id": "db_01M6H1MWSP07VSCWMH5A5AQTVZ",
+        "deleted_confirmed_by_404": true
+      }
+    ],
+    "worker_status": {
+      "native-state": "inactive",
+      "fresh-native-state": "inactive"
+    }
+  },
+  "native_fork": {
+    "http_status": 403,
+    "accepted": false,
+    "fallback": "Explicit read-only SQL transaction with shared baton; private Storage archive"
+  },
+  "production_acceptance": false
+}
