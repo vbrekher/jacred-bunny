@@ -20,15 +20,15 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 
 | Component | Verified state |
 | --- | --- |
-| Original .NET application | 946 local tests passed; running on an isolated Magic Container |
-| Magic Containers | Real HTTPS health, source version, public GHCR pull and digest-pinned update tested |
-| Bunny Database | Real CRUD, FTS5, transaction rollback and separate read-only token tested with synthetic records |
-| Edge API | Deployed preview; empty catalog correctly returns `503 NOT_READY` |
-| Bunny Storage | Real PUT/GET with SHA256 verification; production restore is still untested |
+| Original .NET application | 962 local tests passed; original collector/query running in a SQL-backed Magic Container pilot |
+| Magic Containers | HTTPS source/backend attestation, digest-pinned update and SQL persistence across stop/start verified |
+| Bunny Database | 20 real SubsPlease releases collected in-cloud; typed SQL, FTS, concurrency and read-only separation tested |
+| Edge API | Preview remains gated (`503 NOT_READY`); full compatible gateway still required |
+| Bunny Storage | Checksum-verified SQL catalog restore after source loss; Tracks/config/jobs recovery remains open |
 | 25 original tracker adapters | Source roster preserved; live parser readiness is not established |
 | Native worker, durable scheduler and client acceptance | In progress; no production claim |
 
-The .NET service currently uses persistent FileDB. Database/Edge are a separate staging preview; there is no production SQL cutover. [Dated evidence and limitations](docs/evidence/2026-11-03-staging.md) explain exactly what was tested.
+The standard setup still installs the FileDB candidate. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 20 real releases and verified restart persistence. This is not production acceptance or a general nonempty legacy migration. [Live worker evidence and limits](docs/evidence/live-sql-worker-2026-11-03.json) identify the exact scope.
 
 ## Install the FileDB deployment candidate
 
@@ -67,9 +67,11 @@ jacred-bunny native-staging plan
 ```mermaid
 flowchart LR
   Clients[Browser / Lampa / Torznab clients] --> MC[Magic Containers: original .NET API]
-  MC --> FDB[Persistent FileDB: current authoritative data]
-  Preview[Edge API preview] --> SQL[Bunny Database: isolated staging]
-  SQL -. backup transport tested .-> Storage[Bunny Storage]
+  MC --> FDB[Default candidate: persistent FileDB]
+  Clients --> Pilot[SQL pilot: original .NET collector/API]
+  Pilot --> SQL[Bunny Database: authoritative pilot catalog]
+  Preview[Edge API preview: gated] --> SQL
+  SQL -. SQL catalog backup/restore verified .-> Storage[Bunny Storage]
 ```
 
 The target architecture moves the authoritative catalog and job state into SQL, keeps collection and media processing in Magic Containers, and serves compatible APIs through Edge. That transition is not complete.
@@ -84,13 +86,13 @@ Playback requires a separate service such as [TorrServer-bunny](https://github.c
 
 Hosting is metered. On 3 November 2026 the published rates include CPU at $0.02/core-hour, RAM at $0.005/GB-hour and provisioned volumes at $0.10/GB-month. Egress is separate. The first Edge request activates a $0.22 billing increment; Database is free during public preview. Check the [current Magic Containers rates](https://bunny.net/docs/magic-containers/pricing.md), [Edge rates](https://bunny.net/docs/scripting/pricing.md), [Storage rates](https://bunny.net/docs/storage/pricing.md) and [Database pricing](https://bunny.net/database/).
 
-A single region and replica reduce exposure but do not create a hard spending limit. Stopping compute retains billable volumes. Never delete or reuse another project's resources. The current staging has a one-hour compute expiry watchdog; it is a temporary test environment, not a permanent public demo.
+A single region and replica reduce exposure but do not create a hard spending limit. Stopping compute retains billable volumes. Never delete or reuse another project's resources. Staging uses a compute expiry watchdog (one hour by default, shorter windows for live checks); it is a temporary test environment, not a permanent public demo.
 
 ## Real interface
 
-This is the running .NET staging interface with an **empty** catalog. It is not evidence of successful tracker indexing or completed native SQL integration.
+This is the real SQL-backed Magic Containers pilot after cloud collection and restart. The browser found an actual release through both native and Jackett APIs; it does not establish full client or 25-tracker acceptance. A same-query API-key retry defect was found and still needs fixing.
 
-![Real JacRed staging search interface with an empty catalog](docs/images/staging-search-empty.png)
+![Real SQL-backed JacRed search showing an indexed release](docs/images/sql-live-search-en.png)
 
 ## Documentation and release status
 

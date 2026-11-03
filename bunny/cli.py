@@ -774,6 +774,87 @@ def native_update(args):
             "rollback":result["rollback"],"sql_rollback":False,"health":health},indent=2))
 
 
+def native_empty_sql_cutover(args):
+    from native import API as NativeAPI, NativeError, installation_lock, load_payload, current_pricing, staging_cost_plan, fetch_release_payload
+    from operations import Operations
+    if args.release:
+        if args.payload_dir:raise NativeError("Use either --release or --payload-dir")
+        args.payload_dir=fetch_release_payload(args.release,args.state_dir/"payloads",args.source_sha)
+    if not args.payload_dir:raise NativeError("Require a verified SQL authority payload")
+    manifest=load_payload(args.payload_dir)
+    if manifest.get("catalog_backend")!="bunny-sql":raise NativeError("Cutover requires SQL payload v2")
+    if args.source_sha and manifest['source_sha']!=args.source_sha:raise NativeError("Requested source differs from payload")
+    with installation_lock(args.state_dir):
+        key=account_key() if args.apply else ""
+        deploy=Operations(args.state_dir,NativeAPI(key))
+        if not deploy.state or 'worker' not in deploy.state['resources']:raise NativeError("Existing owned staging worker required")
+        if not args.apply:
+            print(json.dumps({'apply':False,'scope':'empty owned staging only','target_source':manifest['source_sha'],
+                              'nonempty_catalog_migration':False,'existing_volumes_preserved':True},indent=2));return
+        pending=deploy.state.get('pending_cutover')
+        if deploy.state.get('catalog_backend')=='bunny-sql' and not pending:
+            if deploy.state['source_sha']!=manifest['source_sha'] or deploy.state['image_digest']!=manifest['image']['digest']:
+                raise NativeError("SQL authority already active; use compatible update")
+            deploy.verify('worker');deploy.assert_schema_compatible(args.payload_dir)
+            print(json.dumps({'changed':False,'catalog_backend':'bunny-sql','runtime_health_checked':False},indent=2));return
+        preferred=args.registry_id or deploy.state['resources']['worker']['identity']['container']['imageRegistryId']
+        resolve_native_registry(key,manifest['image']['reference'],manifest['image']['digest'],preferred)
+        data_gb=next(row['size'] for row in deploy.state['resources']['worker']['identity']['volumes'] if row['name']=='data')
+        cost=staging_cost_plan(deploy.api('GET','/mc/limits'),args.hours,data_gb,rates=current_pricing())
+        if not .1<=args.hours<=24 or not 0<args.max_estimated_usd<=5 or cost['estimated_initial_usd']>args.max_estimated_usd:
+            raise NativeError("Cutover staging window exceeds conservative estimate budget")
+        if not deploy.watchdog_available() or deploy.state['stop_at']-time.time()<240:
+            deploy.renew_window(args.hours);deploy.start_watchdog()
+        from native import read_private
+        if 'authority_intent_stop' not in read_private(deploy.directory/'watchdog.json').get('capabilities',[]):
+            # Upgrade an older watcher without killing an unrelated local PID or
+            # changing any service secrets. Stop owned compute before expiry.
+            deploy.worker_action('stop')
+            deadline=time.monotonic()+90
+            while deploy.verify_worker_for_stop().get('status')!='inactive':
+                if time.monotonic()>=deadline:raise NativeError("Source stop not confirmed for watchdog upgrade")
+                time.sleep(2)
+            deploy.renew_window(.0001)
+            deadline=time.monotonic()+30
+            while read_private(deploy.directory/'watchdog.json').get('status')!='stopped_confirmed':
+                if time.monotonic()>=deadline:raise NativeError("Prior watcher termination not confirmed")
+                time.sleep(1)
+            deploy.renew_window(args.hours);deploy.start_watchdog()
+            if 'authority_intent_stop' not in read_private(deploy.directory/'watchdog.json').get('capabilities',[]):
+                raise NativeError("Authority-aware watchdog unavailable; transition refused")
+        if not pending or pending.get('phase')=='prepared':
+            if deploy.verify('worker').get('status')!='active':deploy.worker_action('start')
+            deadline=time.monotonic()+180
+            while True:
+                health=native_health(deploy)
+                if health['infrastructureReady']:break
+                if time.monotonic()>=deadline:raise NativeError("Legacy bridge not healthy; transition not started")
+                time.sleep(3)
+            proof=deploy.probe_empty_legacy(extract_endpoint(deploy.verify('worker')))
+            deploy.prepare_empty_sql_cutover(args.payload_dir,proof)
+            deploy.worker_action('stop')
+        deadline=time.monotonic()+90
+        while deploy.verify_worker_for_stop().get('status')!='inactive':
+            if pending and pending.get('phase')=='worker_configuration_confirmed':break
+            if time.monotonic()>=deadline:raise NativeError("Source stop not confirmed; SQL transition refused")
+            time.sleep(2)
+        deploy.configure_sql_cutover(args.payload_dir)
+        deploy.remember_payload(args.payload_dir)
+        deploy.wire_edge(args.payload_dir/'edge.js',manifest['files']['edge.js'])
+        if deploy.state['stop_at']-time.time()<180:
+            deploy.renew_window(args.hours);deploy.start_watchdog()
+        if deploy.verify('worker').get('status')!='active':deploy.worker_action('start')
+        deadline=time.monotonic()+180
+        while True:
+            health=native_health(deploy)
+            if health['infrastructureReady']:break
+            if time.monotonic()>=deadline:raise NativeError("SQL runtime health not confirmed; no legacy authority rollback is allowed")
+            time.sleep(3)
+        deploy.finish_sql_cutover(health)
+        print(json.dumps({'changed':True,'catalog_backend':'bunny-sql','scope':'empty owned staging transition only',
+                          'legacy_rollback_allowed':False,'health':health},indent=2))
+
+
 def native_staging(args):
     # One CLI, with its implementation split into a standard-library module.
     try:
@@ -781,6 +862,9 @@ def native_staging(args):
     except ImportError:
         raise DeploymentError("Native staging module missing; reinstall the CLI") from None
     try:
+        if args.operation == "cutover-empty-sql":
+            native_empty_sql_cutover(args)
+            return
         if args.operation in ("backup", "restore-test"):
             from native import installation_lock
             from backup import Backups
@@ -866,7 +950,7 @@ def main():
     for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
         commands.add_parser(name)
     native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
-    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test"))
+    native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test", "cutover-empty-sql"))
     native.add_argument("--backup-id", help="Private SQL backup receipt ID for isolated restore test")
     native.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
     native.add_argument("--release", help="Public GitHub release payload; no GitHub PAT required")

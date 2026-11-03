@@ -626,6 +626,18 @@ class Deployment:
         try:
             return self.verify("worker")
         except NativeError:
+            cutover = self.state.get("pending_cutover")
+            if cutover:
+                record = self.state["resources"]["worker"]
+                original = record["identity"]
+                try:
+                    for candidate in (cutover.get("old_identity"), cutover.get("target_identity")):
+                        if not isinstance(candidate, dict):continue
+                        record["identity"] = candidate
+                        try:return self.verify("worker")
+                        except NativeError:pass
+                finally:record["identity"] = original
+                raise NativeError("Neither saved cutover worker identity matches; refusing stop")
             pending = self.state.get("pending_update")
             if (not pending or not re.fullmatch(r"[0-9a-f]{40}", pending.get("to_source", "")) or
                 not re.fullmatch(r"sha256:[0-9a-f]{64}", pending.get("to_digest", ""))):
@@ -853,7 +865,7 @@ def run_watchdog(directory, key, nonce, sleep=time.sleep, clock=time.time):
             if not deploy.state or deploy.state.get("watchdog_nonce") != nonce:
                 raise NativeError("Watchdog ownership token changed")
             heartbeat = {"pid": os.getpid(), "nonce": nonce, "at": clock(),
-                         "deadline": deploy.state["stop_at"], "status": "watching"}
+                         "deadline": deploy.state["stop_at"], "status": "watching", "capabilities": ["authority_intent_stop"]}
             if clock() >= deploy.state["stop_at"]:
                 worker = deploy.state["resources"].get("worker")
                 if not worker or worker.get("status") != "created":
