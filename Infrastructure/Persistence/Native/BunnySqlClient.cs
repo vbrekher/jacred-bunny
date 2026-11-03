@@ -19,7 +19,7 @@ internal sealed class NativeSqlException : Exception
 }
 
 /// <summary>Bounded Hrana HTTP transport. Mutations are never retried automatically.</summary>
-internal sealed class BunnySqlClient : IDisposable
+internal sealed partial class BunnySqlClient : IDisposable
 {
     const int MaxRequest = 4 * 1024 * 1024;
     const int MaxResponse = 8 * 1024 * 1024;
@@ -92,16 +92,16 @@ internal sealed class BunnySqlClient : IDisposable
         want_rows = true
     };
 
-    async Task<JsonElement> Send(object request, CancellationToken cancellation)
+    async Task<JsonElement> Exchange(object[] requests, Uri destination, string baton, CancellationToken cancellation)
     {
         byte[] body;
-        try { body = JsonSerializer.SerializeToUtf8Bytes(new { requests = new[] { request, new { type = "close" } } }); }
+        try { body = JsonSerializer.SerializeToUtf8Bytes(new { baton, requests }); }
         catch (Exception ex) when (ex is ArgumentException or JsonException) { throw new NativeSqlException("Cannot encode bounded SQL request"); }
         if (body.Length > MaxRequest) throw new NativeSqlException("SQL request exceeds bounded batch size");
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
         deadline.CancelAfter(TimeSpan.FromSeconds(30));
         cancellation = deadline.Token;
-        using var message = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        using var message = new HttpRequestMessage(HttpMethod.Post, destination);
         message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         message.Content = new ByteArrayContent(body);
         message.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -119,15 +119,26 @@ internal sealed class BunnySqlClient : IDisposable
                 buffer.Write(block, 0, read);
             }
             using var document = JsonDocument.Parse(buffer.ToArray(), new JsonDocumentOptions { MaxDepth = 128 });
-            var results = document.RootElement.GetProperty("results");
-            if (results.GetArrayLength() != 2 || results[0].GetProperty("type").GetString() != "ok" || results[1].GetProperty("type").GetString() != "ok")
-                throw new NativeSqlException("SQL operation rejected; private payload omitted");
-            return results[0].GetProperty("response").GetProperty("result").Clone();
+            return document.RootElement.Clone();
         }
         catch (OperationCanceledException) { throw new NativeSqlException("SQL request cancelled or timed out; outcome may be uncertain, no retry attempted"); }
         catch (HttpRequestException) { throw new NativeSqlException("SQL network failure; outcome may be uncertain, no retry attempted"); }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException or IOException)
         { throw new NativeSqlException("SQL response unavailable or malformed; no retry attempted"); }
+    }
+
+    async Task<JsonElement> Send(object request, CancellationToken cancellation)
+    {
+        var response = await Exchange(new[] { request, new { type = "close" } }, endpoint, null, cancellation).ConfigureAwait(false);
+        try
+        {
+            var results = response.GetProperty("results");
+            if (results.GetArrayLength() != 2 || results[0].GetProperty("type").GetString() != "ok" || results[1].GetProperty("type").GetString() != "ok")
+                throw new NativeSqlException("SQL operation rejected; private payload omitted");
+            return results[0].GetProperty("response").GetProperty("result").Clone();
+        }
+        catch (Exception ex) when (ex is KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
+        { throw new NativeSqlException("Malformed SQL response; private payload omitted"); }
     }
 
     static SqlResult Result(JsonElement result)

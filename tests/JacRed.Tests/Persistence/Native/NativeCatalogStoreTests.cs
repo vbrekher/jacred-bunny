@@ -62,6 +62,110 @@ public sealed class NativeCatalogStoreTests : IDisposable
         Assert.DoesNotContain("corrupt-private-payload",error.Message);
     }
 
+    [Fact]
+    public async Task Read_session_preserves_one_SQLite_snapshot_across_concurrent_commit_and_rotating_batons()
+    {
+        await client.Query(new("CREATE TABLE snapshot_probe(id INTEGER PRIMARY KEY)"));
+        await client.Query(new("INSERT INTO snapshot_probe VALUES(1)"));
+        await using(var session=await client.OpenReadSession())
+        {
+            Assert.Equal(1L,(await session.Query(new("SELECT count(*) AS n FROM snapshot_probe"))).Rows[0]["n"]);
+            await client.Query(new("INSERT INTO snapshot_probe VALUES(2)"));
+            Assert.Equal(1L,(await session.Query(new("SELECT count(*) AS n FROM snapshot_probe"))).Rows[0]["n"]);
+            var queued=await Task.WhenAll(Enumerable.Range(1,8).Select(i=>session.Query(new("SELECT ? AS n",i))));
+            Assert.Equal(Enumerable.Range(1,8).Select(i=>(long)i),queued.Select(r=>(long)r.Rows[0]["n"]));
+        }
+        Assert.Equal(2L,(await client.Query(new("SELECT count(*) AS n FROM snapshot_probe"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Lost_baton_poisoning_prevents_fresh_snapshot_or_query_replay()
+    {
+        await using var session=await client.OpenReadSession();
+        handler.DropNextBaton=true;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>session.Query(new("SELECT 1 AS n")));
+        int count=handler.RequestCount;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>session.Query(new("SELECT 2 AS n")));
+        Assert.Equal(count,handler.RequestCount);
+    }
+
+    [Theory]
+    [InlineData("http://fixture.lite.bunnydb.net/")]
+    [InlineData("https://attacker.example/")]
+    [InlineData("https://fixture.lite.bunnydb.net.attacker.example/")]
+    [InlineData("https://user:secret@fixture.lite.bunnydb.net/")]
+    [InlineData("https://fixture.lite.bunnydb.net/?secret=1")]
+    [InlineData("https://fixture.lite.bunnydb.net/other-path")]
+    public async Task Session_rejects_changed_destination_before_sending_credentials(string destination)
+    {
+        handler.OverrideBaseUrl=destination;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>client.OpenReadSession());
+        // The handler asserts fixture hostname for EVERY token-bearing request,
+        // including best-effort close after the malformed routing response.
+    }
+
+    [Fact]
+    public async Task Failed_begin_cannot_be_used_as_a_read_snapshot()
+    {
+        handler.FailBegin=true;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>client.OpenReadSession());
+        handler.FailBegin=false;
+        await using var session=await client.OpenReadSession();
+        Assert.Equal(1L,(await session.Query(new("SELECT 1 AS n"))).Rows[0]["n"]);
+    }
+
+    [Fact]
+    public async Task Paged_snapshot_exceeds_old_response_limit_and_matches_independent_full_digest()
+    {
+        for(int i=0;i<24;i++)
+        {
+            var key="large:"+i.ToString("D3");
+            var first=Torrent("https://example.invalid/"+i+"/\uE000");
+            var second=Torrent("https://example.invalid/"+i+"/\U00010000");
+            first.videotype=second.videotype=new string('x',200000);
+            await store.WriteBucket(await store.ReadBucket(key),new Dictionary<string,TorrentDetails>{{first.url,first},{second.url,second}},Guid.NewGuid().ToString("N"));
+        }
+        // The former one-response implementation must actually fail on this
+        // dataset, otherwise this test would not prove the removed limitation.
+        var oversized=await Assert.ThrowsAsync<NativeSqlException>(()=>client.Transaction(NativeCatalogStore.SnapshotTables.Select(x=>new SqlStatement("SELECT * FROM "+x.Table+" ORDER BY "+x.Order)).ToArray(),write:false));
+        Assert.Contains("response exceeds bounded size",oversized.Message);
+        var proof=await store.SnapshotProof();
+        Assert.Equal(48,proof.Counts["torrents"]);
+        var database=Path.Combine(directory,"fixture.sqlite");
+        var outputPath=Path.Combine(directory,"large-canonical.json");
+        using var exporter=new Process {StartInfo=new ProcessStartInfo("python3") {RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false}};
+        exporter.StartInfo.ArgumentList.Add("-c");
+        exporter.StartInfo.ArgumentList.Add("import sqlite3,json,sys;db=sqlite3.connect(sys.argv[1]);db.row_factory=sqlite3.Row;spec=json.loads(sys.argv[3]);tables={t:[dict(x) for x in db.execute('SELECT * FROM '+t+' ORDER BY '+o)] for t,o in spec};open(sys.argv[2],'w').write(json.dumps({'schema':'jacred-canonical-golden-snapshot/v1','tables':tables}))");
+        exporter.StartInfo.ArgumentList.Add(database);exporter.StartInfo.ArgumentList.Add(outputPath);
+        exporter.StartInfo.ArgumentList.Add(System.Text.Json.JsonSerializer.Serialize(NativeCatalogStore.SnapshotTables.Select(x=>new[]{x.Table,x.Order})));
+        exporter.Start();await exporter.WaitForExitAsync();Assert.Equal(0,exporter.ExitCode);
+        Assert.True(new FileInfo(outputPath).Length>8*1024*1024);
+        using var verifier=new Process {StartInfo=new ProcessStartInfo("python3") {RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false}};
+        verifier.StartInfo.ArgumentList.Add(Path.Combine(FindRoot(),"tools/bunny_snapshot_checksum.py"));verifier.StartInfo.ArgumentList.Add(outputPath);
+        verifier.Start();var output=await verifier.StandardOutput.ReadToEndAsync();await verifier.WaitForExitAsync();Assert.Equal(0,verifier.ExitCode);
+        Assert.Equal(proof.Sha256,System.Text.Json.JsonDocument.Parse(output).RootElement.GetProperty("snapshotSha256").GetString());
+    }
+
+    [Fact]
+    public async Task Snapshot_does_not_return_a_proof_when_stream_close_is_unconfirmed()
+    {
+        handler.DropNextCloseResponse=true;
+        await Assert.ThrowsAsync<NativeSqlException>(()=>store.SnapshotProof());
+    }
+
+    [Fact]
+    public async Task Cancelled_session_still_closes_without_caller_cancellation_token()
+    {
+        var session=await client.OpenReadSession();
+        using var cancelled=new CancellationTokenSource();cancelled.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>session.Query(new("SELECT 1"),cancelled.Token));
+        int before=handler.RequestCount;
+        await session.DisposeAsync();
+        Assert.Equal(before+1,handler.RequestCount);
+        await session.DisposeAsync();
+        Assert.Equal(before+1,handler.RequestCount);
+    }
+
     static string FindRoot()
     {
         for (var current = new DirectoryInfo(AppContext.BaseDirectory); current != null; current = current.Parent)
@@ -244,21 +348,54 @@ public sealed class NativeCatalogStoreTests : IDisposable
     {
         public bool FailBegin;
         public bool DropNextBatchResponse;
+        readonly SemaphoreSlim gate=new(1,1);
+        Process process;
+        public int RequestCount;
+        public string OverrideBaseUrl;
+        public bool DropNextBaton;
+        public bool DropNextCloseResponse;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken)
         {
-            Assert.Equal("fixture.lite.bunnydb.net",request.RequestUri.Host);
-            Assert.Equal("test-token-only",request.Headers.Authorization.Parameter);
-            var input=await request.Content.ReadAsStringAsync(cancellationToken);
-            using var process=new Process {StartInfo=new ProcessStartInfo("python3")
-                {RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false}};
-            process.StartInfo.ArgumentList.Add(script);process.StartInfo.ArgumentList.Add(database);
-            process.StartInfo.ArgumentList.Add(FailBegin?"fail_begin":"normal");
-            process.Start();await process.StandardInput.WriteAsync(input);process.StandardInput.Close();
-            var output=await process.StandardOutput.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);Assert.Equal(0,process.ExitCode);
-            if(DropNextBatchResponse&&input.Contains("\"type\":\"batch\"",StringComparison.Ordinal))
-            {DropNextBatchResponse=false;throw new HttpRequestException("Simulated response loss after database commit");}
-            return new HttpResponseMessage(HttpStatusCode.OK){Content=new StringContent(output,Encoding.UTF8,"application/json")};
+            await gate.WaitAsync(cancellationToken);
+            try
+            {
+                Assert.Equal("fixture.lite.bunnydb.net",request.RequestUri.Host);
+                Assert.Equal("test-token-only",request.Headers.Authorization.Parameter);
+                var input=await request.Content.ReadAsStringAsync(cancellationToken);
+                if(process==null)
+                {
+                    process=new Process {StartInfo=new ProcessStartInfo("python3")
+                        {RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true,UseShellExecute=false}};
+                    process.StartInfo.ArgumentList.Add(script);process.StartInfo.ArgumentList.Add(database);process.StartInfo.ArgumentList.Add("serve");
+                    process.Start();
+                }
+                var node=System.Text.Json.Nodes.JsonNode.Parse(input);
+                node["fixture_fail_begin"]=FailBegin;
+                RequestCount++;
+                await process.StandardInput.WriteLineAsync(node.ToJsonString());
+                await process.StandardInput.FlushAsync(cancellationToken);
+                var output=await process.StandardOutput.ReadLineAsync(cancellationToken);
+                Assert.NotNull(output);
+                if(DropNextBatchResponse&&input.Contains("\"type\":\"batch\"",StringComparison.Ordinal))
+                {DropNextBatchResponse=false;throw new HttpRequestException("Simulated response loss after database commit");}
+                if(DropNextCloseResponse && node["requests"].AsArray().Count==1 && node["requests"][0]["type"].GetValue<string>()=="close")
+                {DropNextCloseResponse=false;throw new HttpRequestException("Simulated close response loss");}
+                var result=System.Text.Json.Nodes.JsonNode.Parse(output);
+                if(OverrideBaseUrl!=null)result["base_url"]=OverrideBaseUrl;
+                if(DropNextBaton){result["baton"]=null;DropNextBaton=false;}
+                return new HttpResponseMessage(HttpStatusCode.OK){Content=new StringContent(result.ToJsonString(),Encoding.UTF8,"application/json")};
+            }
+            finally {gate.Release();}
+        }
+        protected override void Dispose(bool disposing)
+        {
+            if(disposing&&process!=null)
+            {
+                process.StandardInput.Close();
+                if(!process.WaitForExit(3000)){process.Kill(entireProcessTree:true);process.WaitForExit();}
+                process.Dispose();process=null;
+            }
+            base.Dispose(disposing);
         }
     }
 }

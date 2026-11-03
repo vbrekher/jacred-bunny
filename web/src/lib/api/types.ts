@@ -69,7 +69,7 @@ export interface paths {
         };
         /**
          * Compute an atomic SQL catalog snapshot checksum
-         * @description Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Bounded transport fails closed for oversized snapshots; this is not full production acceptance.
+         * @description Administrative SQL-only proof over seven canonical tables. Never accepts an operator-provided checksum. Pages share one SQL read transaction with bounded transport. Single-row and per-bucket receipt metadata limits still fail closed. Only one proof runs per process; this is not full production acceptance.
          */
         get: operations["internalSnapshotVersion"];
         put?: never;
@@ -1468,6 +1468,13 @@ export interface operations {
             };
             /** @description Administrative access denied */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Another snapshot proof is already running */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
