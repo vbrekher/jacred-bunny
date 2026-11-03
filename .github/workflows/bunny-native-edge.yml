@@ -13,6 +13,7 @@ on:
       - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
       - 'tests/test_bunny_native_evidence.py'
+      - 'tests/test_bunny_native_capture_e2e.py'
       - 'tests/test_bunny_native_capture.py'
       - 'tests/test_bunny_native_split.py'
       - 'tests/test_bunny_native_import.py'
@@ -29,6 +30,7 @@ on:
       - 'bunny-native/migrations/**'
       - 'tests/test_bunny_native_parity.py'
       - 'tests/test_bunny_native_evidence.py'
+      - 'tests/test_bunny_native_capture_e2e.py'
       - 'tests/test_bunny_native_capture.py'
       - 'tests/test_bunny_native_split.py'
       - '.github/workflows/bunny-native-edge.yml'
@@ -84,6 +86,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_parity.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_evidence.py' -v
+          python3 -m unittest discover -s tests -p 'test_bunny_native_capture_e2e.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_capture.py' -v
           python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_bunny_native_split.py' -v
       - name: Check source tracker roster has not drifted
