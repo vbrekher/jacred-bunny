@@ -37,6 +37,19 @@ no production cutover, live Bunny data acceptance or claim of search parity.
 
 **[Русский — v0.4.0 руководство и команды](docs/BUNNY_NATIVE_v0.4.0_IMPLEMENTATION.ru.md)**
 
+## v0.5.1 — Original key matching, SQLite parity and Bunny acceptance
+
+The preview now searches masterDb aliases with original JacRed name normalization
+(including Cyrillic Ё→Е and Щ→Ш), restores FileDB dictionary URL keys, and
+adds card/year/season filtering. The complete synthetic GZip FileDB -> real
+SQLite -> Edge API pathway is tested automatically.
+
+See [Русский · v0.5.1 implementation and acceptance](docs/BUNNY_NATIVE_v0.5.1_IMPLEMENTATION.ru.md).
+
+The optional read-only Bunny Database acceptance checker and a strict private
+original-.NET vs Edge HTTP golden comparator are provided. Real Bunny SQL,
+production dataset and complete original-.NET golden parity are NOT CLAIMED.
+
 ## v0.5.0 — Edge Scripting API Preview
 
 The Bunny-native path now includes a separate, **opt-in / read-only** Edge Scripting

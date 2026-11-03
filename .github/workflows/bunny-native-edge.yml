@@ -8,7 +8,9 @@ on:
       - 'bunny-native/remote-import.mjs'
       - 'tools/bunny_native_export.py'
       - 'tools/bunny_native_parity.py'
+      - 'tools/bunny_native_capture.py'
       - 'tests/test_bunny_native_parity.py'
+      - 'tests/test_bunny_native_capture.py'
       - 'tests/test_bunny_native_import.py'
       - '.github/workflows/bunny-native-edge.yml'
   push:
@@ -18,7 +20,9 @@ on:
       - 'bunny-native/remote-import.mjs'
       - 'tools/bunny_native_export.py'
       - 'tools/bunny_native_parity.py'
+      - 'tools/bunny_native_capture.py'
       - 'tests/test_bunny_native_parity.py'
+      - 'tests/test_bunny_native_capture.py'
       - '.github/workflows/bunny-native-edge.yml'
 permissions:
   contents: read
@@ -42,6 +46,7 @@ jobs:
           node --check bunny-native/edge/live-acceptance.mjs
           python3 -m py_compile bunny-native/edge/tests/fixtures/sqlite_bridge.py
           python3 -m py_compile tools/bunny_native_parity.py
+          python3 -m py_compile tools/bunny_native_capture.py
           node --check bunny-native/remote-import.mjs
       - name: Edge API compatibility and security tests (no network)
         run: |
@@ -67,6 +72,7 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_bunny_native_import.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_audit.py' -v
           python3 -m unittest discover -s tests -p 'test_bunny_native_parity.py' -v
+          python3 -m unittest discover -s tests -p 'test_bunny_native_capture.py' -v
       - name: Check source tracker roster has not drifted
         run: |
           python3 - <<'PY'
