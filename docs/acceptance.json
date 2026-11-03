@@ -9,12 +9,12 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #28 passed. Current local full suite has 1027 .NET tests, including paged snapshot and atomic paged catalog writes. Complete reproducibility/security/license release evidence remains open."
+      "reason": "All CI through PR #29 passed. Current local full suite has 1032 .NET tests, including paged bucket/index/receipt reads with actual SQLite concurrent-write isolation. Complete reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete. Local atomic writes now pass 1200-record and >4 MiB payload cases plus later-page rollback and immutable receipt retry; full large-catalog and migration acceptance remain incomplete."
+      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete. Local atomic writes now pass 1200-record and >4 MiB payload cases plus later-page rollback and immutable receipt retry; full large-catalog and migration acceptance remain incomplete. Local reads additionally cover a 12 MB bucket, a 5000-entry wide index and 4500 long-URL receipt metadata; whole-bucket memory and full deployed capacity remain incomplete."
     },
     {
       "gate": "REAL SQL",
@@ -64,17 +64,18 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #28 merged with green checks. Exact TLS-hardened staging image tested; paged snapshot and write changes are not yet deployed to MC/Edge. No tagged v1.0.0 release, complete acceptance or public production landing page yet."
+      "reason": "PRs through #29 merged with green checks. Exact TLS-hardened staging image tested; paged snapshot/write/read changes are not yet deployed to MC/Edge. No tagged v1.0.0 release, complete acceptance or public production landing page yet."
     }
   ],
   "source_checks": {
     "python": 184,
     "edge_node": 101,
-    "dotnet": 1027,
+    "dotnet": 1032,
     "web": 73,
-    "scope": "Local source checks; all CI through PR #28; atomic paged write changes local full suite only until their CI completes"
+    "scope": "Local source checks; all CI through PR #29; paged read changes local full suite only until their CI completes"
   },
   "recent_evidence": [
+    "evidence/paged-read-source-2026-11-03.json",
     "evidence/paged-write-real-sql-2026-11-03.json",
     "evidence/paged-write-source-2026-11-03.json",
     "evidence/paged-snapshot-real-sql-2026-11-03.json",

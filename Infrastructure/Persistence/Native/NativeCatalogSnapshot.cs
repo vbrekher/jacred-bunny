@@ -36,6 +36,7 @@ internal sealed partial class NativeCatalogStore
         }
         Frame((byte)'s',"jacred-sql-relational-snapshot/v1");
         var counts=new Dictionary<string,long>(StringComparer.Ordinal);
+        var schemaCache=new Dictionary<string,string[]>(StringComparer.Ordinal);
         foreach(var spec in SnapshotTables)
         {
             var table=spec.Table;
@@ -44,7 +45,7 @@ internal sealed partial class NativeCatalogStore
             counts.Add(table,count);
             Frame((byte)'s',table);Frame((byte)'i',count.ToString(CultureInfo.InvariantCulture));
             long seen=0;
-            await foreach(var row in SnapshotRows(session,table,spec.Order,cancellation).ConfigureAwait(false))
+            await foreach(var row in SnapshotRows(session,table,spec.Order,cancellation,schemaCache:schemaCache).ConfigureAwait(false))
             {
                 if(++seen>count)throw new NativeSqlException("Snapshot page count exceeded transaction count");
                 if(table=="torrents" && Hash((string)row["raw_json"])!=(string)row["raw_sha256"])
@@ -53,7 +54,9 @@ internal sealed partial class NativeCatalogStore
                 {
                     // Per-bucket receipt semantics remain the original .NET
                     // UTF-16 ordinal URL ordering, not SQLite UTF-8 ordering.
-                    var entries=(await session.Query(new SqlStatement("SELECT source_url,raw_sha256 FROM torrents WHERE bucket_key=?",row["bucket_key"]),cancellation).ConfigureAwait(false)).Rows;
+                    var entries=new List<IReadOnlyDictionary<string,object>>();
+                    await foreach(var entry in SnapshotRows(session,"torrents","bucket_key,source_url",cancellation,bucketKey:(string)row["bucket_key"],projection:new[]{"source_url","raw_sha256"},pageRows:512,schemaCache:schemaCache).ConfigureAwait(false))
+                        entries.Add(entry);
                     var pairs=entries.OrderBy(x=>(string)x["source_url"],StringComparer.Ordinal).Select(x=>new[]{(string)x["source_url"],(string)x["raw_sha256"]}).ToArray();
                     if((long)row["torrent_count"]!=entries.Count || Hash(JsonConvert.SerializeObject(pairs,Formatting.None))!=(string)row["shard_sha256"])
                         throw new NativeSqlException("Snapshot bucket checksum/count mismatch; contents omitted");
@@ -77,25 +80,43 @@ internal sealed partial class NativeCatalogStore
     }
     internal static async System.Collections.Generic.IAsyncEnumerable<IReadOnlyDictionary<string,object>> SnapshotRows(
         BunnySqlClient.SqlSession session,string table,string order,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellation=default)
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellation=default,
+        string bucketKey=null,string[] projection=null,int pageRows=64,IDictionary<string,string[]> schemaCache=null)
     {
         // Identifiers originate from the fixed schema list, never HTTP input.
         if(!SnapshotTables.Any(x=>x.Table==table&&x.Order==order))throw new NativeSqlException("Unknown snapshot table");
-        var metadata=(await session.Query(new SqlStatement("PRAGMA table_info("+table+")"),cancellation).ConfigureAwait(false)).Rows;
-        var columns=metadata.Select(x=>(string)x["name"]).ToArray();
-        if(columns.Length==0||columns.Length>64||columns.Any(x=>!System.Text.RegularExpressions.Regex.IsMatch(x,"^[a-z][a-z0-9_]*$")))
-            throw new NativeSqlException("Unsupported snapshot schema");
+        string[] columns;
+        if(schemaCache==null||!schemaCache.TryGetValue(table,out columns))
+        {
+            var metadata=(await session.Query(new SqlStatement("PRAGMA table_info("+table+")"),cancellation).ConfigureAwait(false)).Rows;
+            columns=metadata.Select(x=>(string)x["name"]).ToArray();
+            if(columns.Length==0||columns.Length>64||columns.Any(x=>!System.Text.RegularExpressions.Regex.IsMatch(x,"^[a-z][a-z0-9_]*$")))
+                throw new NativeSqlException("Unsupported snapshot schema");
+            if(schemaCache!=null)schemaCache[table]=columns;
+        }
+        if(bucketKey!=null&&table!="torrents")throw new NativeSqlException("Invalid catalog page filter");
+        if(pageRows<1||pageRows>512)throw new NativeSqlException("Invalid catalog page bound");
         var keys=order.Split(',');
+        if(projection!=null)
+        {
+            var selected=projection.Concat(keys).Distinct(StringComparer.Ordinal).ToArray();
+            if(selected.Any(x=>!columns.Contains(x,StringComparer.Ordinal)))throw new NativeSqlException("Unknown catalog page projection");
+            columns=selected;
+        }
+        var selection=string.Join(",",columns);
         var weight="1024+6*("+string.Join("+",columns.Select(x=>"coalesce(length(CAST("+x+" AS BLOB)),0)"))+")";
         object[] position=null;
         while(true)
         {
             cancellation.ThrowIfCancellationRequested();
-            var where=position==null?"":" WHERE ("+order+") > ("+string.Join(",",keys.Select(_=>"?"))+")";
-            var statement="WITH selected AS (SELECT * FROM "+table+where+" ORDER BY "+order+" LIMIT 64), weighted AS (SELECT *,row_number() OVER (ORDER BY "+order+") AS __row,sum("+weight+") OVER (ORDER BY "+order+" ROWS UNBOUNDED PRECEDING) AS __bytes FROM selected) SELECT * FROM weighted WHERE __row=1 OR __bytes<=1048576 ORDER BY "+order;
-            var page=(await session.Query(new SqlStatement(statement,position??Array.Empty<object>()),cancellation).ConfigureAwait(false)).Rows;
+            var filters=new List<string>();var args=new List<object>();
+            if(bucketKey!=null){filters.Add("bucket_key=?");args.Add(bucketKey);}
+            if(position!=null){filters.Add("("+order+") > ("+string.Join(",",keys.Select(_=>"?"))+")");args.AddRange(position);}
+            var where=filters.Count==0?"":" WHERE "+string.Join(" AND ",filters);
+            var statement="WITH selected AS (SELECT "+selection+" FROM "+table+where+" ORDER BY "+order+" LIMIT "+pageRows+"), weighted AS (SELECT *,row_number() OVER (ORDER BY "+order+") AS __row,sum("+weight+") OVER (ORDER BY "+order+" ROWS UNBOUNDED PRECEDING) AS __bytes FROM selected) SELECT * FROM weighted WHERE __row=1 OR __bytes<=1048576 ORDER BY "+order;
+            var page=(await session.Query(new SqlStatement(statement,args.ToArray()),cancellation).ConfigureAwait(false)).Rows;
             if(page.Count==0)yield break;
-            if(page.Count>64)throw new NativeSqlException("Snapshot page exceeds row bound");
+            if(page.Count>pageRows)throw new NativeSqlException("Snapshot page exceeds row bound");
             foreach(var row in page)
             {
                 if(columns.Any(x=>!row.ContainsKey(x))||keys.Any(x=>!row.TryGetValue(x,out var value)||value is not (string or long)))
