@@ -1,0 +1,24 @@
+{
+  "scope": "Source and local real TLS handshake validation; not deployed image or full security acceptance",
+  "dotnet_certificate_bypasses_removed": 8,
+  "operational_python_scripts_hardened": 21,
+  "shared_transport_untrusted_certificate_rejected": true,
+  "regression_with_original_insecure_callback": "FAIL: expected exception not thrown; old transport accepted local self-signed server",
+  "dotnet_tests": {
+    "passed": 965,
+    "failed": 0,
+    "log": "tls-isolated-full-tests.log"
+  },
+  "python_tests": {
+    "passed": 184,
+    "failed": 0
+  },
+  "test_isolation_fix": "TrackerCatalogServiceTests modifying process-wide filters now join the existing nonparallel FileDB collection",
+  "ci_change": "Build workflow now runs .NET unit and security regressions and retains non-secret TRX results",
+  "limitations": [
+    "No live tracker authentication/certificate matrix run for these changes yet",
+    "Deployed staging image remains 764b8de8 until a new exact CI image is deployed",
+    "Announce SSRF, UDP validation, private URL handling and full security scans remain open"
+  ],
+  "production_acceptance": false
+}

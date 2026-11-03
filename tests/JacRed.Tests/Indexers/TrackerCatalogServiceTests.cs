@@ -6,6 +6,8 @@ using Xunit;
 
 namespace JacRed.Tests.Indexers;
 
+// Overrides process-wide AppInit filters; never overlap active search fixtures.
+[Collection("FastDb index")]
 public class TrackerCatalogServiceTests
 {
     [Fact]

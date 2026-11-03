@@ -35,8 +35,6 @@ MAX_TIMEOUT_MS = int(os.environ.get("MAX_TIMEOUT_MS", "180000"))
 CDP_HOSTS = os.environ.get("CDP_HOSTS", "127.0.0.1:9222,127.0.0.1:9223").split(",")
 
 CTX = ssl.create_default_context()
-CTX.check_hostname = False
-CTX.verify_mode = ssl.CERT_NONE
 
 TORRENT_HREF = re.compile(r"""href=["']/details\.php\?id=(\d+)["']""", re.I)
 

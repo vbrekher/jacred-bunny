@@ -58,8 +58,6 @@ PROFILES = [
 ]
 
 CTX = ssl.create_default_context()
-CTX.check_hostname = False
-CTX.verify_mode = ssl.CERT_NONE
 
 INFO_HASH = re.compile(r"Инфо хеш:\s*([A-Fa-f0-9]{40})")
 TORRENT_HREF = re.compile(r"""href=["']/details\.php\?id=(\d+)["']""", re.I)

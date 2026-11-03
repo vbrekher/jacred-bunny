@@ -45,8 +45,6 @@ SAVE_DIR = os.environ.get("SAVE_DIR", "").strip()
 SNIPPET = 400
 
 CTX = ssl.create_default_context()
-CTX.check_hostname = False
-CTX.verify_mode = ssl.CERT_NONE
 
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

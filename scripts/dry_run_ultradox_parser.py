@@ -86,8 +86,6 @@ SPACES_RE = re.compile(r"\s+")
 def fetch(url: str) -> str:
     """GET with google Referer — own-origin Referer returns 503."""
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     headers = {
         "User-Agent": UA,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

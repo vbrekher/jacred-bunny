@@ -149,3 +149,12 @@ Native staging install/resume, start, explicit empty cutover and actual update/r
 Health/doctor now require the actual authenticated worker search/admin and Edge gateway search responses to contain the no-store directive. A CDN rewrite to no-cache makes infrastructure readiness fail. This is stronger than testing the origin handler's intended headers. Native gateway installation also prepares the scoped reader credential, creates the worker, applies CDN policy and then publishes the gateway; publication requires the worker's verified endpoint.
 
 [CLI policy evidence](../docs/evidence/cli-no-store-policy-2026-11-03.json) records two real rule creations on the existing owned linked zones, repeat without duplicate creation, verified replacement and cleanup of the earlier manual rules, actual HTTP no-store health checks and confirmed worker stop. These advanced native-staging checks do not establish a fresh public macOS/Linux bootstrap or the full production security gate.
+
+
+## Tracker TLS validation source changes
+
+The tracker transports and login handlers now use the platform's certificate validation instead of accepting every certificate. Operational Python capture/probe scripts retain their default verified SSL contexts; the Kinozal helper rejects an explicit insecure option. An invalid upstream certificate must produce an objective tracker limitation, not an insecure fallback.
+
+[Source validation evidence](../docs/evidence/tls-validation-source-2026-11-03.json) records a real local self-signed TLS server rejected by the shared .NET transport. The same test fails with the previous permissive callback. The complete 965-test .NET suite and 184 Python tests passed. A pre-existing test race was fixed by isolating the tracker-list configuration override from concurrent search tests. The Build workflow now runs the .NET regression suite in CI.
+
+These changes still need acceptance on the next exact deployed image. They do not fix announce-address SSRF or the legacy UDP reachability probe, and do not establish all 25 tracker or full security readiness.
