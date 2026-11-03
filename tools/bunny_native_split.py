@@ -60,7 +60,7 @@ def split(source,out,shard_count):
         raise SplitRefused("Staging source exceeds conservative size guard")
     out.parent.mkdir(parents=True,exist_ok=True)
     source_stat=(source.stat().st_size,source.stat().st_mtime_ns)
-    uri="file:"+source.as_posix()+"?mode=ro"
+    uri=source.as_uri()+"?mode=ro"
     con=sqlite3.connect(uri,uri=True)
     con.execute("PRAGMA query_only=ON")
     stage_dir=Path(tempfile.mkdtemp(dir=out.parent,prefix=".jacred-split-"))

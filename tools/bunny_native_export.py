@@ -19,7 +19,10 @@ def encode(obj):
     return (json.dumps(obj,sort_keys=True,ensure_ascii=False,separators=(",",":"))+"\n").encode("utf-8")
 
 def export_stage(database, output):
-    database=Path(database).resolve();output=Path(output).resolve()
+    database=Path(database).resolve();output=Path(output)
+    if output.is_symlink():
+        raise Refused("Output conflicts with database or is a symlink")
+    output=output.parent.resolve()/output.name
     if output == database or output.is_symlink():
         raise Refused("Output conflicts with database or is a symlink")
     if output.exists():
@@ -30,7 +33,7 @@ def export_stage(database, output):
     os.fchmod(fd,0o600)
     counts={"bucket":0,"alias":0,"torrent":0,"track":0}
     try:
-        conn=sqlite3.connect("file:"+database.as_posix()+"?mode=ro",uri=True)
+        conn=sqlite3.connect(database.as_uri()+"?mode=ro",uri=True)
         try:
             with os.fdopen(fd,"wb") as stream:
                 manifest=conn.execute("SELECT master_sha256 FROM native_imports WHERE id=1").fetchone()
@@ -74,7 +77,10 @@ def export_stage(database, output):
         digest=hashlib.sha256()
         with open(tmp,"rb") as stream:
             for chunk in iter(lambda:stream.read(1024*1024),b""):digest.update(chunk)
-        os.replace(tmp,output)
+        # Unlike replace(), link() cannot clobber a concurrently created file
+        # or symlink. mkstemp used the destination filesystem and mode 0600.
+        try:os.link(tmp,output)
+        except FileExistsError:raise Refused("Export target exists; choose another path") from None
         return {"status":"PRIVATE_STAGED_EXPORT_NOT_UPLOADED","sha256":digest.hexdigest(),
                 "counts":counts,"bytes":output.stat().st_size,"permissions":"0600"}
     finally:
