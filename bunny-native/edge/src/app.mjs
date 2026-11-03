@@ -2,9 +2,10 @@
 // No app/DB deployment or production cutover occurs from importing this file.
 import {TRACKERS,TRACKER_SET} from "./catalog.mjs";
 import {resultFromTorrent,rssXml,capsXml,indexersXml,prowlarrRelease} from "./format.mjs";
-import {searchSql,isReady} from "./sql.mjs";
+import {searchLegacy,isReady} from "./sql.mjs";
+import {filterRows} from "./parity.mjs";
 
-const VERSION="0.5.0-edge-preview";
+const VERSION="0.5.1-edge-parity-preview";
 const API_ORIGIN="https://github.com/vbrekher/jacred-bunny";
 const BAD={error:"Edge preview unavailable",productionReady:false};
 function json(body,status=200,headers={}){
@@ -49,24 +50,50 @@ function requestedTracker(q,fromPath){
   if(!TRACKER_SET.has(tracker))throw new RangeError("Unknown tracker");
   return tracker;
 }
-function filtered(data,q){
-  const year=getParam(q,"year");
-  const cat=getParam(q,"cat","category");
-  const typ=getParam(q,"type");
-  const serial=getParam(q,"is_serial");
-  const cats=cat.split(",").filter(Boolean);
-  return data.filter(t=>{
-    const types=Array.isArray(t.types)?t.types:[];
-    if(typ&&!types.includes(typ))return false;
-    if(serial==="1"&&!types.includes("movie"))return false;
-    if(serial==="2"&&!types.includes("serial"))return false;
-    if(year&&String(t.relased??"")!==year)return false;
-    if(cats.length){
-      const result=resultFromTorrent(t);
-      if(!result.Category.some(c=>cats.some(cat=>String(c).startsWith(cat))))return false;
-    }
-    return true;
-  });
+function filtered(data,q,{phrase=""}={}){
+  const cats=q.getAll("cat").concat(q.getAll("category"))
+    .concat([...q.entries()].filter(([k])=>/^category\[\d+\]$/i.test(k)).map(([,v])=>v))
+    .flatMap(x=>x.split(",")).map(Number).filter(Number.isInteger);
+  const title=getParam(q,"title");
+  const titleOriginal=getParam(q,"title_original");
+  const serialText=getParam(q,"is_serial");
+  const yearValue=getParam(q,"year");
+  const seasonValue=getParam(q,"season");
+  const episodeValue=getParam(q,"ep","episode");
+  const parse=(v,min,max,defaultVal)=>{
+    if(!v)return defaultVal;
+    if(!/^\d{1,5}$/.test(v))throw new RangeError("Invalid numeric filter");
+    const n=Number(v);
+    if(n<min||n>max)throw new RangeError("Invalid numeric filter");
+    return n;
+  };
+  let serial=serialText?parse(serialText,0,5,-1):-1;
+  if(serial===0&&cats.length){
+    if(cats.includes(5020)||cats.includes(2010))serial=3;
+    else if(cats.includes(5080))serial=4;
+    else if(cats.includes(5070))serial=5;
+    else if(cats.some(x=>x>=2000&&x<3000))serial=1;
+    else if(cats.some(x=>x>=5000&&x<6000))serial=2;
+  }
+  const year=parse(yearValue,1,9999,0);
+  const season=parse(seasonValue,1,999,0);
+  const episode=parse(episodeValue,1,999,0);
+  let rows=filterRows(data,{query:phrase,title,titleOriginal,serial,year,season,episode,
+    categories:cats,type:getParam(q,"type")||null});
+  // The v1 JSON API exposes additional filters not part of Jackett card mode.
+  const quality=getParam(q,"quality");
+  const video=getParam(q,"videotype");
+  const voice=getParam(q,"voice");
+  const release=getParam(q,"relased");
+  if(quality)rows=rows.filter(t=>Number(t.quality)===parse(quality,1,9999,0));
+  if(video)rows=rows.filter(t=>t.videotype===video);
+  if(release)rows=rows.filter(t=>Number(t.relased)===parse(release,1,9999,0));
+  if(voice)rows=rows.filter(t=>Array.isArray(t.voices)&&t.voices.includes(voice));
+  const sort=getParam(q,"sort");
+  const numeric={sid:"sid",pir:"pir",size:"size"};
+  const sortBy=numeric[sort];
+  if(sortBy)rows.sort((a,b)=>Number(b[sortBy]??0)-Number(a[sortBy]??0));
+  return rows;
 }
 function metadata(){
   return [{id:"all",name:"JacRed (all trackers)",
@@ -171,7 +198,8 @@ export function createHandler({getDb,env={}}){
         if(!phrase)return attach(xml(rssXml([],originUrl,apiUrl)),responseHeaders);
         const limit=pageNum(q.get("limit"),30,1,100);
         const offset=pageNum(q.get("offset"),0,0,2000);
-        const rows=filtered(await searchSql(db,{query:phrase,tracker,limit,offset}),q);
+        const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
+          titleOriginal:getParam(q,"title_original"),tracker}),q,{phrase}).slice(offset,offset+limit);
         const payload=rssXml(rows.map(resultFromTorrent),originUrl,apiUrl,getParam(q,"cat"));
         return attach(xml(payload),responseHeaders);
       }
@@ -182,7 +210,8 @@ export function createHandler({getDb,env={}}){
         if(!phrase)return attach(json({Results:[],jacred:true}),responseHeaders);
         const limit=pageNum(q.get("limit"),30,1,100);
         const offset=pageNum(q.get("offset"),0,0,2000);
-        const rows=filtered(await searchSql(db,{query:phrase,tracker,limit,offset}),q);
+        const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
+          titleOriginal:getParam(q,"title_original"),tracker}),q,{phrase}).slice(offset,offset+limit);
         return attach(json({Results:rows.map(resultFromTorrent),jacred:true}),responseHeaders);
       }
       if(pathname==="/api/v1/search"){
@@ -193,7 +222,8 @@ export function createHandler({getDb,env={}}){
         if(!phrase)return attach(json([]),responseHeaders);
         const limit=pageNum(q.get("limit"),30,1,100);
         const offset=pageNum(q.get("offset"),0,0,2000);
-        const rows=filtered(await searchSql(db,{query:phrase,limit,offset}),q);
+        const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
+          titleOriginal:getParam(q,"title_original")}),q,{phrase}).slice(offset,offset+limit);
         return attach(json(rows.map(resultFromTorrent).map(prowlarrRelease)),responseHeaders);
       }
       if(pathname==="/api/v1.0/torrents"){
@@ -202,7 +232,8 @@ export function createHandler({getDb,env={}}){
         const tracker=requestedTracker(q,null);
         const limit=pageNum(q.get("limit"),30,1,100);
         const offset=pageNum(q.get("offset"),0,0,2000);
-        const rows=filtered(await searchSql(db,{query:phrase,tracker,limit,offset}),q);
+        const rows=filtered(await searchLegacy(db,{query:phrase,title:getParam(q,"title"),
+          titleOriginal:getParam(q,"title_original"),tracker}),q,{phrase}).slice(offset,offset+limit);
         return attach(json(rows.map(legacyTorrent)),responseHeaders);
       }
       return attach(deny(404,"Not found"),responseHeaders);
