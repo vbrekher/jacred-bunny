@@ -12,7 +12,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 import sys
 sys.path.insert(0,str(ROOT/"tools"))
-from bunny_native_import import stage,verify_stage
+from bunny_native_import import stage,validate as verify_stage
 from bunny_native_split import split,SplitRefused,index_for
 from bunny_native_export import export_stage
 

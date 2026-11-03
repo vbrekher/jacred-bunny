@@ -22,7 +22,7 @@ SCHEMA=ROOT/"bunny-native/migrations/0001_catalog.sql"
 FTS=ROOT/"bunny-native/migrations/0002_search_fts5.sql"
 SHARD_SCHEMA=ROOT/"bunny-native/migrations/0003_shard_identity.sql"
 
-from bunny_native_import import verify_stage
+from bunny_native_import import validate as verify_stage
 
 class SplitRefused(Exception):pass
 
