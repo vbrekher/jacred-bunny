@@ -688,7 +688,7 @@ def _native_install(args):
     deploy.provision_data_plane()
     changed = deploy.migrate([args.payload_dir / name for name in sorted(payload["files"]) if name.endswith(".sql")])
     print("SQL migrations applied:", len(changed))
-    deploy.wire_edge(args.payload_dir / "edge.js", payload["files"]["edge.js"])
+    deploy.ensure_database_reader()
     deploy.start_watchdog()
     credentials = read_private(deploy.secret_path)
     body = build_payload("AMS", image, registry, credentials["api_key"], credentials["admin_key"], args.data_gb, digest=digest)
@@ -702,6 +702,7 @@ def _native_install(args):
         ]
     deploy.provision_worker(body)
     deploy.bound_staging_cdn()
+    deploy.wire_edge(args.payload_dir / "edge.js", payload["files"]["edge.js"])
     worker = deploy.verify("worker")
     if worker.get("status") != "active":
         deploy.worker_action("start")
@@ -831,6 +832,7 @@ def native_empty_sql_cutover(args):
             raise NativeError("Cutover staging window exceeds conservative estimate budget")
         if not deploy.watchdog_available() or deploy.state['stop_at']-time.time()<240:
             deploy.renew_window(args.hours);deploy.start_watchdog()
+        deploy.bound_staging_cdn()
         from native import read_private
         if 'authority_intent_stop' not in read_private(deploy.directory/'watchdog.json').get('capabilities',[]):
             # Upgrade an older watcher without killing an unrelated local PID or
@@ -929,6 +931,7 @@ def native_staging(args):
             else:
                 if args.operation == "start":
                     remote = deploy.verify("worker")
+                    deploy.bound_staging_cdn()
                     if remote.get("status") == "active" and deploy.watchdog_available():
                         print("Owned worker already active with a live budget watchdog")
                         return

@@ -843,6 +843,18 @@ class Deployment:
         self.save()
         return {"database": db, "storage": storage, "edge": edge}
 
+    def ensure_database_reader(self):
+        self.verify('database')
+        credentials=read_private(self.secret_path)
+        if 'database_read_token' not in credentials:
+            ident=self.state['resources']['database']['id']
+            token=self.api('PUT','/database/v2/databases/'+str(ident)+'/auth/generate',
+                           {'authorization':'read-only','expires_at':None})
+            if not isinstance(token,dict) or not isinstance(token.get('token'),str) or not token['token']:
+                raise NativeError('Missing database read token')
+            credentials['database_read_token']=token['token'];atomic_private(self.secret_path,credentials)
+        return credentials['database_read_token']
+
     @serialized
     def wire_edge(self, bundle, expected_sha256, force=False):
         code = Path(bundle).read_bytes()
@@ -884,14 +896,8 @@ class Deployment:
             self.state["edge_release_id"] == edge.get("CurrentReleaseId") and
             "database_read_token" in credentials):
             return
-        ident = self.state["resources"]["database"]["id"]
-        if "database_read_token" not in credentials:
-            token = self.api("PUT", "/database/v2/databases/" + str(ident) + "/auth/generate",
-                             {"authorization": "read-only", "expires_at": None})
-            if not isinstance(token, dict) or not isinstance(token.get("token"), str):
-                raise NativeError("Missing database read token")
-            credentials["database_read_token"] = token["token"]
-            atomic_private(self.secret_path, credentials)
+        self.ensure_database_reader()
+        credentials=read_private(self.secret_path)
         eid = self.state["resources"]["edge"]["id"]
         values = {"BUNNY_DATABASE_URL": db["url"], "BUNNY_DATABASE_AUTH_TOKEN": credentials["database_read_token"],
                   "JACRED_EDGE_API_KEY": credentials["api_key"], "JACRED_EDGE_PREVIEW_ENABLED": "true",
