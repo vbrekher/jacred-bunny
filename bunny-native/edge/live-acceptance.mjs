@@ -5,7 +5,6 @@
  * Requires dedicated staging database with read-only Bunny token.
  */
 import {createHash} from "node:crypto";
-import {connect} from "@bunny.net/database-client";
 import {isReady} from "./src/sql.mjs";
 
 function safeNumber(v){
@@ -89,6 +88,7 @@ async function main(){
     }
     if(!process.env.BUNNY_DATABASE_URL||!process.env.BUNNY_DATABASE_AUTH_TOKEN)
       throw Error("Missing Bunny Database connection environment");
+    const {connect}=await import("@bunny.net/database-client");
     const db=connect({timeout:3000});
     const result=await verifyRemote(db,{hashAll:args.hashAll});
     console.log(JSON.stringify(result));
