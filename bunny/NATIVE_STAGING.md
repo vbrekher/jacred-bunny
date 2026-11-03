@@ -201,6 +201,10 @@ The exact CI image for source `742e34c3e3354e05062f7caaa801c5698ac9650c`, digest
 
 [Deployed runtime evidence](../docs/evidence/live-paged-runtime-2026-11-03.json) includes update health, 16 HTTPS checks and confirmed compute stop. The subsequent SubsPlease endpoint returned `ok`, with no new rows, hashes or commit receipts. That observation does not prove a fresh collector write; the earlier TLS image and isolated write diagnostic have their separately scoped evidence. Full large live capacity, current-image API parity, 25 trackers, clients, durable jobs and production acceptance remain open.
 
+## Private local migration artifacts
+
+Private local FileDB staging, JSONL exports and HTTP captures publish their completed 0600 files with a same-filesystem hard link. Publication fails if a file or symlink appeared at the destination during validation. Dangling output symlinks are rejected before resolving the parent directory. SQLite import replacement remains an explicit `--replace` action; use it only with exclusive control of the target. Unsupported hard-link filesystems fail closed, without an overwrite fallback. Parent directories must be trusted; this is not a sandbox against a malicious local directory owner. [Local filesystem evidence](../docs/evidence/private-publication-2026-11-04.json) covers the reproduced failures and full Python regression suite, not cloud cutover or FileDB quiescence.
+
 ## Administrative key boundary
 
 A configured `devkey` now protects administrative routes on every network, including loopback/LAN. This fixes a local trust bypass that could expose the configuration to a foreign browser origin. The legacy mode without a devkey remains limited to direct trusted LAN and rejects foreign/opaque browser origins, foreign referrers and cross-site/same-site fetch contexts. Use a configured key for deployment; keyless mode is not a hardened boundary against clients that send no browser metadata.
