@@ -43,6 +43,8 @@ jobs:
           npm install --no-audit --no-fund
           npm run build
           test -s dist/index.js
+          node --check dist/index.js
+          sha256sum dist/index.js
           echo "EDGE_SCRIPT_BUNDLE_CREATED_PASS"
       - name: Save verified standalone Edge bundle (not deployed)
         uses: actions/upload-artifact@v4
