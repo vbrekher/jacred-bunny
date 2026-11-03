@@ -1,0 +1,36 @@
+{
+  "scope": "Source and local actual socket tests for public announce-list probes; not deployed-image/all-tracker/full-security acceptance",
+  "policy": {
+    "dns": "Every answer must be public; connect only to numeric vetted IP without a second lookup",
+    "http": "No proxy, cookies or redirects; platform TLS validation; response headers only; success or HTTP 400 reachability",
+    "udp": "BEP 15 connection request and matching action/transaction response; send alone is not success",
+    "private_urls": "Decode before validation; exclude userinfo/query/fragment/nested encoding/arbitrary paths",
+    "limits": {
+      "distinct_attempts": 128,
+      "endpoint_seconds": 7,
+      "cycle_seconds": 120
+    }
+  },
+  "dotnet_tests": {
+    "passed": 1008,
+    "failed": 0,
+    "skipped": 0,
+    "log": "announce-verified-full-tests.log",
+    "new_probe_cases": 43
+  },
+  "local_socket_evidence": [
+    "Literal loopback rejected before TCP connection",
+    "Pinned original hostname connects to selected test IP without DNS",
+    "HTTP 302 response does not contact redirect target",
+    "Actual UDP BEP 15 request/reply succeeds only after matching response",
+    "Silent UDP endpoint times out",
+    "Short, wrong-transaction and error-action packets rejected"
+  ],
+  "production_acceptance": false,
+  "deployed_tls_only_source_sha": "c0d5dfd00326f41ed63b23a618355e5578316df6",
+  "limitations": [
+    "New announce policy not yet deployed or exercised across public trackers",
+    "Conservative path/address restrictions and bounded cycle can produce a partial tracker list",
+    "No complete dependency/history/license/container/RBAC/429/500 security acceptance"
+  ]
+}

@@ -4,12 +4,12 @@
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
-  "live_worker_source_sha": "764b8de8cc7cee3ffc5678237ba4b86c7a6f9817",
+  "live_worker_source_sha": "c0d5dfd00326f41ed63b23a618355e5578316df6",
   "gates": [
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "CI through PR #24 passed; current local checks include 184 Python, 101 Edge Node, 964 .NET and 73 web tests. Exact CI image/digest and matching Edge bundle deployed. Complete reproducibility/security/license release evidence remains open."
+      "reason": "CI through PR #26 passed, including the new .NET regression job. Current source adds bounded public announce probes; exact final test totals are recorded in scoped evidence. Full reproducibility/security/license release evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -19,7 +19,7 @@
     {
       "gate": "REAL SQL",
       "status": "FAIL",
-      "reason": "Original in-cloud collector wrote 20 real SubsPlease records to Bunny SQL; native/Edge reads and all row checksums verified after image update and restart. Complete 2+ DB live fanout/failure recovery and actual attributed usage metrics remain incomplete."
+      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete."
     },
     {
       "gate": "TRACKERS 25",
@@ -39,7 +39,7 @@
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Live auth/spoofed-proxy denials verified. Correction: earlier 101-response no-store claim was unsupported (all captured flags false). CLI-created owned CDN header rules now preserve no-store and authenticated-then-anonymous checks passed; tracker TLS/SSRF fixes and full scans/429/500/RBAC remain incomplete."
+      "reason": "Live auth/spoofed-proxy denials and CDN no-store checks verified; earlier unsupported no-store claim remains explicitly corrected. TLS bypasses removed and exact-image SubsPlease collection verified. Announce SSRF/UDP/passkey protections have source and local transport tests only; full deployed audit, scans, 429/500/RBAC and all adapters remain incomplete."
     },
     {
       "gate": "CLIENTS",
@@ -64,17 +64,19 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #21 merged with green checks; exact source/digest gateway staging tested. No tagged v1.0.0 release, complete release acceptance or public production landing page yet."
+      "reason": "PRs through #26 merged with green checks; exact TLS-hardened source/digest staging tested. No tagged v1.0.0 release, complete release acceptance or public production landing page yet."
     }
   ],
   "source_checks": {
     "python": 184,
     "edge_node": 101,
-    "dotnet": 964,
+    "dotnet": 1008,
     "web": 73,
-    "scope": "Local source checks and CI evidence through gateway source; not full live gates"
+    "scope": "Local source checks; CI through TLS PR #26; announce changes local full suite only until their CI completes"
   },
   "recent_evidence": [
+    "evidence/public-tracker-probe-source-2026-11-03.json",
+    "evidence/tls-live-collector-2026-11-03.json",
     "evidence/cli-no-store-policy-2026-11-03.json",
     "evidence/service-snapshot-attestation-2026-11-03.json",
     "evidence/live-edge-gateway-2026-11-03.json",
