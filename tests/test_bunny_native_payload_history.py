@@ -40,7 +40,7 @@ class PayloadHistoryTests(unittest.TestCase):
 
     def test_failure_after_mode_publish_compensates_from_exact_old_manifest(self):
         original=self.deploy.wire_edge
-        def interrupted(*args):original(*args);raise native.NativeError('simulated post-publish interruption')
+        def interrupted(*args,**kwargs):original(*args,**kwargs);raise native.NativeError('simulated post-publish interruption')
         with patch.object(self.deploy,'wire_edge',side_effect=interrupted):
             with self.assertRaises(native.NativeError):self.deploy.apply_release(self.gateway)
         self.assertEqual(self.deploy.state['edge_mode'],'original-api-gateway')
@@ -84,3 +84,22 @@ class PayloadHistoryTests(unittest.TestCase):
         health.assert_called_once()
         self.assertEqual(self.deploy.state['edge_mode'],'original-api-gateway')
         self.assertNotEqual(self.deploy.state['release_history'][-1]['from_payload_id'],self.deploy.state['active_payload_id'])
+
+    def test_partial_secret_write_cannot_make_compensation_skip_republish(self):
+        original=self.deploy.api;enabled=[];failed=False
+        def api(method,path,body=None):
+            nonlocal failed
+            result=original(method,path,body)
+            if method=='PUT' and isinstance(body,dict) and body.get('Name')=='JACRED_EDGE_GATEWAY_ENABLED':
+                enabled.append(body['Secret'])
+                if not failed:
+                    failed=True
+                    raise native.NativeError('simulated lost response after secret write')
+            return result
+        self.deploy.api=api
+        with self.assertRaises(native.NativeError):self.deploy.apply_release(self.gateway)
+        self.assertEqual(self.deploy.state['edge_mode'],'preview')
+        self.finish(self.deploy.apply_release(self.deploy.rollback_payload(),rollback=True))
+        self.assertEqual(enabled,['true','false'])
+        self.assertEqual(self.edge_release,2)
+        self.assertEqual(self.deploy.state['edge_mode'],'preview')

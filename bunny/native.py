@@ -809,7 +809,7 @@ class Deployment:
         return {"database": db, "storage": storage, "edge": edge}
 
     @serialized
-    def wire_edge(self, bundle, expected_sha256):
+    def wire_edge(self, bundle, expected_sha256, force=False):
         code = Path(bundle).read_bytes()
         if not re.fullmatch(r"[0-9a-f]{64}", expected_sha256) or hashlib.sha256(code).hexdigest() != expected_sha256:
             raise NativeError("Edge bundle checksum mismatch")
@@ -843,7 +843,7 @@ class Deployment:
         db = self.verify("database")
         edge = self.verify("edge")
         credentials = read_private(self.secret_path)
-        if (self.state.get("edge_mode") == mode and self.state.get("edge_worker_origin", "") == worker_origin and
+        if (not force and self.state.get("edge_mode") == mode and self.state.get("edge_worker_origin", "") == worker_origin and
             self.state.get("edge_bundle_sha256") == expected_sha256 and
             self.state.get("edge_release_id") is not None and
             self.state["edge_release_id"] == edge.get("CurrentReleaseId") and

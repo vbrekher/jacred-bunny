@@ -202,6 +202,13 @@ class Operations(Deployment):
         old_sha=previous_manifest['source_sha']
         from_id=self.payload_id(previous_manifest)
         target=self.remember_payload(directory);to_id=self.payload_id(manifest)
+        if not pending and self.payload_matches_current(manifest):
+            self.verify('worker')
+            edge=self.verify('edge')
+            if self.state.get('edge_release_id')!=edge.get('CurrentReleaseId'):
+                raise NativeError('Active Edge release changed outside this deployment')
+            return {'changed':False,'from_source':old_sha,'to_source':manifest['source_sha'],
+                'from_payload_id':from_id,'to_payload_id':to_id,'previous_payload':str(previous),'rollback':rollback}
         if pending and not rollback and pending.get('to_payload_id',to_id)!=to_id:
             raise NativeError('Resume the exact pending payload before another configuration')
         if not pending or rollback:
@@ -214,7 +221,7 @@ class Operations(Deployment):
             pending.update(from_payload_id=from_id,to_payload_id=to_id);self.save()
         worker_changed=self.switch_worker(target)
         changed=worker_changed or from_id!=to_id
-        self.wire_edge(target/'edge.js',manifest['files']['edge.js'])
+        self.wire_edge(target/'edge.js',manifest['files']['edge.js'],force=True)
         if changed:self.worker_action('start')
         return {'changed':changed,'from_source':old_sha,'to_source':manifest['source_sha'],
                 'from_payload_id':from_id,'to_payload_id':to_id,'previous_payload':str(previous),'rollback':rollback}
