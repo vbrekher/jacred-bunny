@@ -69,7 +69,7 @@ internal static class LegacyArchive
     }
 
     internal static IReadOnlyList<(string Name, string Source, long Length, long Modified)> Inventory(
-        string dataRoot, string configRoot, long byteLimit, int fileLimit)
+        string dataRoot, string configRoot, long byteLimit, int fileLimit, CancellationToken cancellation = default)
     {
         if (byteLimit < 1 || byteLimit > DefaultByteLimit || fileLimit < 1 || fileLimit > DefaultFileLimit)
             throw new InvalidDataException("Invalid legacy export bounds");
@@ -83,6 +83,7 @@ internal static class LegacyArchive
         int directories = 0;
         foreach (var root in new[] { ("Data", data), ("config", config) })
         {
+            cancellation.ThrowIfCancellationRequested();
             NoLinks(root.Item2);
             if (!Directory.Exists(root.Item2)) throw new InvalidDataException("Legacy export source missing");
             var pending = new Stack<string>();
@@ -92,6 +93,7 @@ internal static class LegacyArchive
             {
                 foreach (var item in Directory.EnumerateFileSystemEntries(pending.Pop()))
                 {
+                    cancellation.ThrowIfCancellationRequested();
                     NoLinks(item);
                     var name = root.Item1 + "/" + System.IO.Path.GetRelativePath(root.Item2, item).Replace(System.IO.Path.DirectorySeparatorChar, '/');
                     if (name.Length > 1024 || name.Any(c => char.IsControl(c) || c == '\\' || c == ':'))
@@ -130,7 +132,7 @@ internal static class LegacyArchive
                 throw new InvalidDataException("Legacy export output must be outside sources");
         if (sourceSha.Length != 40 || sourceSha.Any(c => !Uri.IsHexDigit(c)))
             throw new InvalidDataException("Legacy export requires a build source identity");
-        var inventory = Inventory(dataRoot, configRoot, byteLimit, fileLimit);
+        var inventory = Inventory(dataRoot, configRoot, byteLimit, fileLimit, cancellation);
         if (!inventory.Any(x => x.Name.StartsWith("Data/masterDb", StringComparison.Ordinal)
             && x.Name.EndsWith(".bz", StringComparison.Ordinal) && x.Name.Count(c => c == '/') == 1)
             || !inventory.Any(x => x.Name == "config/init.yaml"))
@@ -168,7 +170,7 @@ internal static class LegacyArchive
                     // Re-read original bytes and topology after every tar entry.
                     // This detects concurrent changes but is NOT a substitute for
                     // a controller-verified single-worker stopped-writer window.
-                    var after = Inventory(dataRoot, configRoot, byteLimit, fileLimit);
+                    var after = Inventory(dataRoot, configRoot, byteLimit, fileLimit, cancellation);
                     if (!inventory.SequenceEqual(after)) throw new InvalidDataException("Legacy source changed during export");
                     var byName = after.ToDictionary(x => x.Name, StringComparer.Ordinal);
                     foreach (var file in files)
