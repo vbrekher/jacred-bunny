@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "Local current preflight source: 1089 .NET; retained 230 Python full suite and actual updated HTTP harness. All CI through PR37 passed with 1081 .NET/230 Python plus both Linux HTTP harnesses. Legacy16 cloud export failed and was compensated; new source diagnosis not yet deployed; primary SQL pilot remains ef2. Complete release reproducibility/security/license evidence remains open."
+      "reason": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2. Complete release reproducibility/security/license evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -72,7 +72,7 @@
     "edge_node": 101,
     "dotnet": 1089,
     "web": 73,
-    "scope": "Local current preflight source: 1089 .NET; retained 230 Python full suite and actual updated HTTP harness. All CI through PR37 passed with 1081 .NET/230 Python plus both Linux HTTP harnesses. Legacy16 cloud export failed and was compensated; new source diagnosis not yet deployed; primary SQL pilot remains ef2."
+    "scope": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2."
   },
   "recent_evidence": [
     "evidence/legacy-source-preflight-2026-11-04.json",

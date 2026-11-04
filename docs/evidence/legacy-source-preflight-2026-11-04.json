@@ -2,14 +2,15 @@
   "schema": "jacred-legacy-source-preflight-evidence/v1",
   "checked_at": "2026-11-04",
   "scope": "Actual exact-source local administrative HTTP diagnosis, normal shutdown and exporter verification; separate exact published Alpine synthetic lifecycle",
-  "source_sha": "4d3536bb139e709b79dc754c0484f9cec0760d60",
+  "source_sha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
   "production_ready": false,
   "local_dotnet": {
     "passed": 1089,
     "skipped": 0,
     "new_preflight_cases": 8,
     "build_warnings": 0,
-    "build_errors": 0
+    "build_errors": 0,
+    "seconds": 57
   },
   "local_python_suite": {
     "passed": 230,
@@ -18,37 +19,37 @@
   "actual_local_http": {
     "scope": "Local synthetic normal graceful shutdown -> isolated exporter -> Python archive verifier; synthetic original bytes, not cloud acceptance",
     "normal_version": {
-      "version": "dev-feat-legacy-export-source-preflight+4d3536bb",
-      "gitSha": "4d3536bb",
-      "gitFullSha": "4d3536bb139e709b79dc754c0484f9cec0760d60",
-      "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/4d3536bb139e709b79dc754c0484f9cec0760d60",
+      "version": "dev-feat-legacy-export-source-preflight+6c98c309",
+      "gitSha": "6c98c309",
+      "gitFullSha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
+      "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/6c98c3097d1588deee6eb76585029b0a1b84331c",
       "catalogBackend": "filedb",
       "legacyByteExportVersion": "1",
       "legacyCheckpointVersion": "1",
       "legacyCheckpointReady": "1",
-      "legacyBootId": "59bd141ed19a43309212f09400df1e7e",
+      "legacyBootId": "c9ecca7444ff4fc2b264d9b9f68e86bd",
       "gitBranch": "feat/legacy-export-source-preflight",
-      "buildDate": "2026-11-04 00:27:54 UTC"
+      "buildDate": "2026-11-04 00:38:04 UTC"
     },
     "export_version": {
-      "gitFullSha": "4d3536bb139e709b79dc754c0484f9cec0760d60",
+      "gitFullSha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
       "mode": "legacy-export-only",
       "catalogBackend": "filedb"
     },
     "shutdown_receipt": {
       "schema": "jacred-legacy-shutdown/v1",
       "owner": "jacred-bunny",
-      "boot_id": "59bd141ed19a43309212f09400df1e7e",
-      "source_sha": "4d3536bb139e709b79dc754c0484f9cec0760d60",
+      "boot_id": "c9ecca7444ff4fc2b264d9b9f68e86bd",
+      "source_sha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
       "master_sha256": "7a663df2f9a3a650c838b5d5fa5b58ab6ac97bfdbe8dc43ad429e3abad7322d6",
       "master_keys": 1,
-      "checkpointed_utc": "2026-11-04T00:28:03.8993870Z"
+      "checkpointed_utc": "2026-11-04T00:38:17.0493910Z"
     },
     "archive_receipt": {
       "schema": "jacred-legacy-archive-receipt/v1",
-      "source_sha": "4d3536bb139e709b79dc754c0484f9cec0760d60",
-      "gzip_sha256": "375200fbf9e2599faff68b94544bb65702c522169b5fae67686ff4cd05a91ddc",
-      "manifest_sha256": "7108663cfed030def66acc76ae2bcd28e0bcfcd66f2e28cc28d5d6f28d4e34d5",
+      "source_sha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
+      "gzip_sha256": "00e0eebb952431b5d25daa522fdfc9513cb16e7f0c57c2ade2a5db25408d5a38",
+      "manifest_sha256": "be300a03d15f01f707c04f70fb8cb964c08cba0f28fd877321117f630f590cb2",
       "file_count": 7,
       "source_bytes": 1129,
       "shutdown_checkpoint_verified": true,
@@ -138,6 +139,150 @@
     "Controllers/Dev/DevDiagnosticsController.cs": "79dac61eb72ee0e33e3e79b4639e2740efe85edb0d45f310b56430275b2e6960",
     "Infrastructure/Security/JacRedAccessCatalog.cs": "3c9760b83c8c9eea6ad339f6a248aae034bc5519b7e1fa649e4957c54218f356",
     "tests/JacRed.Tests/Persistence/Legacy/LegacyExportPreflightTests.cs": "0a801a04581f58aa35a64b54bc94135335699cc118a756177972f7b261d1aad2",
-    "tools/bunny_legacy_checkpoint_acceptance.py": "ed487a89a92a833afdcd58f4017d4c229b93e6c145335ab415e8263d0a993743"
+    "tools/bunny_legacy_checkpoint_acceptance.py": "ed487a89a92a833afdcd58f4017d4c229b93e6c145335ab415e8263d0a993743",
+    "Infrastructure/Persistence/Legacy/LegacyExportHost.cs": "a41e59dc333de60f4c4f8ed4f7c20b603c2244ccf30b270d8296c01df45dfd98",
+    "tools/bunny_legacy_export_acceptance.py": "1f0e5a0a5a7d4cbe8a6473e48b5f57cea67aff8b713db9a9918bd1ab8e8e1490"
+  },
+  "export_backpressure": {
+    "scope": "Actual local loopback exporter process with synthetic FileDB, dummy keys and independent tar/hash verification; no cloud migration or customer data",
+    "checkout_source_sha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
+    "service_version": {
+      "gitFullSha": "6c98c3097d1588deee6eb76585029b0a1b84331c",
+      "mode": "legacy-export-only",
+      "catalogBackend": "filedb"
+    },
+    "http_checks": [
+      {
+        "case": "missing",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "wrong",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "search-key",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "search-as-admin",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "query-only",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "foreign-origin",
+        "http": 401,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "normal-config-not-registered",
+        "http": 404,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "collector-not-registered",
+        "http": 404,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "write-not-registered",
+        "http": 404,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "public-health",
+        "http": 200,
+        "no_store": true,
+        "no_cors_reflection": true
+      },
+      {
+        "case": "concurrent-transfer-refused",
+        "http": 429,
+        "reason": "busy",
+        "does_not_consume_download_budget": true
+      },
+      {
+        "case": "private-download-1",
+        "http": 200,
+        "member_hashes_match_source": true,
+        "range_does_not_bypass_full_archive": true,
+        "no_store": true
+      },
+      {
+        "case": "private-download-2",
+        "http": 200,
+        "member_hashes_match_source": true,
+        "range_does_not_bypass_full_archive": true,
+        "no_store": true
+      },
+      {
+        "case": "private-download-3",
+        "http": 200,
+        "member_hashes_match_source": true,
+        "range_does_not_bypass_full_archive": true,
+        "no_store": true
+      },
+      {
+        "case": "download-budget-exhausted",
+        "http": 429,
+        "reason": "download-budget"
+      }
+    ],
+    "lifecycle_processes": [
+      {
+        "case": "expired",
+        "exit_code": 1,
+        "no_dummy_key_logged": true
+      },
+      {
+        "case": "excessive-window",
+        "exit_code": 1,
+        "no_dummy_key_logged": true
+      },
+      {
+        "case": "sql-mode-refused",
+        "exit_code": 1,
+        "no_dummy_key_logged": true
+      },
+      {
+        "case": "deadline-shutdown",
+        "exit_code": 0,
+        "no_dummy_key_logged": true
+      }
+    ],
+    "source_files": 7,
+    "source_bytes_unchanged": true,
+    "normal_startup_log_directory_absent": true,
+    "process_stopped": true,
+    "archive_sha256": "8041ce8316586ad6e3af12adbfb56d1d66be29f8382d3fb485c1e49a3206bdd6",
+    "quiescence": "Single isolated local process; cloud owned-worker lifecycle not exercised",
+    "production_ready": false
+  },
+  "ci_regression": {
+    "baseline_runs": [
+      41747257594,
+      41747652791
+    ],
+    "observed": "Actual Linux unit suite 1089 PASS; old exporter harness second sequential request returned 429 while previous handler cleanup still occupied the transfer slot",
+    "fix": "Distinct fixed busy/download-budget headers; real held TCP transfer verifies contention, bounded retry only for busy, exact three successful downloads and final quota rejection",
+    "new_ci_status": "PENDING for final head; no Linux PASS claimed",
+    "cloud_startup_root_cause": "UNCONFIRMED; this separate contention race does not explain unreachable cloud exporter mode"
   }
 }
