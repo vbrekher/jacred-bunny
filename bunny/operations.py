@@ -69,14 +69,12 @@ class Operations(Deployment):
                     path=self.cached_payload(entry.name)
                     if self.payload_matches_current(load_payload(path)):return path
         destination = self.directory/'releases'/self.state['source_sha']
-        if destination.is_dir():
+        if destination.parent.is_symlink() or destination.is_symlink():
+            raise NativeError('Unsafe historical release cache')
+        if (destination/'manifest.json').exists():
             manifest = load_payload(destination)
-            if manifest['image']['digest'] != self.state['image_digest']:
-                raise NativeError('Current cached image identity differs')
-            if manifest.get('catalog_backend','filedb') != self.state.get('catalog_backend','filedb'):
-                raise NativeError('Current cached catalog authority differs')
-            if manifest.get('edge_mode','preview') != self.state.get('edge_mode','preview'):
-                raise NativeError('Current cached Edge mode differs')
+            if not self.payload_matches_current(manifest):
+                raise NativeError('Current cached release identity differs')
             return self.remember_payload(destination)
         edge = self.verify('edge')
         value = self.api('GET', '/compute/script/'+str(self.state['resources']['edge']['id'])+'/code')
@@ -85,23 +83,54 @@ class Operations(Deployment):
             raise NativeError('Current Edge code differs from saved checksum; refusing overwrite')
         if self.state.get('edge_release_id') is not None and edge.get('CurrentReleaseId') != self.state['edge_release_id']:
             raise NativeError('Active Edge release changed outside this deployment')
-        destination.mkdir(mode=0o700,parents=True,exist_ok=True)
-        (destination/'edge.js').write_text(code,encoding='utf-8')
-        expected = {x['name']:x['sha256'] for x in self.state.get('migration_receipts',[])}
-        files={'edge.js':hashlib.sha256(code.encode()).hexdigest()}
-        for name in (['0001_catalog.sql','0002_search_fts5.sql','0004_catalog_commits.sql'] if self.state.get('catalog_backend') == 'bunny-sql' else ['0001_catalog.sql','0002_search_fts5.sql']):
+        names = (['0001_catalog.sql','0002_search_fts5.sql','0004_catalog_commits.sql'] if self.state.get('catalog_backend') == 'bunny-sql' else ['0001_catalog.sql','0002_search_fts5.sql'])
+        # Older staging could have applied SQL receipts without recording them
+        # locally. Reconcile only the exact server receipts and historical source
+        # bytes, never guess migrations or execute SQL to manufacture provenance.
+        actual_rows = self.sql_client(create=False).query('SELECT name,sha256 FROM native_schema_migrations ORDER BY name')
+        actual = {x['name']:x['sha256'] for x in actual_rows}
+        saved = {x['name']:x['sha256'] for x in (self.state.get('migration_receipts') or [])}
+        if len(actual) != len(actual_rows) or set(actual) != set(names) or (saved and saved != actual):
+            raise NativeError('Current migration receipts differ from the exact known historical schema')
+        bodies = {'edge.js':code.encode('utf-8')}
+        for name in names:
             body=fetch_public('https://raw.githubusercontent.com/vbrekher/jacred-bunny/'+self.state['source_sha']+'/bunny-native/migrations/'+name)
             digest=hashlib.sha256(body).hexdigest()
-            if digest != expected.get(name):
+            if digest != actual[name]:
                 raise NativeError('Cannot reconstruct verified current migration payload')
-            (destination/name).write_bytes(body);files[name]=digest
+            bodies[name]=body
+        files={name:hashlib.sha256(body).hexdigest() for name,body in bodies.items()}
+        if destination.exists():
+            if not destination.is_dir():raise NativeError('Historical cache is not a directory')
+            # Preserve an old interrupted cache for diagnostics. It is reusable
+            # only as corroborating bytes, not as a published complete payload.
+            for path in destination.iterdir():
+                if (path.is_symlink() or not path.is_file() or path.name not in bodies or
+                    path.stat().st_size != len(bodies[path.name]) or path.read_bytes() != bodies[path.name]):
+                    raise NativeError('Unknown or altered partial historical cache; no overwrite allowed')
         manifest={'schema':'jacred-bunny-native-payload/v2' if self.state.get('catalog_backend') == 'bunny-sql' else 'jacred-bunny-native-payload/v1',
             'source_sha':self.state['source_sha'],'image':{'reference':self.state['image'],'digest':self.state['image_digest']},'files':files}
         if self.state.get('catalog_backend') == 'bunny-sql':manifest['catalog_backend']='bunny-sql'
         manifest['edge_mode']=self.state.get('edge_mode','preview')
-        atomic_private(destination/'manifest.json',manifest)
-        load_payload(destination)
-        return self.remember_payload(destination)
+        with tempfile.TemporaryDirectory(prefix='.capture-',dir=self.directory) as temporary:
+            staging=Path(temporary)
+            for name,body in bodies.items():(staging/name).write_bytes(body)
+            atomic_private(staging/'manifest.json',manifest)
+            load_payload(staging)
+            result=self.remember_payload(staging)
+        self._record_verified_migration_receipts(manifest['source_sha'],actual_rows)
+        return result
+
+    @serialized
+    def _record_verified_migration_receipts(self, source_sha, receipts):
+        if self.state['source_sha'] != source_sha:
+            raise NativeError('Deployment source changed during historical receipt reconciliation')
+        old=self.state.get('migration_receipts')
+        if old and {x['name']:x['sha256'] for x in old} != {x['name']:x['sha256'] for x in receipts}:
+            raise NativeError('Saved migration receipts changed during reconciliation')
+        self.state['migration_receipts']=receipts
+        self.state['migration_state']='applied'
+        self.save()
 
     def assert_schema_compatible(self, payload):
         manifest=load_payload(payload)

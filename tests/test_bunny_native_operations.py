@@ -16,6 +16,58 @@ from operations import Operations
 
 
 class OperationTests(unittest.TestCase):
+    def test_existing_matching_partial_release_is_preserved(self):
+        shutil.rmtree(self.deploy.directory/'payload-objects')
+        destination=self.deploy.directory/'releases'/self.deploy.state['source_sha'];destination.mkdir(parents=True)
+        (destination/'edge.js').write_text('old bundle')
+        with patch('operations.fetch_public',side_effect=lambda url:(ROOT/'bunny-native/migrations'/url.rsplit('/',1)[-1]).read_bytes()):
+            captured=self.deploy.capture_current_payload()
+        self.assertNotEqual(destination,captured)
+        self.assertEqual([p.name for p in destination.iterdir()],['edge.js'])
+        self.assertEqual((destination/'edge.js').read_text(),'old bundle')
+
+    def test_altered_partial_release_is_never_overwritten_or_adopted(self):
+        shutil.rmtree(self.deploy.directory/'payload-objects')
+        destination=self.deploy.directory/'releases'/self.deploy.state['source_sha'];destination.mkdir(parents=True)
+        (destination/'edge.js').write_text('unrecognized bytes')
+        with patch('operations.fetch_public',side_effect=lambda url:(ROOT/'bunny-native/migrations'/url.rsplit('/',1)[-1]).read_bytes()):
+            with self.assertRaises(native.NativeError):self.deploy.capture_current_payload()
+        self.assertEqual((destination/'edge.js').read_text(),'unrecognized bytes')
+        self.assertFalse((self.deploy.directory/'payload-objects').exists())
+
+    def test_unknown_remote_receipts_cannot_be_adopted_as_missing_local_metadata(self):
+        shutil.rmtree(self.deploy.directory/'payload-objects')
+        self.sql.query.return_value.append({'name':'0009_unknown.sql','sha256':'f'*64})
+        with self.assertRaises(native.NativeError):self.deploy.capture_current_payload()
+        self.assertNotIn('migration_receipts',self.deploy.state)
+        self.assertFalse((self.deploy.directory/'payload-objects').exists())
+
+    def test_reconstruct_legacy_payload_from_verified_remote_receipts(self):
+        shutil.rmtree(self.deploy.directory/'payload-objects')
+        self.deploy.state.pop('migration_receipts',None);self.deploy.save()
+        def fetch(url):return (ROOT/'bunny-native/migrations'/url.rsplit('/',1)[-1]).read_bytes()
+        with patch('operations.fetch_public',side_effect=fetch):
+            captured=self.deploy.capture_current_payload()
+        self.assertTrue(self.deploy.payload_matches_current(json.loads((captured/'manifest.json').read_text())))
+        self.assertEqual(self.deploy.state['migration_receipts'],self.sql.query.return_value)
+
+    def test_interrupted_reconstruction_can_resume_without_partial_publication(self):
+        shutil.rmtree(self.deploy.directory/'payload-objects')
+        self.deploy.state['migration_receipts']=self.sql.query.return_value;self.deploy.save()
+        count=0
+        def interrupted(url):
+            nonlocal count
+            count+=1
+            if count==2:raise native.NativeError('transient source unavailable')
+            return (ROOT/'bunny-native/migrations'/url.rsplit('/',1)[-1]).read_bytes()
+        with patch('operations.fetch_public',side_effect=interrupted):
+            with self.assertRaises(native.NativeError):self.deploy.capture_current_payload()
+        destination=self.deploy.directory/'releases'/self.deploy.state['source_sha']
+        self.assertFalse(destination.exists())
+        with patch('operations.fetch_public',side_effect=lambda url:(ROOT/'bunny-native/migrations'/url.rsplit('/',1)[-1]).read_bytes()):
+            captured=self.deploy.capture_current_payload()
+        self.assertTrue(self.deploy.payload_matches_current(json.loads((captured/'manifest.json').read_text())))
+
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.root=Path(self.tmp.name);self.calls=[];self.uncertain=False;self.fail_get_after_patch=False;self.pending_get_failure=False
