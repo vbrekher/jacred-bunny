@@ -38,6 +38,16 @@ public sealed class LegacyExportPreflightTests : IDisposable
     }
 
     [Fact]
+    public void Api_serializer_preserves_the_explicit_lowercase_contract()
+    {
+        var json = Newtonsoft.Json.Linq.JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(Inspect()));
+        Assert.Equal("READABLE_SOURCE_METADATA", (string)json["status"]);
+        Assert.Null(json["Status"]);
+        Assert.False((bool)json["quiescenceVerified"]);
+        Assert.False((bool)json["productionReady"]);
+    }
+
+    [Fact]
     public void Invalid_key_returns_fixed_code_without_private_values()
     {
         File.WriteAllText(Path.Combine(Config, "init.yaml"), "devkey: private key that must not appear in result\n");

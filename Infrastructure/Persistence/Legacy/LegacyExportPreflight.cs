@@ -2,11 +2,18 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace JacRed.Infrastructure.Persistence.Legacy;
 
-internal sealed record LegacyExportPreflightResult(string Status, string Phase, string FailureCode,
-    int? Files = null, long? SourceBytes = null, bool QuiescenceVerified = false, bool ProductionReady = false);
+internal sealed record LegacyExportPreflightResult(
+    [property: JsonProperty("status")] string Status,
+    [property: JsonProperty("phase")] string Phase,
+    [property: JsonProperty("failureCode")] string FailureCode,
+    [property: JsonProperty("files")] int? Files = null,
+    [property: JsonProperty("sourceBytes")] long? SourceBytes = null,
+    [property: JsonProperty("quiescenceVerified")] bool QuiescenceVerified = false,
+    [property: JsonProperty("productionReady")] bool ProductionReady = false);
 
 /// <summary>Read-only source diagnosis. Never returns filenames, keys or exception messages.</summary>
 internal static class LegacyExportPreflight
