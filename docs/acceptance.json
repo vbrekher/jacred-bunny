@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "All CI through PR #35 passed, including actual Linux exporter HTTP; the prior local suite had 1071 .NET/195 Python tests. Current local source passes 1081 .NET and 225 Python tests. Exact core 63fae98a normal shutdown, original-byte export and client checkpoint verification passed locally. Current cloud runtime remains ef2cc77a; full reproducibility/security/license release evidence remains open."
+      "reason": "Local 1081 .NET/230 Python. All CI through PR36 passed, including 1081 .NET/225 Python and both Linux HTTP harnesses. Legacy bridge16 deployed normally; actual isolated cloud export failed and was compensated. Primary SQL pilot remains ef2. Full release reproducibility, security and license evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -49,7 +49,7 @@
     {
       "gate": "INSTALLER",
       "status": "FAIL",
-      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete. CLI now journals owned export/compensation with private environment files and verified shutdown receipts; its control-plane tests are simulated and cloud acceptance remains open."
+      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete. CLI now journals owned export/compensation with private environment files and verified shutdown receipts; its control-plane tests are simulated and cloud acceptance remains open. Verified read-only historical payload reconstruction enabled the actual legacy bridge update. Actual exporter startup confirmation failed; original environment restored and compute inactive. No verified cloud archive or nonempty SQL import."
     },
     {
       "gate": "OPERATIONS",
@@ -64,17 +64,18 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #35 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet."
+      "reason": "PRs through #36 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet. Separate legacy16 normal bridge deployed; cloud export failed safely. No v1.0.0 readiness asserted."
     }
   ],
   "source_checks": {
-    "python": 225,
+    "python": 230,
     "edge_node": 101,
     "dotnet": 1081,
     "web": 73,
-    "scope": "Local 1081 .NET/225 Python; all CI through PR35; prior local suite 1071 .NET/195 Python. New checkpoint/controller not cloud accepted; runtime ef2 retains separate scoped evidence."
+    "scope": "Local 1081 .NET/230 Python. All CI through PR36 passed, including 1081 .NET/225 Python and both Linux HTTP harnesses. Legacy bridge16 deployed normally; actual isolated cloud export failed and was compensated. Primary SQL pilot remains ef2."
   },
   "recent_evidence": [
+    "evidence/historical-payload-reconstruction-2026-11-04.json",
     "evidence/legacy-checkpoint-controller-2026-11-04.json",
     "evidence/legacy-export-local-2026-11-04.json",
     "evidence/private-publication-2026-11-04.json",
@@ -95,5 +96,7 @@
     "evidence/http-gateway-parity-2026-11-03.json",
     "evidence/live-sql-worker-2026-11-03.json",
     "evidence/native-runtime-backup-v2-2026-11-03.json"
-  ]
+  ],
+  "legacy_staging_worker_source_sha": "16d4e3eefa2652dfac8fdf1dd8cbb21bea4800aa",
+  "legacy_staging_export_status": "FAIL_COMPENSATED_INACTIVE"
 }
