@@ -58,7 +58,7 @@ with tempfile.TemporaryDirectory(prefix='legacy-http-',dir=SCRATCH) as directory
    # Reading Content-Length bytes can finish before server handler cleanup.
    # Force a real overlapping transfer and distinguish contention from quota.
    connection=http.client.HTTPConnection('127.0.0.1',port,timeout=10)
-   connection.connect();connection.sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,4096)
+   connection.connect()
    try:
     connection.request('GET','/migration/archive',headers={'X-Dev-Key':key,'Range':'bytes=0-1'})
     first=connection.getresponse()
@@ -67,7 +67,6 @@ with tempfile.TemporaryDirectory(prefix='legacy-http-',dir=SCRATCH) as directory
     assert status==429 and headers.get('X-JacRed-Export-Rejection')=='busy',(status,headers.get('X-JacRed-Export-Rejection'))
     assert headers.get('Cache-Control')=='private, no-store' and headers.get('Retry-After')=='1'
     results.append({'case':'concurrent-transfer-refused','http':429,'reason':'busy','does_not_consume_download_budget':True})
-    connection.sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,1024*1024)
     first_response=(first.status,dict(first.headers),first.read())
    finally:connection.close()
    archive_digest=None
