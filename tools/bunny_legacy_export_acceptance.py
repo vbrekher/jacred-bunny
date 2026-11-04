@@ -58,7 +58,7 @@ with tempfile.TemporaryDirectory(prefix='legacy-http-',dir=SCRATCH) as directory
     status,headers,body=request('/migration/archive',{'X-Dev-Key':key,'Range':'bytes=0-1'})
     if attempt==4:
      assert status==429;results.append({'case':'download-budget-exhausted','http':status});continue
-    assert status==200 and headers['Cache-Control']=='private, no-store'
+    assert status==200 and headers.get('Cache-Control')=='private, no-store',(attempt,status,headers.get('Cache-Control'))
     archive_digest=hashlib.sha256(body).hexdigest();assert archive_digest==headers['X-JacRed-Archive-Sha256']
     assert headers['X-JacRed-Source-Sha']==sha
     with tarfile.open(fileobj=io.BytesIO(body),mode='r:gz') as tar:
