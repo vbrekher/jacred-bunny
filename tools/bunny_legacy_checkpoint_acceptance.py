@@ -63,7 +63,7 @@ with tempfile.TemporaryDirectory(dir=SCRATCH,prefix='checkpoint-http-') as direc
    status,headers,body=get('/dev/LegacyExportPreflight',True)
    assert status==200 and headers['Cache-Control']=='private, no-store'
    preflight=json.loads(body)
-   assert preflight['status']=='READABLE_SOURCE_METADATA' and preflight['phase']=='complete'
+   assert preflight.get('status')=='READABLE_SOURCE_METADATA' and preflight.get('phase')=='complete',preflight
    assert preflight['quiescenceVerified'] is False and preflight['productionReady'] is False
    assert key.encode() not in body and str(base).encode() not in body
 
