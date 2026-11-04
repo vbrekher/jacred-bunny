@@ -82,10 +82,21 @@ internal static class LegacyExportHost
             app.MapGet("/health", () => Results.Json(new { status = "legacy-export-only", productionReady = false }));
             app.MapGet("/version", () => Results.Json(new { gitFullSha = VersionInfo.GitFullSha, mode = "legacy-export-only", catalogBackend = "filedb" }));
             app.MapGet("/migration/archive", async context => {
-                if (!await download.WaitAsync(0, context.RequestAborted)) { context.Response.StatusCode = 429; return; }
+                if (!await download.WaitAsync(0, context.RequestAborted))
+                {
+                    context.Response.Headers["X-JacRed-Export-Rejection"] = "busy";
+                    context.Response.Headers.RetryAfter = "1";
+                    context.Response.StatusCode = 429;
+                    return;
+                }
                 try
                 {
-                    if (++attempts > 3) { context.Response.StatusCode = 429; return; }
+                    if (++attempts > 3)
+                    {
+                        context.Response.Headers["X-JacRed-Export-Rejection"] = "download-budget";
+                        context.Response.StatusCode = 429;
+                        return;
+                    }
                     using var transfer = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, deadline.Token);
                     transfer.CancelAfter(TimeSpan.FromSeconds(90));
                     context.Response.ContentType = "application/gzip";

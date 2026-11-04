@@ -36,9 +36,11 @@ Private local migration and HTTP capture tools now refuse output symlinks and pr
 
 A separate [legacy byte export mode](bunny/LEGACY_EXPORT.md) now prepares a private, bounded archive without starting normal writers. Actual local HTTP verified archive hashes, authentication, absent collector routes and deadline shutdown. It is a development building block: owned-volume cloud migration and nonempty SQL import remain incomplete.
 
-The CLI now journals owned legacy export and environment compensation. A graceful shutdown receipt binds the normal process, build and persisted master; a bare asynchronous save response is insufficient. [Local checkpoint/controller evidence](docs/evidence/legacy-checkpoint-controller-2026-11-04.json) records actual normal shutdown and archive verification, with control-plane failure cases explicitly simulated. Current local source passes 1,081 .NET and 230 Python tests; cloud migration acceptance remains open.
+The CLI now journals owned legacy export and environment compensation. A graceful shutdown receipt binds the normal process, build and persisted master; a bare asynchronous save response is insufficient. [Local checkpoint/controller evidence](docs/evidence/legacy-checkpoint-controller-2026-11-04.json) records actual normal shutdown and archive verification, with control-plane failure cases explicitly simulated. Current local source passes 1,089 .NET and 230 Python tests; cloud migration acceptance remains open.
 
 Historical rollback-payload recovery now verifies actual SQL migration receipts against pinned source bytes before repairing local metadata. [Recovery and live attempt evidence](docs/evidence/historical-payload-reconstruction-2026-11-04.json) records the read-only cloud reconciliation, exact Alpine image test and failed owned-volume export. The legacy app was stopped after environment compensation; cloud export and nonempty SQL migration remain incomplete.
+
+[Source preflight evidence](docs/evidence/legacy-source-preflight-2026-11-04.json) records administrative read-only source checks and a full synthetic normal shutdown/export cycle using the published Alpine image. The new route is locally verified; diagnosis on the real owned volume remains pending deployment.
 
 The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store checks matched the retained 22-record catalog. The subsequent collector call produced no fresh commits; it is not new write-path acceptance. [Current runtime evidence](docs/evidence/live-paged-runtime-2026-11-03.json).
 
