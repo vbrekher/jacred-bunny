@@ -77,3 +77,7 @@ The controller journals environment changes before PATCH, reconciles an uncertai
 The archive verifier checks every member's bytes and timestamp, complete manifest identity, gzip CRC, tar end/trailing payload, duplicate JSON fields, portable filename collisions and expansion/metadata bounds. It refuses links, sparse/special entries and non-private archive files. It never extracts the archive.
 
 [Checkpoint/controller evidence](../docs/evidence/legacy-checkpoint-controller-2026-11-04.json) records actual local normal shutdown → exporter → Python verification, plus explicitly mocked control-plane failure tests. Cloud environment switching, nonempty SQL import, executable permissions on restore and full production migration acceptance remain incomplete.
+
+## Latest owned staging attempt
+
+The legacy bridge image `16d4e3ee` started normally on the owned original FileDB app, and the SubsPlease job finished with nonempty catalog assertions. The subsequent isolated exporter did not confirm its source/mode within the 90-second client window. Compensation restored the original environment and stopped compute. No real archive was verified. The same published Alpine image exports synthetic bytes successfully in local Docker; the actual owned-volume startup cause remains unconfirmed. See [dated recovery and attempt evidence](../docs/evidence/historical-payload-reconstruction-2026-11-04.json).

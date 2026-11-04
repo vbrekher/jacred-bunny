@@ -1,0 +1,78 @@
+{
+  "schema": "jacred-historical-payload-reconstruction-evidence/v1",
+  "checked_at": "2026-11-04",
+  "scope": "Historical CLI payload recovery; actual read-only owned SQL reconciliation, local regression tests, and separately scoped live legacy attempt",
+  "source_sha": "eef389e3ddc68a8b4bcd1de0de261079bce13e53",
+  "production_ready": false,
+  "baseline_regression": {
+    "test_methods": 2,
+    "failures": 1,
+    "errors": 1
+  },
+  "local_python_suite": {
+    "passed": 230,
+    "skipped": 0,
+    "seconds": 10.752
+  },
+  "reconciliation": {
+    "scope": "Actual owned legacy staging receipt reconciliation and immutable rollback payload capture; read-only SQL, no worker start",
+    "source_sha": "97b22ee77d046f9ade64fe9b3926b16c8b611e9f",
+    "payload_id": "0e05d60e2c2e1942028696fa850fffabf9949cd6f5864d238812fc2435798c35",
+    "actual_migration_receipts": [
+      {
+        "name": "0001_catalog.sql",
+        "sha256": "e3aad13389a7efa63bb665f13341eba87d3fb69d771152acaf723be0b613b1df"
+      },
+      {
+        "name": "0002_search_fts5.sql",
+        "sha256": "9bd74eaf74022d1f80f3fb0dc58ea39edc4e37ce512deaf3cce9e2d731a46628"
+      }
+    ],
+    "torrents_before": 0,
+    "torrents_after": 0,
+    "worker_status": "inactive",
+    "partial_historical_cache_preserved": true
+  },
+  "verified": [
+    "Exact known server migration receipts match immutable historical source SQL before local metadata reconciliation",
+    "Interrupted reconstruction does not publish a partial release",
+    "An existing matching partial cache is preserved; altered or unknown contents are refused",
+    "No SQL mutation, worker start or schema manufacture during reconciliation"
+  ],
+  "live_legacy_attempt": {
+    "worker_id": "D1KyIP11ZdLNr7A",
+    "source_sha": "16d4e3eefa2652dfac8fdf1dd8cbb21bea4800aa",
+    "image_digest": "sha256:a8ecf69ca8c27867774eec098db4470c7338f1956e9b2ef6d09e4ac05e13411c",
+    "normal_update": "VERIFIED",
+    "normal_export_capability_and_boot": "VERIFIED",
+    "collector": "Original SubsPlease pages=1 finished; nonempty key/torrent assertions passed, exact counts not retained",
+    "export": "FAIL: isolated exporter source/mode not confirmed within 90 seconds",
+    "archive_verified": false,
+    "compensation": "Original environment restored; authoritative app inactive",
+    "primary_sql_catalog_changed": false,
+    "root_cause": "UNCONFIRMED: dashboard requires login; public MC API has no log endpoint",
+    "pending_recovery": "Public CLI returned RECOVERED_RETRY_REQUIRED with no receipt, environment restored and compute stopped"
+  },
+  "exact_published_alpine_synthetic_check": {
+    "scope": "Exact published Alpine image, synthetic fixture and dummy key only; no Bunny API or cloud data",
+    "image": "ghcr.io/vbrekher/jacred-bunny@sha256:a8ecf69ca8c27867774eec098db4470c7338f1956e9b2ef6d09e4ac05e13411c",
+    "production_ready": false,
+    "version": {
+      "gitFullSha": "16d4e3eefa2652dfac8fdf1dd8cbb21bea4800aa",
+      "mode": "legacy-export-only",
+      "catalogBackend": "filedb"
+    },
+    "archive_sha256": "671348e4db5df5d5363afc665950c901b4d5adb32388ab33805c427a4a59780f",
+    "files_verified": 12,
+    "status": "EXACT_ALPINE_SYNTHETIC_EXPORT_VERIFIED",
+    "container_removed": true
+  },
+  "limitations": [
+    "Synthetic exact-image export is not an owned-volume cloud export",
+    "No nonempty SQL migration, restore, production durability or full readiness claim"
+  ],
+  "sha256": {
+    "bunny/operations.py": "8c0e96b0526dd527427f6d2a8065675a360157947473a921fbb99629f66cec87",
+    "tests/test_bunny_native_operations.py": "a3a751cc1eb17e83b1ba391bf94a856ce47f86f6e3aa40cb72ad35af6535b08a"
+  }
+}
