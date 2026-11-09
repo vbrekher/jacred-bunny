@@ -1,0 +1,45 @@
+{
+  "schema": "jacred-owned-ready-pod-observation/v1",
+  "checked_at": "2026-11-10",
+  "scope": "Actual bounded owned normal worker observation; diagnostic stop, not export or SQL migration",
+  "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+  "image_digest": "sha256:f44f7051f00e865debe0fa11836ad1a32654a383a970a35bfee2df644ebb1769",
+  "worker_url": "https://mc-5ge5797xat.bunny.run",
+  "identity_comparison": {
+    "app_status": "progressing",
+    "overview_status": "progressing",
+    "pod_identity_join": true,
+    "instance_count": 1,
+    "pod_count": 1,
+    "template_identity_join": true,
+    "pod_messages_empty": true,
+    "container_messages_empty": true
+  },
+  "observation_count": 26,
+  "observed_app_statuses": [
+    "progressing"
+  ],
+  "normal_http_exact_source_observed": true,
+  "last_pods": [
+    {
+      "status": "ready",
+      "containers": [
+        {
+          "status": "ready",
+          "reason": null,
+          "restarts": 0,
+          "exit_code": null
+        }
+      ]
+    }
+  ],
+  "last_heartbeat_age_seconds": 9.84,
+  "stop_reason": "DIAGNOSTIC_EVIDENCE_CAPTURED; operator interrupted wait early, finally confirmed stop",
+  "compute_stopped": true,
+  "pending_export": false,
+  "observer_stopped": true,
+  "archive_verified": false,
+  "sql_imported": false,
+  "production_ready": false,
+  "api_schema_source": "https://api-mc.opsbunny.net/docs/public/swagger.json"
+}
