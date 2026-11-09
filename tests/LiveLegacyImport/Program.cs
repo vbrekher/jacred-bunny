@@ -1,5 +1,6 @@
 using System.Text.Json;
 using JacRed.Infrastructure.Persistence.Native;
+using JacRed.Infrastructure.Persistence.Legacy;
 if (args.Length == 0)
 {
     Console.WriteLine("PLAN: no network or SQL; use --run with a private reader file");
@@ -17,7 +18,10 @@ try
         UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute)) != 0)
         throw new Exception("Private regular reader file required");
 
-    var credentials = JsonDocument.Parse(File.ReadAllText(args[1])).RootElement;
+    using var input = LegacyArchive.OpenSource(args[1]);
+    if (input.Length > 65536) throw new Exception("Reader configuration exceeds bound");
+    using var document = JsonDocument.Parse(input);
+    var credentials = document.RootElement;
     using var sql = new BunnySqlClient(credentials.GetProperty("url").GetString(),
         credentials.GetProperty("reader").GetString());
     var store = new NativeCatalogStore(sql);
