@@ -95,9 +95,9 @@ COPY LICENSE /usr/share/licenses/jacred/LICENSE
 
 # Copy publish output: /dist contains JacRed (binary), wwwroot/, Data/
 COPY --from=build --chown=root:jacred --chmod=550 /dist/JacRed /app/JacRed
-# The privileged reader must remain image-owned even if /app is modified by
-# the application user. Hard-linking retains one immutable binary inode.
-RUN mkdir -p /usr/local/libexec && ln /app/JacRed /usr/local/libexec/jacred-export
+# Keep the privileged reader outside the app-writable directory. A separate
+# root-only copy also works on builders that cannot hard-link across layers.
+COPY --from=build --chown=root:root --chmod=500 /dist/JacRed /usr/local/libexec/jacred-export
 COPY --from=build --chown=jacred:jacred --chmod=750 /dist/wwwroot /app/wwwroot
 COPY --from=build --chown=jacred:jacred --chmod=750 /dist/Data /app/Data
 # Default config files for first run when Data is overridden by bind mount (./data:/app/Data)
