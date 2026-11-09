@@ -4,8 +4,9 @@ This developer harness checks the captured 20-bucket/20-torrent migration candid
 
 A private mode-0600 JSON file must contain a credential-free Bunny Database URL in "url" and a separately generated scoped read-only token in "reader". Never commit that file, raw snapshots or private archives. The caller must establish the saved owned database identity before running the harness.
 
-    dotnet run --project tests/LiveLegacyImport/Read.csproj --configuration Release
-    dotnet run --project tests/LiveLegacyImport/Read.csproj --configuration Release -- --run /private/reader.json
+    dotnet build tests/LiveLegacyImport/Read.csproj --configuration Release
+    dotnet tests/LiveLegacyImport/bin/Release/net10.0/JacRed.Tests.dll
+    dotnet tests/LiveLegacyImport/bin/Release/net10.0/JacRed.Tests.dll --run /private/reader.json
 
 Without arguments it prints a plan and makes no network requests. The explicit run verifies migration receipts, reads all 20 buckets through the actual native DTO/hash/revision code, and computes the complete native relational snapshot checksum. Compare that checksum with an independent Python calculation over the same immutable candidate and a separate remote snapshot.
 

@@ -11,6 +11,7 @@ if (args.Length != 2 || args[0] != "--run")
     Console.Error.WriteLine("Expected --run and a private JSON file");
     return 2;
 }
+var phase = "private_input";
 try
 {
     if (OperatingSystem.IsWindows() || new FileInfo(args[1]).LinkTarget != null ||
@@ -25,7 +26,9 @@ try
     using var sql = new BunnySqlClient(credentials.GetProperty("url").GetString(),
         credentials.GetProperty("reader").GetString());
     var store = new NativeCatalogStore(sql);
+    phase = "schema";
     await store.VerifySchema();
+    phase = "bucket_reads";
     var keys = (await sql.Query(new SqlStatement("SELECT bucket_key FROM buckets ORDER BY bucket_key"))).Rows;
     long records = 0;
     foreach (var key in keys)
@@ -36,6 +39,7 @@ try
             throw new Exception("Native DTO/revision read mismatch");
         records += bucket.Torrents.Count;
     }
+    phase = "snapshot";
     var snapshot = await store.SnapshotProof();
     if (keys.Count != 20 || records != 20 || snapshot.Counts["torrents"] != 20)
         throw new Exception("Original catalog count mismatch");
@@ -48,8 +52,8 @@ try
     }));
     return 0;
 }
-catch
+catch (Exception error)
 {
-    Console.Error.WriteLine("READ_PROBE_REFUSED: private database details omitted");
+    Console.Error.WriteLine("READ_PROBE_REFUSED: phase=" + phase + "; type=" + error.GetType().Name + "; private details omitted");
     return 1;
 }
