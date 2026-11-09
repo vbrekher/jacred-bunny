@@ -84,6 +84,8 @@ RUN set -eux; \
     /usr/share/locale/* \
     && addgroup -g 1000 -S jacred \
     && adduser -u 1000 -S jacred -G jacred -s /sbin/nologin -h /app \
+    && mkdir -p /usr/local/libexec \
+    && chmod 755 /usr/local/libexec \
     && mkdir -p /app/Data /app/Data/fdb /app/Data/temp /app/Data/tracks /app/config /app/defaults \
     && touch /app/Data/temp/stats.json \
     && chown -R jacred:jacred /app \

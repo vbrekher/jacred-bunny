@@ -59,6 +59,7 @@ try:
   with opener.open(req,timeout=10) as r:
    assert r.headers['Cache-Control']=='private, no-store';diagnosis=json.load(r)
   report['normal_preflight']=diagnosis
+  report['helper_metadata_as_application_user']=docker('exec','--user','1000:1000',normal,'stat','-c','%n|%u|%g|%a','/usr/local/libexec','/usr/local/libexec/jacred-export','/usr/local/libexec/jacred-container-entry').splitlines()
   assert diagnosis['status']=='READ_ONLY_PREPARATION_REQUIRED' and diagnosis['failureCode']=='ACCESS_REFUSED',json.dumps(diagnosis,sort_keys=True)
   assert diagnosis['readOnlyPreparationAvailable'] is True and diagnosis['quiescenceVerified'] is False
   report['normal_preflight']=diagnosis
