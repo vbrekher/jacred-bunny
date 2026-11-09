@@ -4,6 +4,7 @@
 
 The v1.0.0 production gates remain incomplete. These changes extend the original JacRed .NET service and preserve its API, tracker roster and license; they do not announce a production release.
 
+- Prepare a new private runtime SQL stage from a closed original-data stage, preserving raw rows, unknown JSON fields, bucket metadata and master provenance while adding current migration/version/commit receipts. Shared .NET/Python Unicode vectors verify receipt encoding; remote import and installer migration remain incomplete.
 - Add a strict owned ready-pod proof for the observed Bunny global `progressing` grade: one region/instance/pod/container, matching pod/template IDs, no errors and a fresh heartbeat, plus current HTTP/checkpoint identity. Actual diagnosis observed that state and stopped safely; real export remains pending.
 - Wait for authoritative normal-worker activation together with HTTP identity before legacy export; do not redeploy a transitioning normal worker or extend the original bounded window. Real Bunny precondition refusal stopped safely before export; the retry remains unverified.
 - Separate root-only read-only archive preparation from UID 1000 export HTTP in the managed image, with immutable helpers, bounded private handoff verification and entrypoint override rejection. Require synthetic protected-volume image acceptance before installer packaging. Actual owned-volume diagnosis confirmed an inventory permission refusal with 20 keys/20 torrents; real export and SQL migration remain unverified.
