@@ -935,18 +935,12 @@ def native_legacy_export(args):
                 raise NativeError('Legacy-export-aware watchdog unavailable; mutation refused')
         started_here = False
         try:
-            if str(deploy.verify('worker').get('status', '')).lower() != 'active':
+            if str(deploy.verify('worker').get('status', '')).lower() == 'inactive':
                 deploy.worker_action('start')
                 started_here = True
-                deadline = time.monotonic() + 120
-                while True:
-                    try:
-                        deploy._normal_proof()
-                        break
-                    except NativeError:
-                        if time.monotonic() >= deadline:
-                            raise NativeError('Owned normal export bridge not ready; no export configuration applied') from None
-                        time.sleep(2)
+            # A healthy HTTP response can precede control-plane activation.
+            # Do not redeploy a transitioning app or prepare from HTTP alone.
+            deploy.wait_normal_bridge()
             result = deploy.export_legacy()
         finally:
             if started_here:

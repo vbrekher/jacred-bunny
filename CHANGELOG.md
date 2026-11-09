@@ -4,6 +4,7 @@
 
 The v1.0.0 production gates remain incomplete. These changes extend the original JacRed .NET service and preserve its API, tracker roster and license; they do not announce a production release.
 
+- Wait for authoritative normal-worker activation together with HTTP identity before legacy export; do not redeploy a transitioning normal worker or extend the original bounded window. Real Bunny precondition refusal stopped safely before export; the retry remains unverified.
 - Separate root-only read-only archive preparation from UID 1000 export HTTP in the managed image, with immutable helpers, bounded private handoff verification and entrypoint override rejection. Require synthetic protected-volume image acceptance before installer packaging. Actual owned-volume diagnosis confirmed an inventory permission refusal with 20 keys/20 torrents; real export and SQL migration remain unverified.
 - Distinguish an occupied export slot from an exhausted three-download budget using fixed 429 reason headers. Force actual TCP backpressure in HTTP acceptance and retry only bounded contention, retaining the exact quota check. This fixes a Linux acceptance race; it does not explain or claim to fix the earlier cloud exporter startup failure.
 - Add an administrative read-only legacy source preflight with fixed private-safe phase/error codes, bounded inventory/open checks and cooperative cancellation. It creates no archive and never attests quiescence or production readiness. Actual owned-volume diagnosis remains pending deployment.

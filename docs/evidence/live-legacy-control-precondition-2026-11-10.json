@@ -1,0 +1,30 @@
+{
+  "schema": "jacred-owned-legacy-export-attempt/v1",
+  "checked_at": "2026-11-10",
+  "scope": "Actual owned FileDB normal bridge, failed controller precondition; no exporter archive or SQL import",
+  "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+  "image_digest": "sha256:f44f7051f00e865debe0fa11836ad1a32654a383a970a35bfee2df644ebb1769",
+  "worker_url": "https://mc-5ge5797xat.bunny.run",
+  "preflight": {
+    "status": "READ_ONLY_PREPARATION_REQUIRED",
+    "phase": "inventory",
+    "failureCode": "ACCESS_REFUSED",
+    "quiescenceVerified": false,
+    "productionReady": false,
+    "readOnlyPreparationAvailable": true
+  },
+  "filedb": {
+    "keys": 20,
+    "torrents": 20,
+    "diagnostic_ok": true
+  },
+  "failure": "NORMAL_LEGACY_SOURCE_NOT_ACTIVE_BEFORE_ENVIRONMENT_MUTATION",
+  "http_normal_source_observed": true,
+  "control_plane_transition_cause": "UNCONFIRMED: observer used installation name rather than exact worker resource name; no real status was captured",
+  "compute_stopped": true,
+  "pending_legacy_export": false,
+  "observer_stopped": true,
+  "archive_verified": false,
+  "sql_imported": false,
+  "production_ready": false
+}

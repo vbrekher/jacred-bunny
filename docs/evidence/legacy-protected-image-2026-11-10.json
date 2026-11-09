@@ -1,0 +1,56 @@
+{
+  "schema": "jacred-legacy-image-acceptance/v1",
+  "scope": "Synthetic owned Docker volumes, dummy keys, real managed image processes; no Bunny API or customer data",
+  "image": "ghcr.io/vbrekher/jacred-bunny@sha256:f44f7051f00e865debe0fa11836ad1a32654a383a970a35bfee2df644ebb1769",
+  "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+  "production_ready": false,
+  "normal_version": {
+    "version": "dev-fix-legacy-readonly-preparation+0878b14e",
+    "gitSha": "0878b14e",
+    "gitFullSha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+    "sourceUrl": "https://github.com/vbrekher/jacred-bunny/tree/0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+    "catalogBackend": "filedb",
+    "legacyByteExportVersion": "1",
+    "legacyCheckpointVersion": "1",
+    "legacyCheckpointReady": "1",
+    "legacyBootId": "296dcfd175ad47e7b1a33a0c424e621a",
+    "gitBranch": "fix/legacy-readonly-preparation",
+    "buildDate": "2026-11-09 22:50:45 UTC"
+  },
+  "normal_preflight": {
+    "status": "READ_ONLY_PREPARATION_REQUIRED",
+    "phase": "inventory",
+    "failureCode": "ACCESS_REFUSED",
+    "quiescenceVerified": false,
+    "productionReady": false,
+    "readOnlyPreparationAvailable": true
+  },
+  "helper_metadata_as_application_user": [
+    "/usr/local/libexec|0|0|755",
+    "/usr/local/libexec/jacred-export|0|0|500",
+    "/usr/local/libexec/jacred-container-entry|0|0|500"
+  ],
+  "application_user_cannot_read_protected_source": true,
+  "export_version": {
+    "gitFullSha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+    "mode": "legacy-export-only",
+    "catalogBackend": "filedb",
+    "preparationMode": "root-readonly-handoff",
+    "effectiveUid": 1000
+  },
+  "archive_receipt": {
+    "schema": "jacred-legacy-archive-receipt/v1",
+    "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+    "gzip_sha256": "e797cae28b31e5803881e935c91667d2abbfbd9be7a08fea9712475e17bcd6b6",
+    "manifest_sha256": "4892e5ae93e4282b0a8d7ab3cbe0ec55c4386fbb5245a028e299a8b505a92904",
+    "file_count": 15,
+    "source_bytes": 44283,
+    "shutdown_checkpoint_verified": true,
+    "status": "VERIFIED_PRIVATE_BYTES_NOT_SQL_MIGRATION"
+  },
+  "all_source_bytes_modes_owners_and_mtimes_preserved": true,
+  "export_exit_code": 0,
+  "private_handoff_cleaned": true,
+  "status": "SYNTHETIC_PRIVILEGED_READ_UNPRIVILEGED_HTTP_VERIFIED",
+  "owned_test_containers_and_volumes_removed": true
+}
