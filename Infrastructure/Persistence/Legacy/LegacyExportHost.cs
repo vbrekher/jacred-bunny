@@ -30,32 +30,49 @@ internal static class LegacyExportHost
         return match.Groups["key"].Value;
     }
 
-    internal static int Run()
+    internal static (long Expiry, string Data, string Config) ReadInputs()
+    {
+        if (!OperatingSystem.IsMacOS() && !OperatingSystem.IsLinux())
+            throw new PlatformNotSupportedException("Legacy export supports macOS/Linux only");
+        if (Environment.GetEnvironmentVariable("JACRED_CATALOG_BACKEND") is { } backend && backend != "filedb")
+            throw new InvalidDataException("Legacy exporter refuses SQL mode");
+        if (!long.TryParse(Environment.GetEnvironmentVariable("JACRED_LEGACY_EXPORT_DEADLINE_UNIX"),
+            NumberStyles.None, CultureInfo.InvariantCulture, out long expiry))
+            throw new InvalidDataException("Legacy export deadline required");
+        var remaining = DateTimeOffset.FromUnixTimeSeconds(expiry) - DateTimeOffset.UtcNow;
+        if (remaining <= TimeSpan.Zero || remaining > TimeSpan.FromMinutes(10))
+            throw new InvalidDataException("Legacy export deadline outside bounded window");
+        return (expiry, Environment.GetEnvironmentVariable("JACRED_LEGACY_EXPORT_DATA_ROOT") ?? "/app/Data",
+            Environment.GetEnvironmentVariable("JACRED_CONFIG_DIR") ?? "/app/config");
+    }
+
+    internal static int Run(string preparedDirectory = null)
     {
         string privateDirectory = null;
         try
         {
-            if (!OperatingSystem.IsMacOS() && !OperatingSystem.IsLinux())
-                throw new PlatformNotSupportedException("Legacy export supports macOS/Linux only");
-            if (Environment.GetEnvironmentVariable("JACRED_CATALOG_BACKEND") is { } backend && backend != "filedb")
-                throw new InvalidDataException("Legacy exporter refuses SQL mode");
-            if (!long.TryParse(Environment.GetEnvironmentVariable("JACRED_LEGACY_EXPORT_DEADLINE_UNIX"),
-                NumberStyles.None, CultureInfo.InvariantCulture, out long expiry))
-                throw new InvalidDataException("Legacy export deadline required");
-            var remaining = DateTimeOffset.FromUnixTimeSeconds(expiry) - DateTimeOffset.UtcNow;
-            if (remaining <= TimeSpan.Zero || remaining > TimeSpan.FromMinutes(10))
-                throw new InvalidDataException("Legacy export deadline outside bounded window");
+            var inputs = ReadInputs();
+            if (LegacyPreparedArchive.EffectiveUid() == 0)
+                throw new InvalidDataException("The export HTTP server must not run as root");
+            if (preparedDirectory != null && (!OperatingSystem.IsLinux() || LegacyPreparedArchive.EffectiveUid() != 1000))
+                throw new InvalidDataException("Prepared export requires the managed application user");
+            var remaining = DateTimeOffset.FromUnixTimeSeconds(inputs.Expiry) - DateTimeOffset.UtcNow;
             using var deadline = new CancellationTokenSource(remaining);
-            var data = Environment.GetEnvironmentVariable("JACRED_LEGACY_EXPORT_DATA_ROOT") ?? "/app/Data";
-            var config = Environment.GetEnvironmentVariable("JACRED_CONFIG_DIR") ?? "/app/config";
-            var keyHash = SHA256.HashData(Encoding.UTF8.GetBytes(ReadManagedKey(config)));
-            string temporaryRoot = OperatingSystem.IsMacOS() ? "/private/tmp" : Path.GetTempPath();
-            privateDirectory = Path.Combine(temporaryRoot, "jacred-legacy-" + Guid.NewGuid().ToString("N"));
-            if (OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
-            Directory.CreateDirectory(privateDirectory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            var keyHash = SHA256.HashData(Encoding.UTF8.GetBytes(ReadManagedKey(inputs.Config)));
             using var preparation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
             preparation.CancelAfter(TimeSpan.FromSeconds(90));
-            var archive = LegacyArchive.Create(data, config, privateDirectory, VersionInfo.GitFullSha, preparation.Token).GetAwaiter().GetResult();
+            LegacyArchiveResult archive;
+            if (preparedDirectory == null)
+            {
+                string temporaryRoot = OperatingSystem.IsMacOS() ? "/private/tmp" : Path.GetTempPath();
+                privateDirectory = Path.Combine(temporaryRoot, "jacred-legacy-" + Guid.NewGuid().ToString("N"));
+                if (OperatingSystem.IsWindows()) throw new PlatformNotSupportedException();
+                Directory.CreateDirectory(privateDirectory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+                archive = LegacyArchive.Create(inputs.Data, inputs.Config, privateDirectory, VersionInfo.GitFullSha, preparation.Token).GetAwaiter().GetResult();
+            }
+            else
+                archive = LegacyPreparedArchive.Read(preparedDirectory, VersionInfo.GitFullSha,
+                    inputs.Expiry, keyHash, preparation.Token).GetAwaiter().GetResult();
             var builder = WebApplication.CreateSlimBuilder(Array.Empty<string>());
             builder.Logging.ClearProviders();
             var ip = IPAddress.Parse(Environment.GetEnvironmentVariable("JACRED_LEGACY_EXPORT_LISTEN_IP") ?? "0.0.0.0");
@@ -80,7 +97,10 @@ internal static class LegacyExportHost
                 await next();
             });
             app.MapGet("/health", () => Results.Json(new { status = "legacy-export-only", productionReady = false }));
-            app.MapGet("/version", () => Results.Json(new { gitFullSha = VersionInfo.GitFullSha, mode = "legacy-export-only", catalogBackend = "filedb" }));
+            app.MapGet("/version", () => Results.Json(new {
+                gitFullSha = VersionInfo.GitFullSha, mode = "legacy-export-only", catalogBackend = "filedb",
+                preparationMode = preparedDirectory == null ? "unprivileged-inline" : "root-readonly-handoff",
+                effectiveUid = OperatingSystem.IsLinux() ? (uint?)LegacyPreparedArchive.EffectiveUid() : null }));
             app.MapGet("/migration/archive", async context => {
                 if (!await download.WaitAsync(0, context.RequestAborted))
                 {

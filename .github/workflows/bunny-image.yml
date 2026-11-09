@@ -13,6 +13,7 @@ on:
       - 'tests/test_bunny_installer.py'
       - 'Dockerfile.bunny'
       - 'bunny/boot.sh'
+      - 'bunny/container-entry.sh'
       - 'bunny/cron-job.sh'
       - 'bunny/crontabs/**'
       - 'JacRed.csproj'
@@ -41,7 +42,7 @@ jobs:
           python3 -W error::ResourceWarning -m unittest discover -s tests -p 'test_*.py' -v
           python3 -m py_compile bunny/cli.py
           bash -n bunny/build-push.sh
-          sh -n install-bunny.sh bunny/boot.sh bunny/cron-job.sh
+          sh -n install-bunny.sh bunny/boot.sh bunny/container-entry.sh bunny/cron-job.sh
       - name: Enable buildx
         uses: docker/setup-buildx-action@v3
       - name: Authenticate to GHCR
@@ -68,6 +69,15 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+      - name: Verify private preparation and unprivileged HTTP in the exact image
+        run: |
+          python3 tools/bunny_legacy_image_acceptance.py --run --image 'ghcr.io/${{ github.repository_owner }}/jacred-bunny@${{ steps.publish.outputs.digest }}' --source-sha '${{ github.sha }}' --output image-legacy-acceptance.json
+      - name: Save synthetic image lifecycle proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacred-bunny-${{ github.sha }}-legacy-image-acceptance
+          path: image-legacy-acceptance.json
+          retention-days: 14
       - name: Generate SBOM for the exact published digest
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:

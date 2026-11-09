@@ -44,7 +44,7 @@ internal static class LegacyArchive
         catch { handle.Dispose(); throw; }
     }
 
-    static async Task<string> HashExact(FileStream stream, long expected, CancellationToken cancellation)
+    internal static async Task<string> HashExact(FileStream stream, long expected, CancellationToken cancellation)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[64 * 1024];

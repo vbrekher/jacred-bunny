@@ -94,7 +94,10 @@ WORKDIR /app
 COPY LICENSE /usr/share/licenses/jacred/LICENSE
 
 # Copy publish output: /dist contains JacRed (binary), wwwroot/, Data/
-COPY --from=build --chown=jacred:jacred --chmod=550 /dist/JacRed /app/JacRed
+COPY --from=build --chown=root:jacred --chmod=550 /dist/JacRed /app/JacRed
+# The privileged reader must remain image-owned even if /app is modified by
+# the application user. Hard-linking retains one immutable binary inode.
+RUN mkdir -p /usr/local/libexec && ln /app/JacRed /usr/local/libexec/jacred-export
 COPY --from=build --chown=jacred:jacred --chmod=750 /dist/wwwroot /app/wwwroot
 COPY --from=build --chown=jacred:jacred --chmod=750 /dist/Data /app/Data
 # Default config files for first run when Data is overridden by bind mount (./data:/app/Data)
@@ -102,6 +105,8 @@ COPY --from=build --chown=jacred:jacred /dist/Data/init.conf /app/defaults/
 COPY --from=build --chown=jacred:jacred /dist/Data/init.yaml /app/defaults/
 COPY --chown=jacred:jacred --chmod=550 entrypoint.sh /entrypoint.sh
 COPY --chown=jacred:jacred --chmod=550 bunny/boot.sh /app/bunny/boot.sh
+COPY --chown=root:root --chmod=500 bunny/boot.sh /usr/local/libexec/jacred-bunny-boot
+COPY --chown=root:root --chmod=500 bunny/container-entry.sh /usr/local/libexec/jacred-container-entry
 COPY --chown=jacred:jacred --chmod=550 bunny/cron-job.sh /app/bunny/cron-job.sh
 COPY --chown=jacred:jacred --chmod=640 bunny/crontabs/jacred /app/bunny/crontabs/jacred
 
@@ -133,5 +138,5 @@ HEALTHCHECK --interval=30s \
     --start-interval=5s \
     CMD curl -f -s --max-time 10 http://127.0.0.1:9117/health || exit 1
 
-ENTRYPOINT ["dumb-init", "--", "/app/bunny/boot.sh"]
+ENTRYPOINT ["dumb-init", "--", "/usr/local/libexec/jacred-container-entry"]
 CMD ["./JacRed"]

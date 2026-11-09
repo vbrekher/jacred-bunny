@@ -34,8 +34,18 @@ namespace JacRed
     {
         public static void Main(string[] args)
         {
-            if (args.Length == 1 && args[0] == "legacy-export")
-                Environment.Exit(Infrastructure.Persistence.Legacy.LegacyExportHost.Run());
+            if (args.Length > 0 && args[0].StartsWith("legacy-export", StringComparison.OrdinalIgnoreCase))
+            {
+                int exit = args[0] switch
+                {
+                    "legacy-export" when args.Length == 1 => Infrastructure.Persistence.Legacy.LegacyExportHost.Run(),
+                    "legacy-export-prepare" when args.Length == 2 => Infrastructure.Persistence.Legacy.LegacyPreparedArchive.Prepare(args[1]),
+                    "legacy-export-serve" when args.Length == 2 => Infrastructure.Persistence.Legacy.LegacyExportHost.Run(args[1]),
+                    _ => 1
+                };
+                Environment.Exit(exit);
+                return;
+            }
 
             if (args.Length > 0 && string.Equals(args[0], "maintain", StringComparison.OrdinalIgnoreCase))
                 Environment.Exit(MaintainCli.Run(args));

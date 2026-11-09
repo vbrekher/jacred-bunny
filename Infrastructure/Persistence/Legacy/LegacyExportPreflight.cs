@@ -13,7 +13,8 @@ internal sealed record LegacyExportPreflightResult(
     [property: JsonPropertyName("files")] int? Files = null,
     [property: JsonPropertyName("sourceBytes")] long? SourceBytes = null,
     [property: JsonPropertyName("quiescenceVerified")] bool QuiescenceVerified = false,
-    [property: JsonPropertyName("productionReady")] bool ProductionReady = false);
+    [property: JsonPropertyName("productionReady")] bool ProductionReady = false,
+    [property: JsonPropertyName("readOnlyPreparationAvailable")] bool ReadOnlyPreparationAvailable = false);
 
 /// <summary>Read-only source diagnosis. Never returns filenames, keys or exception messages.</summary>
 internal static class LegacyExportPreflight
@@ -43,7 +44,12 @@ internal static class LegacyExportPreflight
             return new("READABLE_SOURCE_METADATA", "complete", null, inventory.Count, inventory.Sum(x => x.Length));
         }
         catch (OperationCanceledException) { return new("REFUSED", phase, "CANCELLED"); }
-        catch (UnauthorizedAccessException) { return new("REFUSED", phase, "ACCESS_REFUSED"); }
+        catch (UnauthorizedAccessException)
+        {
+            bool available = (phase is "inventory" or "source_open") && LegacyPreparedArchive.Available;
+            return new(available ? "READ_ONLY_PREPARATION_REQUIRED" : "REFUSED", phase, "ACCESS_REFUSED",
+                ReadOnlyPreparationAvailable: available);
+        }
         catch (InvalidDataException) { return new("REFUSED", phase, "LAYOUT_REFUSED"); }
         catch (IOException) { return new("REFUSED", phase, "IO_REFUSED"); }
         catch { return new("REFUSED", phase, "INSPECTION_FAILED"); }
