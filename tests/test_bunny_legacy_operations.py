@@ -1,5 +1,6 @@
 """Owned lifecycle state-machine tests with fake API; not live Bunny acceptance."""
 from copy import deepcopy
+from datetime import datetime, timezone
 import contextlib
 import io
 import json
@@ -41,6 +42,7 @@ class LegacyOperationTests(unittest.TestCase):
         self.deploy.save()
         self.deploy.watchdog_available = Mock(return_value=True)
         atomic_private(self.deploy.directory/'watchdog.json', {'capabilities':['authority_intent_stop','legacy_export_stop']})
+        self.overview = {'status':'progressing','desiredInstances':1,'activeInstances':{'indicator':0},'regions':[]}
         self.proof = {'source_sha':'a'*40, 'boot_id':'c'*32}
         self.deploy._normal_proof = Mock(return_value=self.proof)
         self.deploy._download_export = Mock(side_effect=self.download)
@@ -50,6 +52,7 @@ class LegacyOperationTests(unittest.TestCase):
         self.calls.append((method, path))
         if path == '/mc/apps/worker': return deepcopy(self.remote)
         if path == '/mc/limits': return {}
+        if path == '/mc/apps/worker/overview': return deepcopy(self.overview)
         if method == 'PATCH':
             if self.patch_applies: self.remote['containerTemplates'][0].update(deepcopy(body))
             if self.patch_lost: raise NativeError('uncertain')
@@ -245,6 +248,51 @@ class LegacyOperationTests(unittest.TestCase):
         # Only the fenced exporter is deployed, never a second normal rollout.
         self.assertEqual(self.calls.count(('POST','/mc/apps/worker/deploy')), 1)
         self.assertEqual(self.remote['status'], 'inactive')
+
+    def ready_progressing_fixture(self):
+        self.remote['status'] = 'progressing'
+        self.remote['containerInstances'] = [{'podId':'pod-one','templateId':'container'}]
+        self.overview = {'status':'progressing','desiredInstances':1,'activeInstances':{'indicator':1},
+            'regions':[{'region':'AMS','status':'progressing','instances':1,'pods':[
+                {'name':'pod-one','status':'ready','message':'','lastHeartBeat':datetime.now(timezone.utc).isoformat(),'containers':[
+                    {'id':'container','name':'jacred','status':'ready','reason':'','message':'','exitCode':None}]}]}]}
+
+    def test_progressing_grade_requires_exact_owned_ready_pod_before_export(self):
+        self.ready_progressing_fixture()
+        self.assertTrue(self.deploy.normal_worker_ready())
+        self.assertEqual(self.deploy.wait_normal_bridge(timeout=0), self.proof)
+        self.deploy.prepare_legacy_export(self.proof)
+        self.assertEqual(self.deploy.state['pending_legacy_export']['phase'], 'prepared')
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))
+
+    def test_progressing_proof_rejects_missing_extra_foreign_or_unready_instances(self):
+        cases = [
+            lambda: self.remote.update(containerInstances=[]),
+            lambda: self.remote['containerInstances'].append({'podId':'extra','templateId':'container'}),
+            lambda: self.remote['containerInstances'][0].update(podId='foreign'),
+            lambda: self.remote['containerInstances'][0].update(templateId='foreign'),
+            lambda: self.overview.update(desiredInstances=2),
+            lambda: self.overview.update(desiredInstances=True),
+            lambda: self.overview['activeInstances'].update(indicator=0),
+            lambda: self.overview['regions'][0].update(region='FRA'),
+            lambda: self.overview['regions'][0]['pods'].append(deepcopy(self.overview['regions'][0]['pods'][0])),
+            lambda: self.overview['regions'][0]['pods'][0].update(status='scheduled'),
+            lambda: self.overview['regions'][0]['pods'][0].update(lastHeartBeat=None),
+            lambda: self.overview['regions'][0]['pods'][0].update(lastHeartBeat='2000-01-01T00:00:00Z'),
+            lambda: self.overview['regions'][0]['pods'][0].update(lastHeartBeat='2099-01-01T00:00:00Z'),
+            lambda: self.overview['regions'][0]['pods'][0]['containers'][0].update(id='foreign'),
+            lambda: self.overview['regions'][0]['pods'][0]['containers'][0].update(status='waiting'),
+            lambda: self.overview['regions'][0]['pods'][0]['containers'][0].update(reason='CrashLoopBackOff'),
+            lambda: self.overview['regions'][0]['pods'][0]['containers'][0].update(message='error'),
+            lambda: self.overview['regions'][0]['pods'][0]['containers'][0].update(exitCode=137),
+        ]
+        for index, mutate in enumerate(cases):
+            with self.subTest(case=index):
+                self.ready_progressing_fixture(); mutate()
+                self.assertFalse(self.deploy.normal_worker_ready())
+                with self.assertRaises(NativeError): self.deploy.prepare_legacy_export(self.proof)
+                self.assertNotIn('pending_legacy_export', self.deploy.state)
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))
 
     def test_cli_does_not_stop_an_active_pre_bridge_source_for_watcher_upgrade(self):
         import argparse, cli

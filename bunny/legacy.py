@@ -299,6 +299,54 @@ class LegacyExports(Operations):
             raise NativeError('Current legacy administrative credential not confirmed')
         return {'source_sha': version['gitFullSha'], 'boot_id': version['legacyBootId']}
 
+    def normal_worker_ready(self, remote=None):
+        """Read-only proof for an owned ready pod while the global grade converges."""
+        remote = self.verify('worker') if remote is None else remote
+        status = str(remote.get('status', '')).lower()
+        if status == 'active':
+            return True
+        if status != 'progressing':
+            return False
+        overview = self.api('GET', '/mc/apps/' + str(self.state['resources']['worker']['id']) + '/overview')
+        if (overview.get('status') not in ('active', 'progressing') or
+            type(overview.get('desiredInstances')) is not int or overview['desiredInstances'] != 1 or
+            type((overview.get('activeInstances') or {}).get('indicator')) is not int or
+            overview['activeInstances']['indicator'] != 1):
+            return False
+        regions = overview.get('regions')
+        instances = remote.get('containerInstances')
+        templates = remote.get('containerTemplates')
+        if (not isinstance(regions, list) or len(regions) != 1 or not isinstance(instances, list) or len(instances) != 1 or
+            not isinstance(templates, list) or len(templates) != 1):
+            return False
+        region = regions[0]
+        if (region.get('region') != self.state['resources']['worker']['identity']['region'] or
+            region.get('status') not in ('active', 'progressing') or
+            type(region.get('instances')) is not int or region['instances'] != 1):
+            return False
+        pods = region.get('pods')
+        if not isinstance(pods, list) or len(pods) != 1:
+            return False
+        pod = pods[0]
+        containers = pod.get('containers')
+        if (pod.get('status') != 'ready' or pod.get('message') not in (None, '') or
+            not isinstance(containers, list) or len(containers) != 1):
+            return False
+        try:
+            heartbeat = datetime.fromisoformat(pod['lastHeartBeat'].replace('Z', '+00:00'))
+            if heartbeat.utcoffset() is None or not -5 <= time.time() - heartbeat.timestamp() <= 60:
+                return False
+        except (KeyError, AttributeError, ValueError, TypeError, OverflowError):
+            return False
+        instance, template, container = instances[0], templates[0], containers[0]
+        return (isinstance(pod.get('name'), str) and bool(pod['name']) and
+            instance.get('podId') == pod['name'] and
+            isinstance(template.get('id'), str) and bool(template['id']) and
+            instance.get('templateId') == template['id'] == container.get('id') and
+            container.get('name') == template.get('name') and
+            container.get('status') == 'ready' and container.get('reason') in (None, '') and
+            container.get('message') in (None, '') and container.get('exitCode') is None)
+
     def wait_normal_bridge(self, timeout=120):
         """Require control-plane activation and current HTTP identity together.
 
@@ -310,10 +358,10 @@ class LegacyExports(Operations):
             if self.state['stop_at'] - time.time() < 180:
                 raise NativeError('Insufficient original window for normal bridge readiness; no renewal')
             remote = self.verify('worker')
-            if str(remote.get('status', '')).lower() == 'active':
+            if self.normal_worker_ready(remote):
                 try:
                     proof = self._normal_proof()
-                    if str(self.verify('worker').get('status', '')).lower() == 'active':
+                    if self.normal_worker_ready():
                         return proof
                 except NativeError:
                     pass
@@ -344,8 +392,8 @@ class LegacyExports(Operations):
             not isinstance(proof.get('boot_id'), str) or not re.fullmatch(r'[0-9a-f]{32}', proof['boot_id'])):
             raise NativeError('Verified normal legacy process identity required')
         remote = self.verify('worker')
-        if str(remote.get('status', '')).lower() != 'active':
-            raise NativeError('Normal legacy source is not active')
+        if not self.normal_worker_ready(remote):
+            raise NativeError('Normal legacy source has no authoritative running proof')
         if not self.watchdog_available() or self.state['stop_at'] - time.time() < 180:
             raise NativeError('A live bounded watchdog window with at least three minutes is required')
         capabilities = read_private(self.directory / 'watchdog.json').get('capabilities') or []

@@ -911,7 +911,7 @@ def native_legacy_export(args):
         if cost['estimated_initial_usd'] > args.max_estimated_usd:
             raise NativeError('Legacy export window exceeds conservative estimate budget')
         deploy.bound_staging_cdn()
-        if str(deploy.verify('worker').get('status', '')).lower() == 'active':
+        if deploy.normal_worker_ready():
             # Never stop a running pre-bridge legacy process merely to upgrade
             # its watcher: that old process cannot attest a durable shutdown.
             deploy._normal_proof()
