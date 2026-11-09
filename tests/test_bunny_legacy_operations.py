@@ -203,6 +203,49 @@ class LegacyOperationTests(unittest.TestCase):
         self.assertEqual(json.loads(output.getvalue())['status'], 'PRIVATE_ARCHIVE_VERIFIED')
         self.assertEqual(self.remote['status'], 'inactive')
 
+    def test_readiness_waits_for_control_plane_before_accepting_http(self):
+        self.remote['status'] = 'progressing'
+        def activate(_):
+            self.deploy._normal_proof.assert_not_called()
+            self.remote['status'] = 'active'
+        before = self.deploy.state['stop_at']
+        with patch('legacy.time.sleep', side_effect=activate):
+            self.assertEqual(self.deploy.wait_normal_bridge(), self.proof)
+        self.assertEqual(self.deploy.state['stop_at'], before)
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))
+
+    def test_http_success_during_control_plane_regression_does_not_authorize_export(self):
+        self.deploy.verify = Mock(side_effect=[{'status':'active'}, {'status':'progressing'},
+            {'status':'active'}, {'status':'active'}])
+        with patch('legacy.time.sleep') as sleep:
+            self.assertEqual(self.deploy.wait_normal_bridge(), self.proof)
+        self.assertEqual(sleep.call_count, 1)
+        self.assertEqual(self.deploy._normal_proof.call_count, 2)
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))
+
+    def test_transition_timeout_and_small_window_refuse_without_mutation(self):
+        self.remote['status'] = 'progressing'
+        with self.assertRaisesRegex(NativeError, 'control plane and HTTP'):
+            self.deploy.wait_normal_bridge(timeout=0)
+        self.deploy._normal_proof.assert_not_called()
+        self.deploy.state['stop_at'] = 0
+        with self.assertRaisesRegex(NativeError, 'original window'):
+            self.deploy.wait_normal_bridge()
+        self.assertFalse(any(method in ('POST','PATCH') for method,path in self.calls))
+
+    def test_cli_does_not_redeploy_a_transitioning_normal_bridge(self):
+        import argparse, cli
+        self.remote['status'] = 'progressing'
+        self.deploy.bound_staging_cdn = Mock()
+        def activate(_): self.remote['status'] = 'active'
+        with patch('legacy.LegacyExports', return_value=self.deploy), patch.object(cli,'account_key',return_value='unused-local-root'), \
+             patch('native.current_pricing', return_value={}), patch('native.staging_cost_plan', return_value={'estimated_initial_usd':.1}), \
+             patch('legacy.time.sleep', side_effect=activate), contextlib.redirect_stdout(io.StringIO()):
+            cli.native_legacy_export(argparse.Namespace(apply=True,state_dir=self.deploy.directory,hours=.15,max_estimated_usd=2))
+        # Only the fenced exporter is deployed, never a second normal rollout.
+        self.assertEqual(self.calls.count(('POST','/mc/apps/worker/deploy')), 1)
+        self.assertEqual(self.remote['status'], 'inactive')
+
     def test_cli_does_not_stop_an_active_pre_bridge_source_for_watcher_upgrade(self):
         import argparse, cli
         self.deploy.bound_staging_cdn = Mock()

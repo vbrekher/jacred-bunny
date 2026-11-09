@@ -299,6 +299,28 @@ class LegacyExports(Operations):
             raise NativeError('Current legacy administrative credential not confirmed')
         return {'source_sha': version['gitFullSha'], 'boot_id': version['legacyBootId']}
 
+    def wait_normal_bridge(self, timeout=120):
+        """Require control-plane activation and current HTTP identity together.
+
+        A responding old/starting pod alone cannot authorize replacing writers.
+        Keep the existing three-minute export reserve and never renew it here.
+        """
+        deadline = time.monotonic() + timeout
+        while True:
+            if self.state['stop_at'] - time.time() < 180:
+                raise NativeError('Insufficient original window for normal bridge readiness; no renewal')
+            remote = self.verify('worker')
+            if str(remote.get('status', '')).lower() == 'active':
+                try:
+                    proof = self._normal_proof()
+                    if str(self.verify('worker').get('status', '')).lower() == 'active':
+                        return proof
+                except NativeError:
+                    pass
+            if time.monotonic() >= deadline:
+                raise NativeError('Owned normal control plane and HTTP bridge not ready; no export configuration applied')
+            time.sleep(2)
+
     def _export_directory(self, nonce):
         if not re.fullmatch(r'[0-9a-f]{16}', nonce):
             raise NativeError('Invalid private export identity')
