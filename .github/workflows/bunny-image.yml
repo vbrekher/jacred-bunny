@@ -73,6 +73,7 @@ jobs:
         run: |
           python3 tools/bunny_legacy_image_acceptance.py --run --image 'ghcr.io/${{ github.repository_owner }}/jacred-bunny@${{ steps.publish.outputs.digest }}' --source-sha '${{ github.sha }}' --output image-legacy-acceptance.json
       - name: Save synthetic image lifecycle proof
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jacred-bunny-${{ github.sha }}-legacy-image-acceptance

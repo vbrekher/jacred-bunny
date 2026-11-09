@@ -58,7 +58,8 @@ try:
   req=urllib.request.Request(url+'/dev/LegacyExportPreflight',headers={'X-Dev-Key':key})
   with opener.open(req,timeout=10) as r:
    assert r.headers['Cache-Control']=='private, no-store';diagnosis=json.load(r)
-  assert diagnosis['status']=='READ_ONLY_PREPARATION_REQUIRED' and diagnosis['failureCode']=='ACCESS_REFUSED'
+  report['normal_preflight']=diagnosis
+  assert diagnosis['status']=='READ_ONLY_PREPARATION_REQUIRED' and diagnosis['failureCode']=='ACCESS_REFUSED',json.dumps(diagnosis,sort_keys=True)
   assert diagnosis['readOnlyPreparationAvailable'] is True and diagnosis['quiescenceVerified'] is False
   report['normal_preflight']=diagnosis
   denied=subprocess.run(['docker','run','--rm','--user','1000:1000',*readonly,'--entrypoint','/bin/sh',args.image,'-c','cat /app/Data/lost+found/private.bin'],capture_output=True,timeout=20)
