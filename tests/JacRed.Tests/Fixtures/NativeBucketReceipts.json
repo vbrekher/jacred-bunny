@@ -1,0 +1,31 @@
+{
+  "scope": "Synthetic vectors matched against actual Newtonsoft.Json and UTF-16 StringComparer.Ordinal; not production import acceptance",
+  "values": [
+    "plain",
+    "é",
+    "я",
+    "😀",
+    "",
+    "𐀀",
+    "line\nquote\"slash\\",
+    "",
+    " ",
+    " ",
+    "\t\b\f\r\u0000",
+    "a/b?x=1&y=<x>"
+  ],
+  "sha256": [
+    "4b5cce767e489a44cd6b3155f2a7eca17befd07f00ddc8adb4debd9cba0c3cc2",
+    "0eb3a3b8313ea69a3cba5a0be0ca6c79f72dcf301751a19d09290b5eba14b870",
+    "05099525be2911dd033e1ef94b2ce100e9bf133721276a2efbbd22246a51fa3d",
+    "7b8391436116fdcbc572d55212240f0967f5de5bd6dd2c9cc11ae27dfac48bee",
+    "18239e513017102dbfdfea17e4419ea182987708b77b821e71a622a7f74d7951",
+    "151a19f52ba57cb02931a8dd7569220f1e547e0f6c45dce5b2f72ef37a98728b",
+    "0368c4d21b4c6792e108e09734dafc3dc31c7926a801c5901a126a94b13a891c",
+    "65022f22cba5ec10656960c456ffa2bff4743544c9684483f0d3512a626fba50",
+    "902bc54eabe7157bd97bd4002900b4cbaa99bf1f04011ceb79a30a52954b51fa",
+    "c8c89e55d63c8ebac56335848517561187f5d69a1c8dec4887a200ade0c1bc48",
+    "e1ad22be9ed69724555d1d637e90199500a8b0ddabf0d2e0f70abc444b23a22e",
+    "97f7f561f48f17a48d60ac7a3155e4c5426e74a9bb7dfffe4f75780911c3ea9f"
+  ]
+}
