@@ -1,0 +1,43 @@
+{
+  "schema": "jacred-live-legacy-source-access/v1",
+  "checked_at": "2026-11-10",
+  "observed_at_utc": "2026-11-09T21:47:45.438987+00:00",
+  "scope": "Actual owned legacy image update and administrative source diagnosis; no exporter environment enabled, no archive or SQL import verified",
+  "production_ready": false,
+  "worker_id": "D1KyIP11ZdLNr7A",
+  "worker_url": "https://mc-5ge5797xat.bunny.run",
+  "source_sha": "60298b68fec23f7fdf010dba670ae19b004764dc",
+  "image_digest": "sha256:a6d3db97cb2939e7f30d896474781b674e22d4d9ae661ddc206ee47dedea0256",
+  "artifact_verification": {
+    "source": "60298b68fec23f7fdf010dba670ae19b004764dc",
+    "image": "ghcr.io/vbrekher/jacred-bunny@sha256:a6d3db97cb2939e7f30d896474781b674e22d4d9ae661ddc206ee47dedea0256",
+    "sbom_sha256": "b4e7dd6e35bb8297b9b9c0364c3f621382dfa76d7f0b97032c2882a53f6a9d6d",
+    "payload_files": {
+      "edge.js": "334f3b4170908298e4b0ba8ada26ff74d0aa5d771c6196043f96628683ffc234",
+      "0001_catalog.sql": "e3aad13389a7efa63bb665f13341eba87d3fb69d771152acaf723be0b613b1df",
+      "0002_search_fts5.sql": "9bd74eaf74022d1f80f3fb0dc58ea39edc4e37ce512deaf3cce9e2d731a46628"
+    }
+  },
+  "preflight": {
+    "status": "REFUSED",
+    "phase": "inventory",
+    "failureCode": "ACCESS_REFUSED",
+    "quiescenceVerified": false,
+    "productionReady": false
+  },
+  "filedb": {
+    "keys": 20,
+    "torrents": 20,
+    "diagnostic_ok": true
+  },
+  "compute_stopped": true,
+  "pending_legacy_export": false,
+  "primary_sql_pilot": "Unchanged; not used as import target",
+  "result": "CONFIRMED_SOURCE_INVENTORY_PERMISSION_FAILURE",
+  "limitations": [
+    "The particular inaccessible source entry has not been identified; no lost+found claim is asserted",
+    "The original source permissions were not changed to bypass the refusal",
+    "The new root-reader/private-handoff fix is under local validation and has no cloud PASS",
+    "No nonempty SQL migration, full backup/restore or production readiness claimed"
+  ]
+}

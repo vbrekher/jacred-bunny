@@ -24,3 +24,6 @@ web/dist
 **/temp
 *.user
 *.log
+
+# Finder metadata is not a source or image asset.
+.DS_Store

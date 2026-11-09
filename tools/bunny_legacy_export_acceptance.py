@@ -103,6 +103,11 @@ with tempfile.TemporaryDirectory(prefix='legacy-http-',dir=SCRATCH) as directory
   assert run.returncode==expected,(name,run.returncode)
   assert key.encode() not in run.stdout+run.stderr and search.encode() not in run.stdout+run.stderr
   lifecycle.append({'case':name,'exit_code':run.returncode,'no_dummy_key_logged':True})
+ for name,argv in [('prepare-missing-path',['legacy-export-prepare']),('serve-missing-path',['legacy-export-serve']),('unknown-export-mode',['legacy-export-unknown']),('mixed-case-export-refused',['Legacy-Export-Prepare']),('unexpected-export-argument',['legacy-export','extra']),('untrusted-prepared-directory',['legacy-export-serve',str(base/'unused')])]:
+  run=subprocess.run([DOTNET,APP]+argv,cwd=base,env=env,capture_output=True,timeout=10)
+  assert run.returncode==1,(name,run.returncode)
+  assert key.encode() not in run.stdout+run.stderr and search.encode() not in run.stdout+run.stderr
+  lifecycle.append({'case':name,'exit_code':run.returncode,'no_dummy_key_logged':True})
  after=inventory(base);after.pop('server.log',None);assert after==before
  assert not (data/'log').exists()
  report={'scope':'Actual local loopback exporter process with synthetic FileDB, dummy keys and independent tar/hash verification; no cloud migration or customer data','checkout_source_sha':sha,'service_version':version,'http_checks':results,'lifecycle_processes':lifecycle,'source_files':len(before),'source_bytes_unchanged':True,'normal_startup_log_directory_absent':True,'process_stopped':process.poll() is not None,'archive_sha256':archive_digest,'quiescence':'Single isolated local process; cloud owned-worker lifecycle not exercised','production_ready':False}

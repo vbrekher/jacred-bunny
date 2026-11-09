@@ -189,6 +189,16 @@ def environment_fingerprint(values):
     return hashlib.sha256(json.dumps(sorted(values,key=lambda row:row["name"]),sort_keys=True,separators=(",",":")).encode()).hexdigest()
 
 
+def uses_image_bootstrap(value):
+    if value is None:
+        return True
+    if not isinstance(value, dict) or set(value) - {'command','commandArray','arguments','argumentsArray','workingDirectory'}:
+        return False
+    return (value.get('command') in (None,'') and value.get('commandArray') in (None,[]) and
+        value.get('arguments') in (None,'') and value.get('argumentsArray') in (None,[]) and
+        value.get('workingDirectory') in (None,'','/app'))
+
+
 def payload_spec(manifest):
     try:
         sha, image, files = manifest["source_sha"], manifest["image"], manifest["files"]
@@ -559,6 +569,7 @@ class Deployment:
         if identity:
             templates = remote.get("containerTemplates")
             if (not isinstance(templates, list) or len(templates) != 1 or
+                not uses_image_bootstrap(templates[0].get('entryPoint')) or
                 any(templates[0].get(k) != v for k, v in identity["container"].items()) or
                 remote.get("autoScaling") != {"min": 1, "max": 1} or
                 (remote.get("regionSettings") or {}).get("requiredRegionIds") != [identity["region"]] or
@@ -603,6 +614,8 @@ class Deployment:
         if not isinstance(containers, list) or len(containers) != 1:
             raise NativeError("Exactly one bounded worker is required")
         container = containers[0]
+        if not uses_image_bootstrap(container.get('entryPoint')):
+            raise NativeError('Worker image bootstrap override is not supported')
         if (container.get("imageNamespace") != "vbrekher" or container.get("imageName") != "jacred-bunny" or
             container.get("imageTag") != self.state["image"].rsplit(":", 1)[-1]):
             raise NativeError("Worker image source differs from verified fork")

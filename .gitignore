@@ -408,3 +408,6 @@ temp/*
 # Version info file
 VersionInfo.g.cs
 init.yaml
+
+# Finder metadata is not a source or image asset.
+.DS_Store

@@ -16,6 +16,30 @@ from operations import Operations
 
 
 class OperationTests(unittest.TestCase):
+    def test_entrypoint_drift_is_rejected_before_any_update_mutation(self):
+        for entry in ({'command':'/bin/sh'},{'commandArray':['/app/JacRed']},
+                      {'arguments':'legacy-export'},{'argumentsArray':['maintain']},
+                      {'workingDirectory':'/other'},{'unknown':None}):
+            with self.subTest(entry=entry):
+                self.remote['containerTemplates'][0]['entryPoint']=entry
+                self.calls.clear()
+                with self.assertRaises(native.NativeError):self.deploy.switch_worker(self.new)
+                self.assertTrue(all(method=='GET' for method,path in self.calls))
+                self.assertNotIn('pending_update',self.deploy.state)
+
+    def test_default_provider_entrypoint_shapes_preserve_verified_image_bootstrap(self):
+        for entry in (None,{},dict(command=None,commandArray=None,arguments=None,argumentsArray=None,workingDirectory=None),
+                      dict(command='',commandArray=[],arguments='',argumentsArray=[],workingDirectory='/app')):
+            with self.subTest(entry=entry):
+                self.remote['containerTemplates'][0]['entryPoint']=entry
+                self.assertIs(self.remote,self.deploy.verify('worker'))
+
+    def test_provision_refuses_custom_bootstrap_before_creating_a_worker(self):
+        self.calls.clear()
+        with self.assertRaisesRegex(native.NativeError,'bootstrap override'):
+            self.deploy.provision_worker({'containerTemplates':[{'entryPoint':{'command':'/bin/sh'}}]})
+        self.assertEqual(self.calls,[])
+
     def test_existing_matching_partial_release_is_preserved(self):
         shutil.rmtree(self.deploy.directory/'payload-objects')
         destination=self.deploy.directory/'releases'/self.deploy.state['source_sha'];destination.mkdir(parents=True)

@@ -88,6 +88,23 @@ New source adds administrative `GET /dev/LegacyExportPreflight` for diagnosing a
 
 The response contains a fixed phase (`configuration`, `inventory`, `source_open` or `complete`), a fixed failure code and aggregate counts on success. It never returns member names, paths, keys or exception messages. `READABLE_SOURCE_METADATA` does not validate compressed FileDB semantics, full content hashes or immutability. Both `quiescenceVerified` and `productionReady` stay false. Normal writers may still be active; this diagnosis cannot authorize SQL cutover or replace the stopped-worker checkpoint protocol.
 
-The ten-second cancellation is cooperative between filesystem operations, with the same 256 MiB inventory and 10,000-file/directory bounds. It cannot interrupt an individual blocked kernel filesystem call. Missing configuration or unsafe topology can produce `LAYOUT_REFUSED`; the phase identifies which part failed without disclosing a private filename. Source support and actual owned-volume diagnosis must be verified against the next deployed image; the current legacy cloud bridge `16d4e3ee` does not contain this route.
+The ten-second cancellation is cooperative between filesystem operations, with the same 256 MiB inventory and 10,000-file/directory bounds. It cannot interrupt an individual blocked kernel filesystem call. Missing configuration or unsafe topology can produce `LAYOUT_REFUSED`; the phase identifies which part failed without disclosing a private filename. The owned legacy app was updated to source `60298b68` and this route actually returned `REFUSED` at `inventory` with `ACCESS_REFUSED`. An independent administrative catalog check reported 20 keys and 20 torrents. The controller refused to enable export and stopped compute. The exact inaccessible entry remains unknown; no real archive was verified. See [owned-volume diagnosis](../docs/evidence/live-legacy-source-access-2026-11-10.json).
 
 [Source diagnosis evidence](../docs/evidence/legacy-source-preflight-2026-11-04.json) records three missing/wrong/search-key HTTP denials, an authenticated no-store report, unchanged export bytes and a matching shutdown receipt from the exact local build. The separate published Alpine normal-boot/shutdown/export check uses synthetic data and actual image digest `a8ecf69c`; it does not diagnose the real cloud failure.
+
+## Managed image read-only preparation
+
+The managed image now separates privileged filesystem reading from serving HTTP. Its immutable root-owned entrypoint runs a protected reader synchronously before starting any listener. The reader accepts only `/app/Data` and `/app/config`, applies the same source bounds and absolute expiry, and writes a fresh private archive plus strict metadata under a new 0700 temporary directory. It never changes source permissions or ownership. Only those fresh handoff files and directory are transferred to UID 1000.
+
+The HTTP process refuses root, requires UID 1000 for the handoff path, verifies the exact source SHA, key fingerprint, expiry, private modes, archive length and SHA256, and exposes the existing isolated export routes. The parent cleans the private handoff after shutdown. This is an ordinary image startup sequence, with no setuid executable. The installer rejects custom entrypoint commands, arguments and working directories that could bypass the image bootstrap.
+
+When ordinary source inventory fails for permissions and the protected image helpers are available, preflight reports `READ_ONLY_PREPARATION_REQUIRED` with `readOnlyPreparationAvailable: true`. This remains a diagnosis, not permission to skip the stopped-worker checkpoint or a production readiness assertion.
+
+The public image acceptance command uses only synthetic labelled Docker volumes and dummy keys. It creates a root-only file, proves UID 1000 cannot read it, then requires the real image exporter to include its exact bytes while serving HTTP as UID 1000. It compares all source bytes, owners, modes and modification times before and after export, verifies the normal shutdown receipt, and checks private handoff cleanup. It removes only its labelled resources.
+
+```sh
+python3 tools/bunny_legacy_image_acceptance.py
+python3 tools/bunny_legacy_image_acceptance.py --run --image ghcr.io/vbrekher/jacred-bunny@sha256:IMAGE_DIGEST --source-sha SOURCE_SHA --output /private/synthetic-image-proof.json
+```
+
+The image publishing workflow requires this check before generating installer payloads. At this checkpoint the new path has 14 handoff unit tests, 1,103 passing .NET tests, 233 passing Python tests and actual local unprivileged HTTP verification. Privileged Linux image acceptance and real Bunny export are still pending. The local Docker build stalled while the daemon stopped answering status requests; that attempt supplies no image PASS. Full restore, SQL migration and production gates remain incomplete.
