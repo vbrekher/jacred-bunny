@@ -39,6 +39,7 @@ namespace JacRed.Infrastructure.Security
             new("/internal/version", JacRedAccessPolicy.DevAdmin, "InternalVersionController", "Atomic SQL catalog snapshot checksum"),
             new("/dev/updateSize", JacRedAccessPolicy.DevAdmin, "DevMaintenanceController"),
             new("/dev/FindCorrupt", JacRedAccessPolicy.DevAdmin, "DevDiagnosticsController"),
+            new("/dev/LegacyExportPreflight", JacRedAccessPolicy.DevAdmin, "DevDiagnosticsController", "Read-only bounded source metadata; no quiescence attestation"),
             new("/dev/TracksStats", JacRedAccessPolicy.DevAdmin, "DevTracksController"),
             new("/dev/FixKnabenNames", JacRedAccessPolicy.DevAdmin, "DevMigrationController"),
             new("/dev/FixRudubRelased", JacRedAccessPolicy.DevAdmin, "DevMigrationController"),

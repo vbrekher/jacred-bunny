@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Explicit local normal-shutdown/checkpoint/export acceptance. Synthetic data; no Bunny API."""
-import argparse,gzip,hashlib,json,os,shutil,socket,subprocess,sys,tempfile,time,urllib.request
+import argparse,gzip,hashlib,json,os,shutil,socket,subprocess,sys,tempfile,time,urllib.request,urllib.error
 from pathlib import Path
 REPO=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser(description=__doc__)
@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory(dir=SCRATCH,prefix='checkpoint-http-') as direc
  marker.write_text(json.dumps({'schema':'jacred-legacy-shutdown/v1','owner':'jacred-bunny','boot_id':'stale'}))
  with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
  (config/'init.yaml').write_text(f'listenip: 127.0.0.1\nlistenport: {port}\napikey: dummy_search_key_1234567890\ndevkey: {key}\ntracks: false\nsyncapi: ""\nsyncspidr: false\nweb: false\n')
- env=dict(os.environ,JACRED_CATALOG_BACKEND='filedb',JACRED_CONFIG_DIR=str(config),TZ='UTC')
+ env=dict(os.environ,JACRED_CATALOG_BACKEND='filedb',JACRED_CONFIG_DIR=str(config),JACRED_LEGACY_EXPORT_DATA_ROOT=str(data),TZ='UTC')
  command=[DOTNET,APP]
  def get(path,admin=False):
   req=urllib.request.Request(f'http://127.0.0.1:{port}'+path,headers={'X-Dev-Key':key} if admin else {})
@@ -52,6 +52,21 @@ with tempfile.TemporaryDirectory(dir=SCRATCH,prefix='checkpoint-http-') as direc
    assert version['gitFullSha']==SOURCE,version
    assert version['legacyCheckpointReady']=='1',version
    assert not marker.exists(),'Stale receipt was not invalidated'
+   preflight_denials=[]
+   for headers in ({},{'X-Dev-Key':'wrong'},{'X-Api-Key':'dummy_search_key_1234567890'}):
+    request=urllib.request.Request(f'http://127.0.0.1:{port}/dev/LegacyExportPreflight',headers=headers)
+    try:response=opener.open(request,timeout=5)
+    except urllib.error.HTTPError as error:response=error
+    with response:
+     assert response.status==401
+     preflight_denials.append(response.status)
+   status,headers,body=get('/dev/LegacyExportPreflight',True)
+   assert status==200 and headers['Cache-Control']=='private, no-store'
+   preflight=json.loads(body)
+   assert preflight.get('status')=='READABLE_SOURCE_METADATA' and preflight.get('phase')=='complete',preflight
+   assert preflight['quiescenceVerified'] is False and preflight['productionReady'] is False
+   assert key.encode() not in body and str(base).encode() not in body
+
   finally:stop(p)
  assert p.returncode==0,p.returncode
  assert marker.exists(),'No verified receipt after normal shutdown'
@@ -74,6 +89,6 @@ with tempfile.TemporaryDirectory(dir=SCRATCH,prefix='checkpoint-http-') as direc
  assert p.returncode==0,p.returncode
  after={str(x.relative_to(base)):hashlib.sha256(x.read_bytes()).hexdigest() for root in (data,config) for x in root.rglob('*') if x.is_file()}
  assert snapshot==after
- report={'scope':'Local synthetic normal graceful shutdown -> isolated exporter -> Python archive verifier; synthetic original bytes, not cloud acceptance','normal_version':version,'export_version':export_version,'shutdown_receipt':proof,'archive_receipt':receipt,'stale_receipt_invalidated':True,'source_bytes_unchanged_during_export':True,'normal_and_exporter_stopped':True}
+ report={'scope':'Local synthetic normal graceful shutdown -> isolated exporter -> Python archive verifier; synthetic original bytes, not cloud acceptance','normal_version':version,'export_version':export_version,'shutdown_receipt':proof,'archive_receipt':receipt,'stale_receipt_invalidated':True,'source_preflight':preflight,'source_preflight_denials':preflight_denials,'source_bytes_unchanged_during_export':True,'normal_and_exporter_stopped':True}
  if args.output:args.output.write_text(json.dumps(report,indent=2)+'\n')
  print(json.dumps(report,indent=2))

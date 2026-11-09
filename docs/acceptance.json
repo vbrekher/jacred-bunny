@@ -9,7 +9,7 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "Local 1081 .NET/230 Python. All CI through PR36 passed, including 1081 .NET/225 Python and both Linux HTTP harnesses. Legacy bridge16 deployed normally; actual isolated cloud export failed and was compensated. Primary SQL pilot remains ef2. Full release reproducibility, security and license evidence remains open."
+      "reason": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2. Complete release reproducibility/security/license evidence remains open."
     },
     {
       "gate": "FEATURE PARITY",
@@ -49,7 +49,7 @@
     {
       "gate": "INSTALLER",
       "status": "FAIL",
-      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete. CLI now journals owned export/compensation with private environment files and verified shutdown receipts; its control-plane tests are simulated and cloud acceptance remains open. Verified read-only historical payload reconstruction enabled the actual legacy bridge update. Actual exporter startup confirmation failed; original environment restored and compute inactive. No verified cloud archive or nonempty SQL import."
+      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete. CLI now journals owned export/compensation with private environment files and verified shutdown receipts; its control-plane tests are simulated and cloud acceptance remains open. Verified read-only historical payload reconstruction enabled the actual legacy bridge update. Actual exporter startup confirmation failed; original environment restored and compute inactive. No verified cloud archive or nonempty SQL import. New admin-only source diagnosis passes actual local HTTP and does not attest quiescence. Actual cloud preflight and migration remain open."
     },
     {
       "gate": "OPERATIONS",
@@ -64,17 +64,18 @@
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #36 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet. Separate legacy16 normal bridge deployed; cloud export failed safely. No v1.0.0 readiness asserted."
+      "reason": "PRs through #37 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet. Separate legacy16 normal bridge deployed; cloud export failed safely. No v1.0.0 readiness asserted."
     }
   ],
   "source_checks": {
     "python": 230,
     "edge_node": 101,
-    "dotnet": 1081,
+    "dotnet": 1089,
     "web": 73,
-    "scope": "Local 1081 .NET/230 Python. All CI through PR36 passed, including 1081 .NET/225 Python and both Linux HTTP harnesses. Legacy bridge16 deployed normally; actual isolated cloud export failed and was compensated. Primary SQL pilot remains ef2."
+    "scope": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2."
   },
   "recent_evidence": [
+    "evidence/legacy-source-preflight-2026-11-04.json",
     "evidence/historical-payload-reconstruction-2026-11-04.json",
     "evidence/legacy-checkpoint-controller-2026-11-04.json",
     "evidence/legacy-export-local-2026-11-04.json",

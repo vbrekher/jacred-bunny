@@ -32,7 +32,7 @@ The default listener is `0.0.0.0:9117`. Local diagnostics can set `JACRED_LEGACY
 | `GET /version` | Public built source SHA and `legacy-export-only` mode |
 | `GET /migration/archive` | Current `X-Dev-Key` required; no query-key, cookie, search-key or LAN bypass |
 
-All responses request `private, no-store`; there is no CORS reflection. Normal configuration, search, collector and write routes are absent. A single transfer may run at a time. At most three authenticated download attempts are allowed per process; additional attempts return 429. Range headers do not bypass the complete archive or transfer budget.
+All responses request `private, no-store`; there is no CORS reflection. Normal configuration, search, collector and write routes are absent. A single transfer may run at a time. At most three authenticated download attempts are allowed per process; additional attempts return 429 with `X-JacRed-Export-Rejection: download-budget`. An overlapping transfer returns 429 with `X-JacRed-Export-Rejection: busy` and `Retry-After: 1`, without consuming the download budget. Reading the complete response body does not guarantee that server cleanup has released the transfer slot; clients must distinguish these reasons. Range headers do not bypass the complete archive or transfer budget.
 
 The successful response carries `X-JacRed-Archive-Sha256` and `X-JacRed-Source-Sha`. A client must download to a new 0600 file, verify the complete compressed digest, verify the service source against the approved immutable image and verify every manifest member before considering an import. Do not extract archive paths blindly. Cleanup removes the temporary archive after graceful shutdown; a forced pod termination can leave ephemeral files until that pod's filesystem is removed.
 
@@ -81,3 +81,13 @@ The archive verifier checks every member's bytes and timestamp, complete manifes
 ## Latest owned staging attempt
 
 The legacy bridge image `16d4e3ee` started normally on the owned original FileDB app, and the SubsPlease job finished with nonempty catalog assertions. The subsequent isolated exporter did not confirm its source/mode within the 90-second client window. Compensation restored the original environment and stopped compute. No real archive was verified. The same published Alpine image exports synthetic bytes successfully in local Docker; the actual owned-volume startup cause remains unconfirmed. See [dated recovery and attempt evidence](../docs/evidence/historical-payload-reconstruction-2026-11-04.json).
+
+## Read-only source diagnosis
+
+New source adds administrative `GET /dev/LegacyExportPreflight` for diagnosing a failed owned-volume startup before another export attempt. It uses the existing `X-Dev-Key` boundary and sends `private, no-store`. SQL authority is refused before source access. It validates the managed configuration key, bounded source inventory and actual opening/first-byte reading of regular files. It creates no archive, checkpoint or configuration file.
+
+The response contains a fixed phase (`configuration`, `inventory`, `source_open` or `complete`), a fixed failure code and aggregate counts on success. It never returns member names, paths, keys or exception messages. `READABLE_SOURCE_METADATA` does not validate compressed FileDB semantics, full content hashes or immutability. Both `quiescenceVerified` and `productionReady` stay false. Normal writers may still be active; this diagnosis cannot authorize SQL cutover or replace the stopped-worker checkpoint protocol.
+
+The ten-second cancellation is cooperative between filesystem operations, with the same 256 MiB inventory and 10,000-file/directory bounds. It cannot interrupt an individual blocked kernel filesystem call. Missing configuration or unsafe topology can produce `LAYOUT_REFUSED`; the phase identifies which part failed without disclosing a private filename. Source support and actual owned-volume diagnosis must be verified against the next deployed image; the current legacy cloud bridge `16d4e3ee` does not contain this route.
+
+[Source diagnosis evidence](../docs/evidence/legacy-source-preflight-2026-11-04.json) records three missing/wrong/search-key HTTP denials, an authenticated no-store report, unchanged export bytes and a matching shutdown receipt from the exact local build. The separate published Alpine normal-boot/shutdown/export check uses synthetic data and actual image digest `a8ecf69c`; it does not diagnose the real cloud failure.
