@@ -122,3 +122,7 @@ The CLI now waits for both authoritative active status and the current normal HT
 For this state, the controller now requires a separate read-only proof through the documented application overview API. It accepts only one region matching the saved region, exactly one desired/active instance, exactly one pod joined to the application's instance list, and exactly one ready container joined to its immutable template identity. Messages, failure reasons or exit codes refuse the proof. A missing, naive, more than 60-second-old or more than five-second-future heartbeat also refuses it. The current HTTP source/admin/checkpoint proof and a second readiness check remain required; the stopped-worker fence and matching shutdown receipt still apply.
 
 A global `active` status retains its existing behavior. A global `progressing` status alone never permits export. New mocked failure cases cover missing/extra/foreign instances, wrong regions/templates, unready containers, errors, stale heartbeats and malformed counts. All 239 Python tests pass locally. A real archive through this new readiness path remains unverified.
+
+## Preparing a later SQL import
+
+[Runtime SQL stage preparation](LEGACY_MIGRATION.md) copies a closed original-data stage into a new private candidate with preserved raw rows, original metadata and the current native receipt/schema format. It performs no cloud writes or cutover and does not complete real-volume migration acceptance.
