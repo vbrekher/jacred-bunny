@@ -78,8 +78,9 @@ def publish(directory,run=False):
     command += [str(directory/name) for name in sorted(names)]
     subprocess.run(command,check=True,stdout=subprocess.DEVNULL)
     release=find_release(tag)
+    if not isinstance(release,dict):raise NativeError('Created draft could not be reconciled; do not replay')
     remote=release.get('assets',[])
-    if not release.get('draft') or release.get('prerelease') is not True or release.get('target_commitish')!=source or len(remote)!=len(assets):
+    if not isinstance(release,dict) or not release.get('draft') or release.get('prerelease') is not True or release.get('target_commitish')!=source or len(remote)!=len(assets) or {a.get('name') for a in remote if isinstance(a,dict)}!=set(assets):
         raise NativeError('Draft identity/assets differ; retained unpublished for inspection')
     for asset in remote:
         name=asset.get('name')

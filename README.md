@@ -28,7 +28,7 @@ An independent AGPL fork of [JacRed](https://github.com/jacred-fdb/jacred), adap
 | 25 original tracker adapters | Source roster preserved; live parser readiness is not established |
 | Native worker, durable scheduler and client acceptance | In progress; no production claim |
 
-The standard setup still installs the FileDB candidate. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 22 real releases and verified restart persistence of the original 20-record snapshot. The original API also ran behind the real Bunny Edge gateway. This is not production acceptance or a general nonempty legacy migration. [Live gateway evidence and limits](docs/evidence/live-edge-gateway-2026-11-03.json) identify the exact scope. Staging compute is stopped after each bounded test window; these endpoints are not an always-on public demo.
+The standard installer now selects a checksum-verified SQL gateway release and refuses a FileDB fallback. Publication and fresh-install acceptance of that new default remain pending. An explicit SQL pilot now runs the original collector and search service against Bunny Database, with 22 real releases and verified restart persistence of the original 20-record snapshot. The original API also ran behind the real Bunny Edge gateway. This is not production acceptance or a general nonempty legacy migration. [Live gateway evidence and limits](docs/evidence/live-edge-gateway-2026-11-03.json) identify the exact scope. Staging compute is stopped after each bounded test window; these endpoints are not an always-on public demo.
 
 TLS-hardened live collection and source announce-probe safeguards are recorded in the [changelog](CHANGELOG.md). Source SQL snapshot checks now page one consistent read session; a local dataset exceeding the former 8 MiB response limit matches an independent verifier. Catalog writes also use transport pages in one atomic transaction, retaining durable commit receipts. Bucket, index and receipt reads also page one consistent transaction. Per-row transport limits, whole-bucket memory, deadlines and complete large-catalog acceptance remain open.
 
@@ -42,47 +42,31 @@ The paged SQL image was deployed and its MC/Edge snapshot, auth and no-store che
 
 The subsequent administrative-key hardening image also passed a real nonempty MC/Edge search and config-schema permission checks. [Latest runtime evidence](docs/evidence/live-admin-key-boundary-2026-11-04.json). Compute remains bounded staging, not an always-on demo.
 
-## Install the FileDB deployment candidate
+## Install the SQL development candidate
 
-You need a bunny.net account, `curl`, and Python 3.9+ on macOS or Linux. Docker, local .NET builds and a GitHub PAT are not required when the public GHCR registry is available.
-
-Download and inspect the installer before running it:
+You need a bunny.net account, curl and Python 3.9+ on macOS/Linux. Local Docker/.NET and a GitHub PAT are unnecessary. Download and inspect the installer, then inspect its plan:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh -o /tmp/install-jacred-bunny.sh
-sh /tmp/install-jacred-bunny.sh
+sh /tmp/install-jacred-bunny.sh install --plan
+sh /tmp/install-jacred-bunny.sh install --hours 1 --max-estimated-usd 2
 ```
 
-The shorter form trusts the current remote installer immediately:
+The bootstrap pins one public source commit and atomically installs its modules. The CLI selects a public SQL gateway payload with an immutable image digest and three verified migrations. If that release is absent, it stops before requesting account credentials or creating resources. This source path is under development; fresh macOS/Linux SQL installation is not yet accepted.
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh | sh
-```
+The one-hour compute window and $2 estimate are not a hard account spending limit. Traffic is separately metered and Storage retains charges after stopping. The local watchdog requires the computer/network to remain available. Repeated installation preserves the existing lifecycle and window. Existing FileDB profiles require explicit verified migration; `setup` retains the separate legacy profile.
 
-The bootstrap resolves one exact GitHub commit and downloads its CLI modules. It reuses an authorized Bunny CLI profile or prompts for the account key. Verify the downloaded source and pin the URL to a reviewed commit for stronger repeatability. The legacy setup still asks before creating paid resources.
-
-Useful commands:
-
-```sh
-jacred-bunny plan --data-gb 1 --hours 1
-jacred-bunny doctor
-jacred-bunny status
-jacred-bunny stop
-jacred-bunny start
-jacred-bunny native-staging plan
-```
-
-`native-staging provision` is an advanced, journalled Database/Storage/Edge infrastructure operation. It does not install a SQL collector or make the preview production ready. [Control-plane reference](bunny/NATIVE_STAGING.md).
+After SQL installation use `status`, `credentials`, `doctor`, `health`, `stop` and `start`. Advanced operations currently use `native-staging`. Full public migration, all 18 CLI modes and owned cleanup remain incomplete. [RU/EN/NL installation guide](bunny/README.md) · [Control-plane reference](bunny/NATIVE_STAGING.md).
 
 ## How it works
 
 ```mermaid
 flowchart LR
   Clients[Browser / Lampa / Torznab clients] --> MC[Magic Containers: original .NET API]
-  MC --> FDB[Default candidate: persistent FileDB]
-  Clients --> Gateway[Bunny Edge: original API gateway pilot]
-  Gateway --> Pilot[SQL pilot: original .NET collector/API]
-  Pilot --> SQL[Bunny Database: authoritative pilot catalog]
+  MC --> FDB[Explicit legacy profile: persistent FileDB]
+  Clients --> Gateway[Bunny Edge: original API gateway]
+  Gateway --> Pilot[SQL candidate: original .NET collector/API]
+  Pilot --> SQL[Bunny Database: SQL candidate catalog]
   SQL -. SQL catalog backup/restore verified .-> Storage[Bunny Storage]
 ```
 
