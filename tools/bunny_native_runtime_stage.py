@@ -39,7 +39,12 @@ def schema(connection):
     return connection.execute("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name").fetchall()
 
 
-def prepare(database, output):
+def prepare(database, output, *, migrations_dir=None):
+    migrations = Path(migrations_dir) if migrations_dir is not None else ROOT/'bunny-native/migrations'
+    # A portable installed CLI supplies its already checksum-verified payload.
+    # Snapshot all three inputs once so DDL and receipts use identical bytes.
+    migration_bytes = {name:(migrations/name).read_bytes() for name in MIGRATIONS}
+    migration_text = {name:value.decode('utf-8') for name,value in migration_bytes.items()}
     database, output = Path(database), Path(output)
     if database.is_symlink() or output.is_symlink():
         raise Refused('Stage symlink refused')
@@ -62,7 +67,7 @@ def prepare(database, output):
     try:
         source = sqlite3.connect(database.as_uri() + '?mode=ro', uri=True)
         expected = sqlite3.connect(':memory:')
-        expected.executescript(SCHEMA.read_text() + '\n' + FTS.read_text())
+        expected.executescript(migration_text['0001_catalog.sql'] + '\n' + migration_text['0002_search_fts5.sql'])
         source.execute('BEGIN')
         if schema(source) != schema(expected):
             raise Refused('Input must have exactly the original unsharded stage schema')
@@ -84,11 +89,11 @@ def prepare(database, output):
         temporary = Path(name)
         candidate = sqlite3.connect(temporary)
         source.backup(candidate)
-        candidate.executescript((ROOT/'bunny-native/migrations/0004_catalog_commits.sql').read_text())
+        candidate.executescript(migration_text['0004_catalog_commits.sql'])
         candidate.execute('CREATE TABLE native_schema_migrations(name TEXT PRIMARY KEY,sha256 TEXT NOT NULL,applied_at TEXT NOT NULL)')
         stamp = datetime.now(timezone.utc).isoformat()
         for name in MIGRATIONS:
-            sha = hashlib.sha256((ROOT/'bunny-native/migrations'/name).read_bytes()).hexdigest()
+            sha = hashlib.sha256(migration_bytes[name]).hexdigest()
             candidate.execute('INSERT INTO native_schema_migrations VALUES(?,?,?)', (name, sha, stamp))
         for (key,) in candidate.execute('SELECT bucket_key FROM buckets ORDER BY bucket_key').fetchall():
             pairs = [list(row) for row in candidate.execute('SELECT source_url,raw_sha256 FROM torrents WHERE bucket_key=?', (key,))]

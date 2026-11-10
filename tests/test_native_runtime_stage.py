@@ -29,6 +29,24 @@ class RuntimeStageTests(unittest.TestCase):
         stage(data, self.source)
         self.output = self.root/'runtime.db'
 
+    def test_portable_explicit_migrations_need_no_repository_layout(self):
+        import shutil
+        import bunny_native_import as importer
+        import bunny_native_runtime_stage as runtime
+        payload=self.root/'verified-payload';payload.mkdir()
+        for name in runtime.MIGRATIONS:shutil.copyfile(ROOT/'bunny-native/migrations'/name,payload/name)
+        data,_,records,shard=make_source(self.root/'portable-source')
+        for url,value in records.items():value['url']=url
+        gz(shard,records)
+        with patch.object(importer,'SCHEMA',self.root/'missing/schema'),patch.object(importer,'FTS',self.root/'missing/fts'),patch.object(runtime,'ROOT',self.root/'missing-repository'):
+            original=self.root/'portable-original.sqlite'
+            stage(data,original,migrations_dir=payload)
+            result=prepare(original,self.root/'portable-runtime.sqlite',migrations_dir=payload)
+        self.assertEqual(result['counts']['torrents'],len(records))
+        with closing(sqlite3.connect(self.root/'portable-runtime.sqlite')) as con:
+            receipts=dict(con.execute('SELECT name,sha256 FROM native_schema_migrations'))
+        self.assertEqual(receipts,{name:hashlib.sha256((payload/name).read_bytes()).hexdigest() for name in runtime.MIGRATIONS})
+
     def test_preserves_unknown_raw_fields_metadata_provenance_and_fts(self):
         con = sqlite3.connect(self.source)
         url, raw = con.execute('SELECT source_url,raw_json FROM torrents LIMIT 1').fetchone()
