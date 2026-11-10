@@ -1,6 +1,6 @@
 {
   "schema": "jacred-bunny-acceptance/v1",
-  "checked_at": "2026-11-04",
+  "checked_at": "2026-11-10",
   "production_ready": false,
   "status": "IN_PROGRESS",
   "baseline_source_sha": "878c4e89e17ce833d287cab1fe128791bb5e8fc3",
@@ -9,72 +9,77 @@
     {
       "gate": "SOURCE",
       "status": "FAIL",
-      "reason": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2. Complete release reproducibility/security/license evidence remains open."
+      "reason": "PRs through #42 merged with green checks. Actual Linux CI: 1104 .NET tests, 245 Python tests and actual HTTP acceptance. Pinned image 0878/f44 passed protected-source/UID 1000 image acceptance. Complete release reproducibility, licensing and security acceptance remain open."
     },
     {
       "gate": "FEATURE PARITY",
       "status": "FAIL",
-      "reason": "107 immutable-snapshot local HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Paged snapshot source passes an independent >8 MiB synthetic dataset and SQLite concurrent-write isolation. Exact source 203817b5 local HTTP using real Bunny SQL matched the 22-record snapshot; concurrent proof returned 429. Deployed large-catalog proof, all routes, richer media/fuzz and complete original parity remain incomplete. Local atomic writes now pass 1200-record and >4 MiB payload cases plus later-page rollback and immutable receipt retry; full large-catalog and migration acceptance remain incomplete. Local reads additionally cover a 12 MB bucket, a 5000-entry wide index and 4500 long-URL receipt metadata; whole-bucket memory and full deployed capacity remain incomplete. Deployed ef2cc77a additionally returned one real nonempty native query identically through MC and Edge; this is not full current-image API parity."
+      "reason": "107 local immutable-golden HTTP cases and scoped live 101 JSON/six XML gateway cases remain verified. Primary 22 MC/Edge snapshot checks passed previously. The new20-record original-data candidate passes actual native DTO/snapshot reads; migrated HTTP/Edge, every original route, richer media/fuzz and full deployed capacity remain incomplete."
     },
     {
       "gate": "REAL SQL",
       "status": "FAIL",
-      "reason": "Original in-cloud SubsPlease collector with TLS validation increased the real catalog and commit receipts from 20 to 22; old source URLs preserved and new service snapshot matched independent SQL snapshot. Complete 2+ DB live fanout/failure recovery and attributed usage metrics remain incomplete. Exact-source isolated Bunny SQL probe additionally committed 1200 rows/4915200 payload bytes, verified late-page rollback and cleanup, and preserved all seven canonical tables. Exact-source native bucket/index read-only slice additionally verified all 22 real row hashes and the unchanged independent snapshot; large live capacity remains incomplete. Current image 742e34c3 MC/Edge proofs matched the independent 22-record snapshot; latest collector returned ok with zero new commits, so no new write-path PASS is asserted."
+      "reason": "Primary 22-row collector catalog is unchanged. A separate NEW owned empty Bunny Database now contains 20 original-volume records: all seven tables match the local stage, independent Python/.NET framed snapshots agree and FTS matches. This is an operator candidate, not authority cutover or 2+ DB query fanout. Full fanout/failure/capacity/cost acceptance remains open."
     },
     {
       "gate": "TRACKERS 25",
       "status": "FAIL",
-      "reason": "All 25 source IDs retained. Earlier HEAD observations are not parser readiness. Actual source-to-SQL and query proof exists for SubsPlease; complete per-adapter live samples, auth setup and objective readiness matrix remain incomplete."
+      "reason": "All 25 original source IDs retained. Actual collector/SQL/search proof exists for SubsPlease. Complete per-adapter live samples, credentials/auth/challenge setup and objective readiness evidence remain incomplete."
     },
     {
       "gate": "DURABILITY",
       "status": "FAIL",
-      "reason": "Real SQL catalog backup in Bunny Storage restored into a new DB after verified source loss; query checksum preserved. SQL MC restart preserved 20 real rows. General reimport, Tracks/config/jobs recovery and all-component restart gates remain incomplete."
+      "reason": "Prior real private Storage SQL backup/restore and restart slices remain verified. New original 30-file archive has a matching shutdown receipt and complete byte/hash verification; original 20-row SQL reimport into a new candidate is verified. Full config/Tracks/jobs recovery, executable/ownership restoration and all-component restart acceptance remain incomplete."
     },
     {
       "gate": "WORKERS",
       "status": "FAIL",
-      "reason": "Original collector runs against SQL in the owned Magic Container. Durable scheduler leases/cursors/retries/crash resume, full concurrency acceptance and 24h live soak remain incomplete."
+      "reason": "Original collector runs against SQL in owned Magic Containers. Durable scheduler leases/cursors/retries/crash resume, full concurrency acceptance and 24h live soak remain incomplete."
     },
     {
       "gate": "SECURITY",
       "status": "FAIL",
-      "reason": "Configured-key LAN bypass reproduced and fixed with exact-source local dummy HTTP evidence. Deployed ef2cc77a MC/Edge schema routes reject missing/wrong/search keys, allow admin, and retain actual no-store; service snapshots match independently. Keyless legacy mode is not a hardened network boundary. Full scans, RBAC/CORS/429/500 audit remain incomplete."
+      "reason": "Actual admin-key/no-store/TLS/announce-boundary slices and protected-reader image checks pass within their recorded scopes. npm production audit found 0 issues; development audit found 19 low/moderate issues; NuGet reported no affected packages. Full scans, RBAC/CORS/error/logging review, key rotation and privileged cron review remain incomplete."
     },
     {
       "gate": "CLIENTS",
       "status": "FAIL",
-      "reason": "Actual English/Russian native and Jackett web search verified through Edge, including saved-key retry fix. Six Torznab XML protocol cases pass. Actual Lampa/Tizen/Prowlarr/Sonarr/Radarr applications and separate TorrServer integration remain incomplete."
+      "reason": "Actual English/Russian native and Jackett web search plus six Torznab XML protocol cases remain verified. Actual Lampa/Tizen/Prowlarr/Sonarr/Radarr applications and separate TorrServer integration remain incomplete."
     },
     {
       "gate": "INSTALLER",
       "status": "FAIL",
-      "reason": "Owned native staging install/update/rollback, idempotence, expiry stop, empty SQL cutover and gateway update tested. Standard public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, general migration and full owned cleanup remain incomplete. Isolated legacy byte export is locally verified; owned-volume lifecycle and nonempty SQL import remain incomplete. CLI now journals owned export/compensation with private environment files and verified shutdown receipts; its control-plane tests are simulated and cloud acceptance remains open. Verified read-only historical payload reconstruction enabled the actual legacy bridge update. Actual exporter startup confirmation failed; original environment restored and compute inactive. No verified cloud archive or nonempty SQL import. New admin-only source diagnosis passes actual local HTTP and does not attest quiescence. Actual cloud preflight and migration remain open."
+      "reason": "Owned staging install/update/rollback and empty SQL cutover remain verified. Actual nonempty original-volume export now passes; local runtime preparation and operator import of20 original records into a new SQL candidate pass. Public bootstrap still defaults to FileDB; fresh macOS/Linux SQL setup, all commands, resumable public migration, HTTP authority cutover and full cleanup remain incomplete."
     },
     {
       "gate": "OPERATIONS",
       "status": "FAIL",
-      "reason": "Live warmed Edge latency measured for 101 cases (p50/p95/p99 in evidence); bounded worker stop confirmed. Actual attributed cost is COST_UNKNOWN. Complete bytes/cost telemetry, alerting, controlled cold-start measurements and full rollback/restore operations remain incomplete."
+      "reason": "Both owned workers stopped, original environments restored and primary 22 snapshot independently unchanged. Prior scoped live latency evidence retained. Actual attributed cost is COST_UNKNOWN; complete byte/cost telemetry, alerts, controlled cold starts and full rollback/restore operations remain incomplete."
     },
     {
       "gate": "DOCUMENTATION",
       "status": "FAIL",
-      "reason": "English root README, real SQL/Edge product screenshots and dated scoped evidence updated; equivalent complete RU/EN/NL documentation and public product presentation remain incomplete."
+      "reason": "Real product screenshots and scoped original-volume/SQL-candidate evidence exist. Equivalent complete RU/EN/NL documentation, Dutch UI translation and professional public product presentation remain incomplete."
     },
     {
       "gate": "RELEASE",
       "status": "FAIL",
-      "reason": "PRs through #37 merged with green checks. Exact hardening image ef2cc77a/31e83f4a deployed, scoped checks passed and compute stopped. No tagged v1.0.0 release, complete acceptance or public landing page yet. Separate legacy16 normal bridge deployed; cloud export failed safely. No v1.0.0 readiness asserted."
+      "reason": "PRs through #42 merged with green checks. Legacy 0878/f44 export and separate original-data SQL candidate verified; primary ef2/22 retained. No production HTTP cutover, always-on deployment, v1.0.0 tag or complete production acceptance."
     }
   ],
   "source_checks": {
-    "python": 230,
+    "python": 245,
     "edge_node": 101,
-    "dotnet": 1089,
+    "dotnet": 1104,
     "web": 73,
-    "scope": "Current local source: 1089 .NET (57s), retained 230 Python suite; actual 15-check exporter HTTP/backpressure plus four lifecycle cases and separate preflight/checkpoint HTTP harness. All CI through PR37 passed. Current PR38 Linux unit tests passed but old HTTP acceptance exposed a contention race; final fixed-head CI pending. Legacy16 cloud export failed and was compensated; new diagnosis not deployed; primary SQL pilot remains ef2."
+    "scope": "Actual PR #42 Linux CI: 1104 .NET (0 skipped), 245 Python; existing HTTP harnesses pass. Real original archive plus separate 20-row SQL candidate independently verified. No production readiness claimed."
   },
   "recent_evidence": [
+    "evidence/live-original-legacy-export-2026-11-10.json",
+    "evidence/live-original-sql-candidate-2026-11-10.json",
+    "evidence/legacy-protected-image-2026-11-10.json",
+    "evidence/live-legacy-control-precondition-2026-11-10.json",
+    "evidence/live-legacy-source-access-2026-11-10.json",
     "evidence/legacy-source-preflight-2026-11-04.json",
     "evidence/historical-payload-reconstruction-2026-11-04.json",
     "evidence/legacy-checkpoint-controller-2026-11-04.json",
@@ -99,5 +104,12 @@
     "evidence/native-runtime-backup-v2-2026-11-03.json"
   ],
   "legacy_staging_worker_source_sha": "16d4e3eefa2652dfac8fdf1dd8cbb21bea4800aa",
-  "legacy_staging_export_status": "FAIL_COMPENSATED_INACTIVE"
+  "legacy_staging_export_status": "FAIL_COMPENSATED_INACTIVE",
+  "pending_pr": null,
+  "pending_image_ci": null,
+  "verified_image_ci": "https://github.com/vbrekher/jacred-bunny/actions/runs/42715233395",
+  "source_main_sha": "75815119ebe613de1997b1464a46943d7ffd2b85",
+  "legacy_worker_source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+  "original_migration_candidate_database_id": "db_01M71B9SD6FPH4NEVT9AYR633V",
+  "original_migration_candidate_framed_sha256": "ade6874b79a9ef8581f7439fb5506aeddc809e046a74d1e8d4e4c82dba28e6ae"
 }

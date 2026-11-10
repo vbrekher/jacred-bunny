@@ -121,8 +121,17 @@ The CLI now waits for both authoritative active status and the current normal HT
 
 For this state, the controller now requires a separate read-only proof through the documented application overview API. It accepts only one region matching the saved region, exactly one desired/active instance, exactly one pod joined to the application's instance list, and exactly one ready container joined to its immutable template identity. Messages, failure reasons or exit codes refuse the proof. A missing, naive, more than 60-second-old or more than five-second-future heartbeat also refuses it. The current HTTP source/admin/checkpoint proof and a second readiness check remain required; the stopped-worker fence and matching shutdown receipt still apply.
 
-A global `active` status retains its existing behavior. A global `progressing` status alone never permits export. New mocked failure cases cover missing/extra/foreign instances, wrong regions/templates, unready containers, errors, stale heartbeats and malformed counts. All 239 Python tests pass locally. A real archive through this new readiness path remains unverified.
+A global `active` status retains its existing behavior. A global `progressing` status alone never permits export. New mocked failure cases cover missing/extra/foreign instances, wrong regions/templates, unready containers, errors, stale heartbeats and malformed counts. All 239 Python tests pass locally. The subsequent actual original-volume archive succeeded through this readiness path; see the latest evidence below.
 
 ## Preparing a later SQL import
 
 [Runtime SQL stage preparation](LEGACY_MIGRATION.md) copies a closed original-data stage into a new private candidate with preserved raw rows, original metadata and the current native receipt/schema format. It performs no cloud writes or cutover and does not complete real-volume migration acceptance.
+
+
+## Actual original-volume archive and SQL candidate
+
+[Real export evidence](../docs/evidence/live-original-legacy-export-2026-11-10.json) records the pinned 0878/f44 image exporting 30 original files (93,635 bytes) with a matching normal-process checkpoint receipt. The complete 33,027-byte private archive and every member were verified. The controller restored the normal environment and stopped compute with no pending export. The brief isolated HTTP version response fell between observer polls; UID 1000 is enforced by the pinned image and independently verified in Linux image acceptance, not claimed as a separate cloud UID observation.
+
+A private operator working copy then produced a new runtime SQL stage with 20 buckets/20 torrents. It was imported atomically into a NEW owned empty Bunny Database. Independent full readback and actual native .NET DTO/snapshot reads match; the primary 22-row snapshot remains unchanged. [SQL candidate evidence](../docs/evidence/live-original-sql-candidate-2026-11-10.json) distinguishes the backup-content and native-framed checksums, and the compressed versus decompressed master provenance.
+
+The archive contains credentials and remains private. The public installer still lacks this complete resumable migration/cutover path. Full HTTP/Edge acceptance, restored executable/ownership metadata, config/Tracks/jobs recovery and production gates remain open.
