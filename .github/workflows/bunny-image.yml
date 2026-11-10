@@ -8,6 +8,8 @@ on:
       - 'bunny/cli.py'
       - 'bunny/native.py'
       - 'tools/bunny_native_package.py'
+      - 'tools/bunny_candidate_release.py'
+      - 'install-bunny.sh'
       - 'bunny-native/edge/**'
       - 'bunny-native/migrations/**'
       - 'tests/test_bunny_installer.py'
@@ -23,6 +25,10 @@ on:
       - 'scripts/build-web-ui.sh'
       - '.github/workflows/bunny-image.yml'
 
+concurrency:
+  group: native-image-${{ github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
   packages: write
@@ -36,6 +42,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Refuse rebuilding an already released immutable source
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PYGUARD'
+          import sys
+          sys.path.insert(0,'tools')
+          from bunny_candidate_release import find_release
+          if find_release('v0.5.4-native.${{ github.sha }}') is not None:
+              raise SystemExit('Candidate/draft already exists; immutable image tag must not be overwritten')
+          PYGUARD
       - name: Offline CLI source smoke
         run: |
           python3 bunny/cli.py self-test
@@ -110,9 +127,32 @@ jobs:
           npm ci --prefix bunny-native/edge --no-audit --no-fund
           npm run build --prefix bunny-native/edge
           python3 tools/bunny_native_package.py --output native-installer-payload --source-sha '${{ github.sha }}' --image-digest '${{ steps.publish.outputs.digest }}'
+      - name: Include independently recorded image and SBOM identities
+        run: cp image-digest.txt sbom.sha256 jacred-bunny-sbom.spdx.json native-installer-payload/
       - name: Save public native installer payload
         uses: actions/upload-artifact@v4
         with:
           name: jacred-native-${{ github.sha }}-installer-payload
           path: native-installer-payload/
           retention-days: 14
+
+  candidate:
+    needs: image
+    if: github.ref == 'refs/heads/main' && github.repository == 'vbrekher/jacred-bunny'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: jacred-native-${{ github.sha }}-installer-payload
+          path: public-candidate
+      - name: Publish complete verified development candidate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/bunny_candidate_release.py --directory public-candidate --run

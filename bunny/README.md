@@ -1,35 +1,40 @@
 # JacRed Bunny — installation / установка / installatie
 
-## Автоматическая установка (RU)
-На Mac/Linux нужны только `curl` и Python 3.9+. Никакого Docker на компьютере пользователя.
+## Русский
 
-```bash
-curl -fsSL --retry 3   https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh   -o /tmp/jacred-bunny-install.sh   && sh /tmp/jacred-bunny-install.sh
+Стандартная команда устанавливает SQL-кандидат: Bunny Database, Edge gateway оригинального API, Storage и один Magic Container в AMS. Нужны macOS/Linux, curl, Python 3.9+ и Bunny Account API Key; локальные Docker/.NET и GitHub PAT не нужны. Ключ аккаунта остаётся локально. Установщик проверяет публичный пакет и точные хеши до запроса ключа; если SQL-пакет ещё не опубликован, ресурсы не создаются.
+
+```sh
+curl -fsSL --retry 3 https://raw.githubusercontent.com/vbrekher/jacred-bunny/main/install-bunny.sh -o /tmp/jacred-bunny-install.sh
+sh /tmp/jacred-bunny-install.sh install --plan
+# Создание ресурсов в пределах проверенной оценки:
+sh /tmp/jacred-bunny-install.sh install --hours 1 --max-estimated-usd 2
 ```
 
-Скрипт скрыто спрашивает Bunny Account API Key (настройки аккаунта Bunny → API). Он проверяет существующие приложения, доступный GHCR image/digest и регионы, затем предлагает выбрать регион и ввод `CREATE` перед созданием оплачиваемых ресурсов. Для GHCR, уже подключённого в Bunny, других API-ключей не требуется. Если GHCR ещё не подключён, скрипт запросит GitHub username и PAT с `read:packages` и попробует создать подключение через Bunny API. **Образ JacRed Bunny должен быть предварительно опубликован в GHCR** — публикация автоматизирована в workflow `bunny-image.yml`. До публикации установщик остановится без создания платного приложения. Приватный GHCR образ должен быть доступен подключённому registry.
+По умолчанию окно вычислений — один час, оценка — до $2; это не жёсткий лимит счёта. Трафик оплачивается отдельно, Storage сохраняет минимальную плату после остановки. Локальный watchdog требует работающего компьютера и сети. Повторный `install` использует сохранённый пакет и проверяет существующие ресурсы без продления окна или запуска остановленного worker. Существующая FileDB требует отдельной проверенной миграции; автоматической подмены данных нет. Полная production acceptance, перенос всех конфигураций и все 18 режимов CLI ещё не завершены.
 
-Создаётся ровно один Magic Container в одном регионе, HTTPS endpoint и постоянные тома `/app/Data` (10 GB по умолчанию) и `/app/config` (1 GB). Настройки и два ключа JacRed создаются автоматически. Дополнительная официальная синхронизация FileDB — по желанию. Bunny Database/Scripting не создаются.
+После SQL-установки: `jacred-bunny status`, `credentials`, `doctor`, `health`, `stop`, `start`. `credentials` выводит только ключи поиска/администрирования JacRed, не ключ Bunny и не SQL-токены. Расширенные операции пока доступны через `native-staging`; см. [руководство](NATIVE_STAGING.md). `setup` — отдельный устаревший FileDB-профиль.
 
-Команды после установки (работают даже если `~/.local/bin` не добавлен в PATH):
+## English
 
-```bash
-$HOME/.local/bin/jacred-bunny status
-$HOME/.local/bin/jacred-bunny credentials
-$HOME/.local/bin/jacred-bunny stop
-$HOME/.local/bin/jacred-bunny start
-$HOME/.local/bin/jacred-bunny doctor
-```
+The standard command above installs a development SQL candidate: Bunny Database, an Edge gateway for the original API, Storage and one Magic Container in AMS. macOS/Linux, curl, Python 3.9+ and a Bunny account key are required; local Docker/.NET and a GitHub PAT are unnecessary. The account key stays local. Public artifacts and exact checksums are verified before requesting credentials; an absent SQL release stops before resource creation.
 
-Ключ Bunny сохраняется локально в `~/.config/jacred-bunny/config.json`, права 600. **Никогда не публикуйте этот файл.** Изменения в веб-конфигурации сохраняются в отдельном томе. Остановка `stop` останавливает вычисления, но не удаляет оплачиваемые тома. Контейнер может запускаться/создаваться асинхронно; до появления HTTPS URL и ответа `/health` запуск не считается подтверждённым.
+Use `install --plan` first. `install --hours 1 --max-estimated-usd 2` creates resources within the checked estimate. The default one-hour compute window and $2 estimate are not a hard billing cap; traffic is separate and Storage retains its minimum charge after stopping. The local watchdog needs the computer and network to remain available. Repeated installation checks the saved immutable package/resources without extending the window or starting a stopped worker. Existing FileDB requires separately verified migration. Full production acceptance, complete configuration migration and all 18 CLI modes remain incomplete.
 
-## Automatic installation (EN)
-On macOS/Linux, run the single curl command above. The installer asks for a Bunny account API key, checks the GHCR image and numeric registry ID, offers a region, creates one single-replica Magic Container, HTTPS endpoint, and two persistent volumes automatically after you type `CREATE`. JacRed API and admin keys are generated locally. If no GHCR connection exists, a GitHub `read:packages` PAT may also be required. The built image must already exist in GHCR; the dedicated GitHub Actions workflow builds it. The default FileDB is empty; optional official sync can populate it. Run `~/.local/bin/jacred-bunny status` or `credentials`. Stopping the app does not delete billed storage.
+SQL commands: `status`, `credentials`, `doctor`, `health`, `stop`, `start`. Credentials shows only JacRed search/admin keys, never the Bunny account key or SQL tokens. Advanced operations currently use `native-staging`; see the [guide](NATIVE_STAGING.md). `setup` explicitly selects the old FileDB profile.
 
-## Automatische installatie (NL)
-Voer op macOS/Linux de curl-opdracht hierboven uit. Het programma vraagt om de Bunny-account-API-sleutel, controleert de GHCR-image en de numerieke register-ID, laat een regio kiezen en maakt na `CREATE` automatisch één Magic Container, HTTPS-endpoint en twee permanente volumes aan. De API- en beheerderssleutel van JacRed worden automatisch gegenereerd. Als er nog geen GHCR-verbinding is, kan ook een GitHub PAT met `read:packages` nodig zijn. De Docker-image moet al via GitHub Actions in GHCR gepubliceerd zijn. De FileDB is aanvankelijk leeg; officiële synchronisatie is optioneel. Status: `~/.local/bin/jacred-bunny status`. Stoppen verwijdert de betaalde opslag niet.
+## Nederlands
+
+De standaardopdracht hierboven installeert een SQL-ontwikkelkandidaat: Bunny Database, een Edge-gateway voor de oorspronkelijke API, Storage en één Magic Container in AMS. Vereist: macOS/Linux, curl, Python 3.9+ en een Bunny-accountsleutel; lokale Docker/.NET en een GitHub PAT zijn niet nodig. De accountsleutel blijft lokaal. Publieke bestanden en exacte controlesommen worden vóór het opvragen van de sleutel gecontroleerd. Zonder gepubliceerde SQL-release worden geen resources aangemaakt.
+
+Begin met `install --plan`. `install --hours 1 --max-estimated-usd 2` maakt resources binnen de gecontroleerde schatting. Het standaardvenster van één uur en de schatting van $2 vormen geen harde factuurlimiet. Verkeer wordt apart berekend; Storage houdt na stoppen zijn minimumtarief. De lokale watchdog vereist een beschikbare computer en netwerkverbinding. Herhaald installeren controleert het opgeslagen onveranderlijke pakket en de bestaande resources zonder het venster te verlengen of een gestopte worker te starten. Een bestaande FileDB vereist afzonderlijk gecontroleerde migratie. Volledige productieacceptatie, configuratiemigratie en alle 18 CLI-modi zijn nog niet voltooid.
+
+SQL-opdrachten: `status`, `credentials`, `doctor`, `health`, `stop`, `start`. Credentials toont alleen de zoek- en beheersleutels van JacRed, nooit de Bunny-accountsleutel of SQL-tokens. Geavanceerde handelingen gebruiken voorlopig `native-staging`; zie de [handleiding](NATIVE_STAGING.md). `setup` kiest uitdrukkelijk het oude FileDB-profiel.
 
 ---
+
+The following manual FileDB deployment notes are historical and apply only to the explicit legacy profile.
+
 
 
 **[Русский](#русский)** · **[English](#english)** · **[Nederlands](#nederlands)**

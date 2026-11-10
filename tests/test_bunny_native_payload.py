@@ -81,7 +81,7 @@ class PayloadTests(unittest.TestCase):
         (root/'bunny-native/edge/dist/index.js').write_text('test-only bundle')
         for name in ['0001_catalog.sql','0002_search_fts5.sql']:(root/'bunny-native/migrations'/name).write_text('SELECT 1;')
         out=self.root/'packaged'
-        manifest=pkg.package(root,out,'a'*40,'sha256:'+'b'*64)
+        manifest=pkg.package(root,out,'a'*40,'sha256:'+'b'*64,'filedb')
         self.assertEqual(n.load_payload(out),manifest)
 
     def test_sql_payload_requires_exact_runtime_migrations_and_backend(self):

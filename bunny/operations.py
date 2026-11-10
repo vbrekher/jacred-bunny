@@ -57,7 +57,7 @@ class Operations(Deployment):
             manifest.get('catalog_backend','filedb')==self.state.get('catalog_backend','filedb') and
             manifest.get('edge_mode','preview')==self.state.get('edge_mode','preview'))
 
-    def capture_current_payload(self):
+    def capture_current_payload(self, allow_network=True):
         root=self.directory/'payload-objects'
         if root.is_symlink():raise NativeError('Unsafe immutable payload cache')
         if self.state.get('active_payload_id'):
@@ -76,6 +76,8 @@ class Operations(Deployment):
             if not self.payload_matches_current(manifest):
                 raise NativeError('Current cached release identity differs')
             return self.remember_payload(destination)
+        if not allow_network:
+            raise NativeError('Current verified local payload is missing; explicit release recovery is required')
         edge = self.verify('edge')
         value = self.api('GET', '/compute/script/'+str(self.state['resources']['edge']['id'])+'/code')
         code = value.get('Code') if isinstance(value,dict) else None

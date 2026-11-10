@@ -96,7 +96,7 @@ class API:
 
 
 class PublicRedirect(urllib.request.HTTPRedirectHandler):
-    ALLOWED = {"bunny.net", "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "raw.githubusercontent.com"}
+    ALLOWED = {"bunny.net", "api.github.com", "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "raw.githubusercontent.com"}
 
     @classmethod
     def validate(cls, url):
@@ -241,6 +241,35 @@ def load_payload(directory):
         return manifest
     except (ValueError, TypeError, KeyError):
         raise NativeError("Invalid native payload manifest") from None
+
+
+def discover_sql_release():
+    """Anonymous public metadata only; never asks for an account key or PAT."""
+    try:
+        releases = json.loads(fetch_public("https://api.github.com/repos/vbrekher/jacred-bunny/releases?per_page=20"))
+    except (ValueError, TypeError):
+        raise NativeError("Public release metadata is invalid; no paid resources created") from None
+    if not isinstance(releases, list):
+        raise NativeError("Public release metadata is invalid; no paid resources created")
+    required = {"manifest.json", "edge.js", *SQL_RUNTIME_MIGRATIONS}
+    eligible = []
+    for release in releases:
+        if not isinstance(release, dict) or release.get("draft") is not False:
+            continue
+        tag = release.get("tag_name")
+        if not isinstance(tag, str) or len(tag) > 128 or not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?", tag):
+            continue
+        assets = release.get("assets")
+        if not isinstance(assets, list) or not required.issubset({x.get("name") for x in assets if isinstance(x, dict) and isinstance(x.get("name"), str)}):
+            continue
+        eligible.append(release)
+    # Stable SQL releases take precedence over development candidates.
+    eligible.sort(key=lambda item: item.get("prerelease") is not False)
+    if not eligible:
+        raise NativeError("No public SQL installer release is available; no paid resources created")
+    tag = eligible[0]["tag_name"]
+    candidate = re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+-native\.([0-9a-f]{40})", tag)
+    return tag, candidate.group(1) if candidate else None
 
 
 def fetch_release_payload(tag, cache, expected_source=None):
