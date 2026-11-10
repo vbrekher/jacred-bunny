@@ -9,11 +9,13 @@ import shutil
 import subprocess
 
 
-def package(root, output, source_sha, image_digest, catalog_backend="filedb", edge_mode="preview"):
+def package(root, output, source_sha, image_digest, catalog_backend="bunny-sql", edge_mode=None):
     if not re.fullmatch(r'[0-9a-f]{40}',source_sha) or not re.fullmatch(r'sha256:[0-9a-f]{64}',image_digest):
         raise ValueError('Require exact source SHA and immutable OCI digest')
     if catalog_backend not in ("filedb", "bunny-sql"):
         raise ValueError('Unsupported catalog backend')
+    if edge_mode is None:
+        edge_mode = "original-api-gateway" if catalog_backend == "bunny-sql" else "preview"
     if edge_mode not in ("preview", "original-api-gateway") or (edge_mode == "original-api-gateway" and catalog_backend != "bunny-sql"):
         raise ValueError('Gateway requires SQL authority payload')
     output.mkdir(parents=True,exist_ok=True)
@@ -39,8 +41,8 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--source-sha',required=True)
     p.add_argument('--image-digest',required=True)
-    p.add_argument('--catalog-backend',choices=('filedb','bunny-sql'),default='filedb')
-    p.add_argument('--edge-mode',choices=('preview','original-api-gateway'),default='preview')
+    p.add_argument('--catalog-backend',choices=('filedb','bunny-sql'),default='bunny-sql')
+    p.add_argument('--edge-mode',choices=('preview','original-api-gateway'),default=None)
     a=p.parse_args()
     head=subprocess.run(['git','-C',str(a.root),'rev-parse','HEAD'],capture_output=True,text=True,check=True).stdout.strip()
     if head != a.source_sha or subprocess.run(['git','-C',str(a.root),'diff','--quiet','HEAD']).returncode:

@@ -176,6 +176,27 @@ class OperationTests(unittest.TestCase):
         health.assert_not_called();registry.assert_not_called()
         self.assertFalse(any(method in ('PATCH','POST','DELETE') for method,path in self.calls))
 
+    def test_repeat_install_preserves_inactive_worker_and_expired_window(self):
+        import argparse
+        import cli
+        self.deploy.state.update(phase='infrastructure_ready_catalog_not_accepted', edge_release_id=self.edge_release)
+        self.deploy.state['resources']['storage']={'id':2}
+        self.deploy.save()
+        before=(self.deploy.directory/'deployment.json').read_bytes()
+        original_verify=self.deploy.verify
+        self.deploy.verify=lambda kind: {} if kind=='storage' else original_verify(kind)
+        self.deploy.assert_schema_compatible=Mock()
+        self.remote['status']='inactive'
+        args=argparse.Namespace(payload_dir=self.old,release=None,state_dir=self.deploy.directory,apply=True)
+        with patch('native.Deployment',return_value=self.deploy),patch('operations.Operations',return_value=self.deploy),\
+             patch.object(cli,'account_key',return_value='test-key'),patch('native.API'),\
+             patch('native.current_pricing',side_effect=AssertionError('must not reprice/rearm')):
+            result=cli._native_install(args)
+        self.assertFalse(result['changed'])
+        self.assertEqual(result['worker_status'],'inactive')
+        self.assertEqual(before,(self.deploy.directory/'deployment.json').read_bytes())
+        self.assertTrue(all(method=='GET' for method,path in self.calls))
+
     def test_private_environment_readback_is_hashed_and_drift_is_rejected(self):
         env=[{'name':'JACRED_CATALOG_BACKEND','value':'bunny-sql'},{'name':'PRIVATE_TEST','value':'dummy-secret-only'}]
         self.remote['containerTemplates'][0]['environmentVariables']=env

@@ -19,7 +19,7 @@ import urllib.request
 API = "https://api.bunny.net"
 IMAGE = "ghcr.io/vbrekher/jacred-bunny:main"
 APP_NAME = "jacred-bunny"
-CONFIG = Path.home() / ".config" / "jacred-bunny" / "config.json"
+CONFIG = Path(os.environ.get("JACRED_BUNNY_CONFIG_DIR", str(Path.home() / ".config" / "jacred-bunny"))) / "config.json"
 UA = "JacRed-bunny/0.2 (+https://github.com/vbrekher/jacred-bunny)"
 
 class DeploymentError(Exception):
@@ -619,6 +619,46 @@ def native_health(deploy):
     return observations
 
 
+def default_install(args):
+    """Standard user path; explicit legacy setup remains available separately."""
+    from native import NativeError, discover_sql_release
+    try:
+        if CONFIG.exists() and not (args.state_dir / "deployment.json").exists() and not args.new_instance:
+            raise NativeError("Existing legacy configuration detected; refusing an implicit authority change")
+        if not args.release and not args.payload_dir and (args.state_dir / "deployment.json").exists():
+            from operations import Operations
+            installed = Operations(args.state_dir, None)
+            if installed.state.get("catalog_backend", "filedb") != "bunny-sql":
+                raise NativeError("Existing FileDB authority requires explicit verified migration")
+            args.payload_dir = installed.capture_current_payload(allow_network=False)
+            args.source_sha = args.source_sha or installed.state["source_sha"]
+        if not args.release and not args.payload_dir:
+            args.release, source = discover_sql_release()
+            if args.source_sha and source and args.source_sha != source:
+                raise NativeError("Requested source differs from the published SQL release")
+            args.source_sha = args.source_sha or source
+        args.require_sql = True
+        return native_install(args)
+    except NativeError as error:
+        raise DeploymentError(str(error)) from None
+
+
+def standard_install_options(parser):
+    parser.set_defaults(operation="install", apply=True, require_sql=True)
+    choice = parser.add_mutually_exclusive_group()
+    choice.add_argument("--apply", dest="apply", action="store_true", help="Install within the explicit estimate budget")
+    choice.add_argument("--plan", dest="apply", action="store_false", help="Verify public artifacts without account/API writes")
+    parser.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
+    parser.add_argument("--release", help="Public immutable release tag; automatically selects a SQL release otherwise")
+    parser.add_argument("--payload-dir", type=Path, help="Advanced: local checksum-verified SQL payload")
+    parser.add_argument("--source-sha")
+    parser.add_argument("--registry-id")
+    parser.add_argument("--hours", type=float, default=1)
+    parser.add_argument("--data-gb", type=int, default=1)
+    parser.add_argument("--max-estimated-usd", type=float, default=2.0)
+    parser.add_argument("--new-instance", action="store_true", help="Explicitly create an isolated instance despite a legacy profile")
+
+
 def native_install(args):
     from native import installation_lock
     if not args.apply:
@@ -638,6 +678,11 @@ def _native_install(args):
     if not args.payload_dir:
         raise NativeError("Require --release or --payload-dir containing verified release artifacts")
     payload = load_payload(args.payload_dir)  # All files checked BEFORE paid API writes.
+    if getattr(args, "source_sha", None) and args.source_sha != payload["source_sha"]:
+        raise NativeError("Requested source differs from verified payload")
+    if getattr(args, "require_sql", False) and (
+        payload.get("catalog_backend") != "bunny-sql" or payload.get("edge_mode") != "original-api-gateway"):
+        raise NativeError("Standard installation requires a verified SQL gateway payload; no FileDB fallback")
     if not args.apply:
         print(json.dumps({"apply": False, "source_sha": payload["source_sha"],
             "resources": {"database": 1, "storage": 1, "edge": 1, "worker": 1},
@@ -649,6 +694,28 @@ def _native_install(args):
     backend = payload.get("catalog_backend", "filedb")
     if deploy.state and deploy.state.get("catalog_backend", "filedb") != backend:
         raise NativeError("Catalog authority change requires an explicit verified migration; install cannot silently switch backends")
+    if (deploy.state and deploy.state.get("phase") == "infrastructure_ready_catalog_not_accepted" and
+        not any(deploy.state.get(name) for name in ("pending_update", "pending_cutover", "pending_legacy_export")) and
+        {"database", "storage", "edge", "worker"}.issubset(deploy.state["resources"]) and
+        deploy.state["source_sha"] == payload["source_sha"] and
+        deploy.state["image_digest"] == payload["image"]["digest"] and
+        deploy.state.get("edge_mode", "preview") == payload.get("edge_mode", "preview") and
+        deploy.state.get("edge_bundle_sha256") == payload["files"]["edge.js"]):
+        # Installing an already verified instance is a read-only operation,
+        # including after its original compute window has expired.
+        for kind in deploy.state["resources"]:
+            deploy.verify(kind)
+        from operations import Operations
+        Operations(args.state_dir, api).assert_schema_compatible(args.payload_dir)
+        edge = deploy.verify("edge")
+        if edge.get("CurrentReleaseId") != deploy.state.get("edge_release_id"):
+            raise NativeError("Active Edge release changed outside this installation")
+        worker = deploy.verify("worker")
+        result = {"changed": False, "source_sha": payload["source_sha"],
+            "worker_status": worker.get("status"), "lifecycle_preserved": True,
+            "runtime_health_checked": False, "productionReady": False}
+        print(json.dumps(result, indent=2))
+        return result
     limits = api("GET", "/mc/limits")
     rates = current_pricing()  # Refuse unknown/changed billing formats before creation.
     cost = staging_cost_plan(limits, args.hours, args.data_gb, rates=rates)
@@ -1038,15 +1105,20 @@ def native_staging(args):
 def main():
     parser = argparse.ArgumentParser(description="JacRed Bunny: Magic Containers installer")
     commands = parser.add_subparsers(dest="action")
-    s = commands.add_parser("setup")
+    standard_install_options(commands.add_parser("install", help="Install the verified Bunny SQL stack (no local Docker/.NET/PAT)"))
+    s = commands.add_parser("setup", help="Advanced legacy FileDB installation")
     s.add_argument("--image", default=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE))
     s.add_argument("--data-gb", type=int, default=10)
     s.add_argument("--no-deploy", action="store_true")
     plan = commands.add_parser("plan", help="Offline allocation/cost estimate; creates nothing")
     plan.add_argument("--data-gb", type=int, default=1)
     plan.add_argument("--hours", type=float, default=1)
-    for name in ("status", "credentials", "doctor", "start", "stop", "self-test"):
-        commands.add_parser(name)
+    for name in ("status", "credentials", "doctor", "health", "start", "stop"):
+        command = commands.add_parser(name)
+        command.add_argument("--state-dir", type=Path, default=CONFIG.parent / "native-staging")
+        command.add_argument("--hours", type=float, default=1)
+        command.add_argument("--max-estimated-usd", type=float, default=2.0)
+    commands.add_parser("self-test")
     native = commands.add_parser("native-staging", help="Journalled Database/Storage/Edge staging (collector cutover disabled)")
     native.add_argument("operation", choices=("plan", "provision", "install", "resume", "status", "health", "doctor", "start", "stop", "update", "rollback", "backup", "restore-test", "cutover-empty-sql", "legacy-export"))
     native.add_argument("--backup-id", help="Private SQL backup receipt ID for isolated restore test")
@@ -1066,11 +1138,26 @@ def main():
         if args.action == "native-staging":
             native_staging(args)
         elif args.action is None:
-            setup(argparse.Namespace(image=os.environ.get("JACRED_BUNNY_IMAGE", IMAGE), data_gb=10, no_deploy=False))
+            defaults = argparse.ArgumentParser()
+            standard_install_options(defaults)
+            default_install(defaults.parse_args([]))
+        elif args.action == "install":
+            default_install(args)
         elif args.action == "setup":
             setup(args)
         elif args.action == "plan":
             print(json.dumps(deployment_plan(args.data_gb, args.hours), indent=2))
+        elif args.action in ("status", "credentials", "doctor", "health", "start", "stop") and (args.state_dir / "deployment.json").exists():
+            if args.action == "credentials":
+                from native import Deployment, read_private
+                installed = Deployment(args.state_dir, None)
+                private = read_private(installed.secret_path)
+                print(json.dumps({"api_key": private["api_key"], "admin_key": private["admin_key"]}, indent=2))
+            else:
+                args.operation = args.action
+                native_staging(args)
+        elif args.action == "health":
+            raise DeploymentError("No native installation; use doctor for an existing legacy profile")
         elif args.action == "status": status()
         elif args.action == "credentials": status(show_keys=True)
         elif args.action == "doctor": doctor()
