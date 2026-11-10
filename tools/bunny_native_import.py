@@ -99,12 +99,19 @@ def check_source(root,plan,cap):
     if discover(root,cap)["stats"]!=plan["stats"]:
         raise Refused("Source changed during import; use a stable snapshot")
 
-def init_database(path):
+def init_database(path, migrations_dir=None):
+    schema=SCHEMA if migrations_dir is None else Path(migrations_dir)/'0001_catalog.sql'
+    fts=FTS if migrations_dir is None else Path(migrations_dir)/'0002_search_fts5.sql'
+    # Read immutable caller-verified migration bytes before creating SQLite.
+    ddl=schema.read_text('utf-8')+'\n'+fts.read_text('utf-8')
     con=sqlite3.connect(str(path))
-    con.execute("PRAGMA foreign_keys=ON")
-    con.executescript(SCHEMA.read_text("utf-8"))
-    con.executescript(FTS.read_text("utf-8"))
-    return con
+    try:
+        con.execute("PRAGMA foreign_keys=ON")
+        con.executescript(ddl)
+        return con
+    except BaseException:
+        con.close()
+        raise
 
 def validate(con):
     row=con.execute("SELECT bucket_count,torrent_count,track_file_count FROM native_imports").fetchone()
@@ -125,7 +132,7 @@ def validate(con):
     return {"buckets":buckets,"torrents":torrents,
             "track_files_inventory_only":tracks,"stage_is_production_ready":False}
 
-def stage(data_root,out,cap=LIMIT,replace=False):
+def stage(data_root,out,cap=LIMIT,replace=False,*,migrations_dir=None):
     data_root=data_root.resolve()
     # Resolve the directory, never the output leaf: a dangling symlink is still
     # an occupied destination and must not redirect private data elsewhere.
@@ -141,7 +148,7 @@ def stage(data_root,out,cap=LIMIT,replace=False):
     os.close(fd)
     temp=Path(p);con=None
     try:
-        con=init_database(temp)
+        con=init_database(temp,migrations_dir)
         total=0
         for bucket,md5,path,meta in plan["specs"]:
             try:
