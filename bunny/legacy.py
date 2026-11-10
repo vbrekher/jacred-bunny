@@ -16,6 +16,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from copy import deepcopy
+from contextlib import ExitStack
 
 from native import NativeError, NoRedirect, atomic_private, environment_fingerprint, read_private, serialized
 from operations import Operations
@@ -93,7 +94,7 @@ def _unique_object(pairs):
     return result
 
 
-def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_boot_id=None):
+def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_boot_id=None, *, _copy_to=None):
     """Stream and verify every original byte. Does not extract or modify sources.
 
     Parent directories must be trusted. The private archive remains available
@@ -134,7 +135,7 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
                         stream = archive.extractfile(member)
                         if stream is None:
                             raise NativeError('Legacy archive member content missing')
-                        with stream:
+                        with stream, ExitStack() as opened:
                             if member.name == 'manifest.json':
                                 if member.size > MANIFEST_LIMIT:
                                     raise NativeError('Legacy archive manifest exceeds bound')
@@ -152,6 +153,13 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
                             total += member.size
                             if total > SOURCE_LIMIT:
                                 raise NativeError('Legacy archive source capacity exceeded')
+                            output = None
+                            target = None
+                            if _copy_to is not None:
+                                target = Path(_copy_to)/member.name
+                                target.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+                                outfd = os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+                                output = opened.enter_context(os.fdopen(outfd,'wb'))
                             digest = hashlib.sha256()
                             length = 0
                             marker = bytearray() if member.name == 'Data/temp/.jacred-bunny-checkpoint.json' else None
@@ -165,6 +173,7 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
                                 if length > member.size:
                                     raise NativeError('Legacy archive member length exceeded')
                                 digest.update(block)
+                                if output is not None:output.write(block)
                                 if marker is not None:
                                     marker.extend(block)
                             if length != member.size:
@@ -172,6 +181,10 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
                             ticks = Decimal(str(member.pax_headers.get('mtime', member.mtime))) * 10000000 + EPOCH_TICKS
                             if not ticks.is_finite() or ticks != ticks.to_integral_value():
                                 raise NativeError('Legacy archive timestamp precision invalid')
+                            if output is not None:
+                                output.flush();os.fsync(output.fileno())
+                                stamp=(int(ticks)-EPOCH_TICKS)*100
+                                os.utime(target,ns=(stamp,stamp),follow_symlinks=False)
                             members[member.name] = (length, digest.hexdigest(), int(ticks))
                             if marker is not None:
                                 checkpoint = json.loads(marker.decode('utf-8'), object_pairs_hook=_unique_object)
@@ -227,6 +240,8 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
             source.seek(0)
             if _digest(source) != expected_sha256 or _identity(os.fstat(source.fileno())) != _identity(info):
                 raise NativeError('Legacy archive changed during verification')
+            if _copy_to is not None:
+                atomic_private(Path(_copy_to)/'archive-manifest.json',manifest)
             return {'schema': 'jacred-legacy-archive-receipt/v1', 'source_sha': expected_source_sha,
                     'gzip_sha256': expected_sha256, 'manifest_sha256': manifest_digest,
                     'file_count': len(members), 'source_bytes': total,
@@ -239,6 +254,35 @@ def verify_legacy_archive(path, expected_sha256, expected_source_sha, expected_b
     finally:
         if fd is not None:
             os.close(fd)
+
+
+def prepare_legacy_working_copy(archive, destination, expected_sha256, expected_source_sha, expected_boot_id):
+    """New private working bytes only, never a server-volume or SQL restore.
+
+    The caller supplies a trusted private parent. Existing destinations are never
+    adopted or modified. A failed copy is retained privately for diagnosis;
+    only the final receipt permits downstream staging.
+    """
+    if expected_boot_id is None:
+        raise NativeError('Working copy requires a verified normal shutdown identity')
+    destination=Path(destination)
+    parent=destination.parent
+    try:info=parent.lstat()
+    except OSError:raise NativeError('Working-copy parent unavailable; private path omitted') from None
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid!=os.getuid() or info.st_mode & 0o077:
+        raise NativeError('Working-copy parent must be a trusted private owned directory')
+    if destination.exists() or destination.is_symlink():
+        raise NativeError('Working-copy destination already exists; refusing overwrite')
+    # Complete bounded validation before creating output; repeat while copying
+    # through the same guarded parser, avoiding tar.extract and unchecked PAX.
+    verify_legacy_archive(archive,expected_sha256,expected_source_sha,expected_boot_id)
+    try:destination.mkdir(mode=0o700)
+    except OSError:raise NativeError('Cannot exclusively create private working copy') from None
+    receipt=verify_legacy_archive(archive,expected_sha256,expected_source_sha,expected_boot_id,_copy_to=destination)
+    receipt=dict(receipt,status='PRIVATE_WORKING_COPY_VERIFIED_NOT_SQL_OR_VOLUME_RESTORE',
+        original_permissions_restored=False,original_ownership_restored=False,production_ready=False)
+    atomic_private(destination/'working-copy-receipt.json',receipt)
+    return receipt
 
 
 class LegacyExports(Operations):
