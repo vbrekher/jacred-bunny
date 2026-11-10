@@ -30,3 +30,7 @@ The candidate records exact checksums for migrations 0001_catalog.sql, 0002_sear
 The result explicitly reports PRIVATE_RUNTIME_STAGE_PREPARED_NOT_IMPORTED and production_ready: false. It contains private torrent/config-derived data and must not be uploaded as a public CI artifact.
 
 Still required: safe verified archive extraction, full real-record DTO/API/golden validation, journalled import into a new owned empty Bunny Database, independent complete remote snapshot/FTS proof, resumable failure handling, guarded authority cutover, original config/Tracks/jobs restoration and public installer integration. The existing 22-record SQL pilot must be preserved.
+
+## Actual candidate verification
+
+[The real 20-record candidate](../docs/evidence/live-original-sql-candidate-2026-11-10.json) now passes complete operator import/readback into a new owned Bunny Database and native DTO/snapshot reads. The [public read-only developer harness](../tests/LiveLegacyImport/README.md) reproduces that slice. This does not complete resumable public migration, HTTP cutover or full restore.

@@ -48,6 +48,10 @@ jobs:
         run: python3 tools/bunny_legacy_export_acceptance.py --run --app bin/Release/net10.0/JacRed.dll
       - name: Verify normal shutdown checkpoint and private archive transport
         run: python3 tools/bunny_legacy_checkpoint_acceptance.py --run --app bin/Release/net10.0/JacRed.dll
+      - name: Verify migration probe defaults to a no-SQL plan
+        run: |
+          dotnet build tests/LiveLegacyImport/Read.csproj --configuration Release
+          dotnet tests/LiveLegacyImport/bin/Release/net10.0/JacRed.Tests.dll
       - name: Retain non-secret test results
         if: always()
         uses: actions/upload-artifact@v4
