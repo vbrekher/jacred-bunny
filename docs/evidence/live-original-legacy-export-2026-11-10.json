@@ -1,0 +1,41 @@
+{
+  "schema": "jacred-real-legacy-export/v1",
+  "checked_at": "2026-11-10",
+  "scope": "Actual owned original FileDB volume checkpoint, private archive transfer and complete member verification; not full migration/restore acceptance",
+  "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+  "image_digest": "sha256:f44f7051f00e865debe0fa11836ad1a32654a383a970a35bfee2df644ebb1769",
+  "worker_url": "https://mc-5ge5797xat.bunny.run",
+  "normal_catalog": {
+    "keys": 20,
+    "torrents": 20,
+    "diagnostic_ok": true
+  },
+  "preflight": {
+    "status": "READ_ONLY_PREPARATION_REQUIRED",
+    "phase": "inventory",
+    "failureCode": "ACCESS_REFUSED",
+    "quiescenceVerified": false,
+    "productionReady": false,
+    "readOnlyPreparationAvailable": true
+  },
+  "receipt": {
+    "schema": "jacred-legacy-archive-receipt/v1",
+    "source_sha": "0878b14ed33b9dac52e4a46567b9ea08bbe9e560",
+    "gzip_sha256": "c640457a91c64011e6d3e6df98651086e3d544a25ebb4ee0ee41c7b1b9ebacb1",
+    "manifest_sha256": "443f00de77926b941aa94ace66501cde30d5196e21e531729ea63e2d6448bf40",
+    "file_count": 30,
+    "source_bytes": 93635,
+    "shutdown_checkpoint_verified": true,
+    "status": "VERIFIED_PRIVATE_BYTES_NOT_SQL_MIGRATION"
+  },
+  "archive_bytes": 33027,
+  "archive_published": false,
+  "private_mode": "0600",
+  "normal_environment_restored": true,
+  "compute_stopped": true,
+  "pending_export": false,
+  "observer_stopped": true,
+  "direct_cloud_uid_observed": false,
+  "uid_scope": "UID1000 is enforced by the pinned image and separately verified in Linux image acceptance; the cloud observer missed the brief isolated version response",
+  "production_ready": false
+}
