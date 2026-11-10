@@ -55,6 +55,60 @@ class LegacyArchiveTests(unittest.TestCase):
         self.path.chmod(0o600)
         return hashlib.sha256(self.path.read_bytes()).hexdigest()
 
+    def working_archive(self):
+        boot='b'*32
+        checkpoint=dict(schema='jacred-legacy-shutdown/v1',owner='jacred-bunny',boot_id=boot,
+            source_sha=SOURCE,master_sha256=hashlib.sha256(b'original-compressed-bytes').hexdigest(),
+            master_keys=1,checkpointed_utc='2026-11-10T00:00:00Z')
+        digest=self.archive([('Data/temp/.jacred-bunny-checkpoint.json',json.dumps(checkpoint).encode()),
+            ('Data/tracks/日本語.json',b'\x00\xff\x80')])
+        return digest,boot
+
+    def test_verified_private_working_copy_preserves_bytes_and_input(self):
+        digest,boot=self.working_archive()
+        before=self.path.read_bytes();identity=legacy._identity(self.path.stat())
+        destination=self.root/'new-copy'
+        result=legacy.prepare_legacy_working_copy(self.path,destination,digest,SOURCE,boot)
+        self.assertEqual(result['file_count'],4)
+        self.assertFalse(result['original_permissions_restored'])
+        self.assertEqual((destination/'Data/tracks/日本語.json').read_bytes(),b'\x00\xff\x80')
+        self.assertEqual((destination/'Data/masterDb.bz').stat().st_mtime_ns,TIME*1000000000)
+        self.assertEqual((destination/'config/init.yaml').stat().st_mode & 0o777,0o600)
+        self.assertEqual((destination/'config').stat().st_mode & 0o777,0o700)
+        self.assertEqual(self.path.read_bytes(),before);self.assertEqual(legacy._identity(self.path.stat()),identity)
+        self.assertEqual(json.loads((destination/'working-copy-receipt.json').read_text()),result)
+
+    def test_working_copy_never_adopts_existing_or_symlink_destinations(self):
+        digest,boot=self.working_archive()
+        existing=self.root/'existing';existing.mkdir();(existing/'keep').write_bytes(b'keep')
+        link=self.root/'link';link.symlink_to(existing,target_is_directory=True)
+        for target in (existing,link):
+            with self.subTest(target=target),self.assertRaises(NativeError):
+                legacy.prepare_legacy_working_copy(self.path,target,digest,SOURCE,boot)
+        self.assertEqual(list(existing.iterdir()),[existing/'keep'])
+        self.assertEqual((existing/'keep').read_bytes(),b'keep')
+
+    def test_invalid_checkpoint_or_public_parent_creates_no_output(self):
+        digest,boot=self.working_archive()
+        target=self.root/'absent'
+        for identity in (None,'c'*32):
+            with self.assertRaises(NativeError):legacy.prepare_legacy_working_copy(self.path,target,digest,SOURCE,identity)
+            self.assertFalse(target.exists())
+        parent=self.root/'public';parent.mkdir(mode=0o755)
+        with self.assertRaises(NativeError):legacy.prepare_legacy_working_copy(self.path,parent/'absent',digest,SOURCE,boot)
+        self.assertEqual(list(parent.iterdir()),[])
+
+    def test_copy_write_failure_retains_private_partial_without_complete_receipt(self):
+        digest,boot=self.working_archive()
+        target=self.root/'partial'
+        before=self.path.read_bytes()
+        with mock.patch.object(legacy.os,'fsync',side_effect=OSError('simulated disk failure')):
+            with self.assertRaises(NativeError):legacy.prepare_legacy_working_copy(self.path,target,digest,SOURCE,boot)
+        self.assertTrue(target.is_dir());self.assertEqual(target.stat().st_mode & 0o777,0o700)
+        self.assertFalse((target/'working-copy-receipt.json').exists())
+        self.assertEqual(self.path.read_bytes(),before)
+        with self.assertRaises(NativeError):legacy.prepare_legacy_working_copy(self.path,target,digest,SOURCE,boot)
+
     def test_original_bytes_unicode_empty_and_fractional_mtime(self):
         digest = self.archive([('Data/tracks/日本語.json', b'\x00\xff\x80'), ('Data/temp/checkpoint', b'')])
         before = self.path.read_bytes()

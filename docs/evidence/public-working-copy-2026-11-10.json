@@ -1,0 +1,16 @@
+{
+  "module_source_sha": "1080e8b3cdb40e0d4defb46c3018fabd17df7331",
+  "module_file_sha256": "b75feabafd5b76bf3490395e697e6f6e25af292484f968ac8139aeb8bc45bacc",
+  "schema": "jacred-public-private-working-copy/v1",
+  "scope": "Actual archived original bytes copied by repository module and locally staged; no cloud writes or volume restore",
+  "archive_sha256": "c640457a91c64011e6d3e6df98651086e3d544a25ebb4ee0ee41c7b1b9ebacb1",
+  "file_count": 30,
+  "source_bytes": 93635,
+  "source_identity_and_hash_unchanged": true,
+  "shutdown_checkpoint_verified": true,
+  "original_torrents": 20,
+  "runtime_torrents": 20,
+  "original_permissions_restored": false,
+  "original_ownership_restored": false,
+  "production_ready": false
+}

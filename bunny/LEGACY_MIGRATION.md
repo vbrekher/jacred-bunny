@@ -34,3 +34,11 @@ Still required: safe verified archive extraction, full real-record DTO/API/golde
 ## Actual candidate verification
 
 [The real 20-record candidate](../docs/evidence/live-original-sql-candidate-2026-11-10.json) now passes complete operator import/readback into a new owned Bunny Database and native DTO/snapshot reads. The [public read-only developer harness](../tests/LiveLegacyImport/README.md) reproduces that slice. This does not complete resumable public migration, HTTP cutover or full restore.
+
+## Verified private archive working copies
+
+`legacy.prepare_legacy_working_copy` is a local developer building block for the public migration controller. It requires the exact archive digest, source SHA and observed normal-process shutdown identity, plus a NEW destination under a trusted private owned parent. It performs complete bounded archive/checkpoint validation before creating output, then repeats that validation while copying through the same guarded streaming parser. It never calls `tar.extract`, reuses a destination, follows an output file symlink or modifies a source volume.
+
+Only regular original files are copied with private 0600 permissions and private 0700 directories. Original bytes and precise recorded modification times are preserved. A final private receipt marks success. Disk/parser failure retains an incomplete private directory without a completion receipt; do not adopt it or retry into it. Existing directories and their contents remain untouched. The archive may contain credentials: neither working directories nor manifests belong in GitHub artifacts.
+
+[Actual original-data working-copy evidence](../docs/evidence/public-working-copy-2026-11-10.json) records 30 files/93,635 original bytes and subsequent local original/runtime stages with 20 torrents each. The input inode/metadata identity and compressed hash were unchanged. This does not restore executable bits, original UID/GID, empty directories or a server volume; archive v1 does not record that information. General resumable import, HTTP authority cutover and complete config/Tracks/jobs recovery remain incomplete.
